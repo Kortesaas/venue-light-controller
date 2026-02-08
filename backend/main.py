@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pathlib import Path
@@ -6,6 +7,18 @@ from pathlib import Path
 from src.lighting.api import router as lighting_router
 
 app = FastAPI()
+
+# CORS for local frontend dev server
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # API mounten
 app.include_router(lighting_router, prefix="/api", tags=["lighting"])
