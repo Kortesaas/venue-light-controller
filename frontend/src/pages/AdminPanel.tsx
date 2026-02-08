@@ -17,6 +17,8 @@ import {
   Typography,
 } from "@mui/material";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
+import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
@@ -26,42 +28,27 @@ type Scene = {
   id: string;
   name: string;
   universes: Record<string, number[]>;
-  fade_in?: number;
-  fade_out?: number;
 };
 
 type SceneFormState = {
   name: string;
-  id: string;
   universe: number;
   duration: number;
-  fadeIn: number;
-  fadeOut: number;
 };
 
 type EditFormState = {
-  id: string;
   name: string;
-  fadeIn: number;
-  fadeOut: number;
 };
 
 const initialFormState: SceneFormState = {
   name: "",
-  id: "",
   universe: 0,
   duration: 1,
-  fadeIn: 0,
-  fadeOut: 0,
 };
 
-function slugifyName(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/[^a-z0-9_-]/g, "");
-}
+type AdminPanelProps = {
+  sceneVersion: number;
+};
 
 function formatUniverses(universes: Record<string, number[]>) {
   return Object.keys(universes ?? {})
@@ -70,7 +57,7 @@ function formatUniverses(universes: Record<string, number[]>) {
     .join(", ");
 }
 
-export default function AdminPanel() {
+export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [isLoadingScenes, setIsLoadingScenes] = useState(true);
   const [isPerformingAction, setIsPerformingAction] = useState(false);
@@ -101,15 +88,12 @@ export default function AdminPanel() {
 
   useEffect(() => {
     void loadScenes();
-  }, []);
+  }, [sceneVersion]);
 
   const handleSelectScene = (scene: Scene) => {
     setSelectedSceneId(scene.id);
     setEditForm({
-      id: scene.id,
       name: scene.name,
-      fadeIn: scene.fade_in ?? 0,
-      fadeOut: scene.fade_out ?? 0,
     });
   };
 
@@ -158,6 +142,44 @@ export default function AdminPanel() {
     }
   };
 
+  const handleReorder = async (sceneId: string, direction: "up" | "down") => {
+    const currentIndex = scenes.findIndex((scene) => scene.id === sceneId);
+    if (currentIndex < 0) {
+      return;
+    }
+
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= scenes.length) {
+      return;
+    }
+
+    const nextScenes = [...scenes];
+    const [moved] = nextScenes.splice(currentIndex, 1);
+    nextScenes.splice(targetIndex, 0, moved);
+
+    setScenes(nextScenes);
+    setIsPerformingAction(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/scenes/reorder`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scene_ids: nextScenes.map((scene) => scene.id) }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to reorder scenes");
+      }
+      setActionMessage("Reihenfolge gespeichert.");
+    } catch {
+      setErrorMessage("Reihenfolge konnte nicht gespeichert werden.");
+      await loadScenes();
+    } finally {
+      setIsPerformingAction(false);
+    }
+  };
+
   const handleSaveEdit = async () => {
     if (!selectedSceneId || !editForm) {
       return;
@@ -173,9 +195,6 @@ export default function AdminPanel() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editForm.name.trim(),
-          fade_in: editForm.fadeIn,
-          fade_out: editForm.fadeOut,
-          new_id: editForm.id.trim(),
         }),
       });
       if (!res.ok) {
@@ -185,10 +204,7 @@ export default function AdminPanel() {
       const updated = (await res.json()) as Scene;
       setSelectedSceneId(updated.id);
       setEditForm({
-        id: updated.id,
         name: updated.name,
-        fadeIn: updated.fade_in ?? 0,
-        fadeOut: updated.fade_out ?? 0,
       });
       setActionMessage("Szene aktualisiert.");
       await loadScenes();
@@ -206,20 +222,9 @@ export default function AdminPanel() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleNameChange = (value: string) => {
-    setForm((prev) => {
-      const next = { ...prev, name: value };
-      if (!prev.id.trim()) {
-        next.id = slugifyName(value);
-      }
-      return next;
-    });
-  };
-
   const canRecord = useMemo(
     () =>
       form.name.trim().length > 0 &&
-      form.id.trim().length > 0 &&
       form.duration > 0 &&
       !isRecording,
     [form, isRecording]
@@ -236,12 +241,9 @@ export default function AdminPanel() {
 
     try {
       const payload = {
-        id: form.id.trim(),
         name: form.name.trim(),
         universe: form.universe,
         duration: form.duration,
-        fade_in: form.fadeIn,
-        fade_out: form.fadeOut,
       };
 
       const res = await fetch(`${API_BASE}/api/scenes/record`, {
@@ -275,9 +277,6 @@ export default function AdminPanel() {
             Szenen verwalten, bearbeiten und aufnehmen.
           </Typography>
         </Box>
-        <Button variant="outlined" onClick={loadScenes} disabled={isLoadingScenes}>
-          Reload
-        </Button>
       </Stack>
 
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
@@ -306,11 +305,27 @@ export default function AdminPanel() {
                     >
                       <ListItemText
                         primary={scene.name}
-                        secondary={`${scene.id} | ${formatUniverses(scene.universes) || "-"}`}
+                        secondary={formatUniverses(scene.universes) || "-"}
                       />
                     </ListItemButton>
                     <ListItemSecondaryAction>
                       <Stack direction="row" spacing={0.5}>
+                        <IconButton
+                          edge="end"
+                          aria-label="nach oben"
+                          onClick={() => handleReorder(scene.id, "up")}
+                          disabled={isPerformingAction || index === 0}
+                        >
+                          <ArrowUpwardRoundedIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          aria-label="nach unten"
+                          onClick={() => handleReorder(scene.id, "down")}
+                          disabled={isPerformingAction || index === scenes.length - 1}
+                        >
+                          <ArrowDownwardRoundedIcon />
+                        </IconButton>
                         <IconButton
                           edge="end"
                           aria-label="testen"
@@ -346,14 +361,7 @@ export default function AdminPanel() {
               <TextField
                 label="Name"
                 value={form.name}
-                onChange={(event) => handleNameChange(event.target.value)}
-                size="small"
-                fullWidth
-              />
-              <TextField
-                label="ID"
-                value={form.id}
-                onChange={(event) => handleFormChange("id", event.target.value)}
+                onChange={(event) => handleFormChange("name", event.target.value)}
                 size="small"
                 fullWidth
               />
@@ -378,26 +386,6 @@ export default function AdminPanel() {
                   size="small"
                   fullWidth
                 />
-                <TextField
-                  label="Fade-In"
-                  type="number"
-                  value={form.fadeIn}
-                  onChange={(event) =>
-                    handleFormChange("fadeIn", Number(event.target.value))
-                  }
-                  size="small"
-                  fullWidth
-                />
-                <TextField
-                  label="Fade-Out"
-                  type="number"
-                  value={form.fadeOut}
-                  onChange={(event) =>
-                    handleFormChange("fadeOut", Number(event.target.value))
-                  }
-                  size="small"
-                  fullWidth
-                />
               </Box>
               <Button variant="contained" onClick={handleRecord} disabled={!canRecord}>
                 {isRecording ? "Aufnahme laeuft..." : "Szene aufnehmen"}
@@ -416,17 +404,6 @@ export default function AdminPanel() {
             ) : (
               <Stack spacing={1.5}>
                 <TextField
-                  label="ID"
-                  value={editForm.id}
-                  onChange={(event) =>
-                    setEditForm((prev) =>
-                      prev ? { ...prev, id: event.target.value } : prev
-                    )
-                  }
-                  size="small"
-                  fullWidth
-                />
-                <TextField
                   label="Name"
                   value={editForm.name}
                   onChange={(event) =>
@@ -437,32 +414,6 @@ export default function AdminPanel() {
                   size="small"
                   fullWidth
                 />
-                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-                  <TextField
-                    label="Fade-In"
-                    type="number"
-                    value={editForm.fadeIn}
-                    onChange={(event) =>
-                      setEditForm((prev) =>
-                        prev ? { ...prev, fadeIn: Number(event.target.value) } : prev
-                      )
-                    }
-                    size="small"
-                    fullWidth
-                  />
-                  <TextField
-                    label="Fade-Out"
-                    type="number"
-                    value={editForm.fadeOut}
-                    onChange={(event) =>
-                      setEditForm((prev) =>
-                        prev ? { ...prev, fadeOut: Number(event.target.value) } : prev
-                      )
-                    }
-                    size="small"
-                    fullWidth
-                  />
-                </Box>
                 <Button
                   variant="contained"
                   color="secondary"
@@ -470,7 +421,6 @@ export default function AdminPanel() {
                   onClick={handleSaveEdit}
                   disabled={
                     isPerformingAction ||
-                    editForm.id.trim().length === 0 ||
                     editForm.name.trim().length === 0
                   }
                 >

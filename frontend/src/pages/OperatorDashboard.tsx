@@ -32,18 +32,18 @@ type Scene = {
   id: string;
   name: string;
   universes: Record<string, number[]>;
-  fade_in?: number;
-  fade_out?: number;
 };
 
 type OperatorDashboardProps = {
   activeSceneId: string | null;
   onActiveSceneChange: (sceneId: string | null) => void;
+  sceneVersion: number;
 };
 
 export default function OperatorDashboard({
   activeSceneId,
   onActiveSceneChange,
+  sceneVersion,
 }: OperatorDashboardProps) {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
@@ -80,7 +80,7 @@ export default function OperatorDashboard({
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [sceneVersion]);
 
   const handlePlayScene = async (sceneId: string) => {
     setPendingSceneId(sceneId);
@@ -150,16 +150,13 @@ export default function OperatorDashboard({
           direction={{ xs: "column", sm: "row" }}
           spacing={1.5}
           alignItems={{ sm: "center" }}
-          justifyContent="space-between"
+          justifyContent="flex-start"
         >
           <Stack direction="row" spacing={1} flexWrap="wrap">
             <Chip size="small" label={`NODE: ${status?.node_ip ?? "-"}`} />
             <Chip size="small" label={`SCENES: ${scenes.length}`} />
             <Chip size="small" color="primary" label={`AKTIV: ${activeSceneName}`} />
           </Stack>
-          <Button variant="outlined" size="small" onClick={loadData}>
-            Reload
-          </Button>
         </Stack>
       </Paper>
 
@@ -209,13 +206,6 @@ export default function OperatorDashboard({
                       <Box minWidth={0}>
                         <Typography variant="h6" noWrap>
                           {scene.name}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ fontFamily: "monospace" }}
-                        >
-                          {scene.id}
                         </Typography>
                       </Box>
                       {isPending && <CircularProgress size={18} />}

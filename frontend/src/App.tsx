@@ -28,6 +28,7 @@ function App() {
   const [mode, setMode] = useState<Mode>("operator");
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [activeSceneId, setActiveSceneId] = useState<string | null>(null);
+  const [sceneVersion, setSceneVersion] = useState(0);
 
   useEffect(() => {
     const loadStatus = async () => {
@@ -65,8 +66,13 @@ function App() {
     };
 
     source.addEventListener("status", handleStatusEvent);
+    const handleScenesEvent = () => {
+      setSceneVersion((prev) => prev + 1);
+    };
+    source.addEventListener("scenes", handleScenesEvent);
     return () => {
       source.removeEventListener("status", handleStatusEvent);
+      source.removeEventListener("scenes", handleScenesEvent);
       source.close();
     };
   }, []);
@@ -99,9 +105,10 @@ function App() {
           <OperatorDashboard
             activeSceneId={activeSceneId}
             onActiveSceneChange={setActiveSceneId}
+            sceneVersion={sceneVersion}
           />
         ) : (
-          <AdminPanel />
+          <AdminPanel sceneVersion={sceneVersion} />
         )}
       </Container>
 

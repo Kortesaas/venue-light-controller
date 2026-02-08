@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import threading
 from typing import Dict, List, Optional
 
@@ -9,7 +10,14 @@ from pydantic import BaseModel
 
 from .artnet_core import record_snapshot, start_stream, stop_stream
 from .config import settings
-from .scenes import Scene, delete_scene, get_scene, list_scenes, save_scene
+from .scenes import (
+    Scene,
+    delete_scene,
+    get_scene,
+    list_scenes,
+    save_scene,
+    set_scene_order,
+)
 
 router = APIRouter()
 
@@ -108,19 +116,17 @@ def test_stop():
 
 
 class SceneRecordRequest(BaseModel):
-    id: str
     name: str
     universe: int = 0
     duration: float = 1.0
-    fade_in: float = 0.0
-    fade_out: float = 0.0
 
 
 class SceneUpdateRequest(BaseModel):
     name: str
-    fade_in: float = 0.0
-    fade_out: float = 0.0
-    new_id: Optional[str] = None
+
+
+class SceneReorderRequest(BaseModel):
+    scene_ids: List[str]
 
 
 @router.get("/scenes", response_model=list[Scene])
@@ -136,30 +142,54 @@ def api_get_scene(scene_id: str):
     return scene
 
 
+def _slugify_name(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+    return slug or "scene"
+
+
+def _scene_name_exists(name: str, ignore_id: Optional[str] = None) -> bool:
+    wanted = name.strip().lower()
+    for scene in list_scenes():
+        if ignore_id is not None and scene.id == ignore_id:
+            continue
+        if scene.name.strip().lower() == wanted:
+            return True
+    return False
+
+
+def _build_unique_scene_id(scene_name: str) -> str:
+    base = _slugify_name(scene_name)
+    existing_ids = {scene.id for scene in list_scenes()}
+    if base not in existing_ids:
+        return base
+
+    counter = 2
+    while True:
+        candidate = f"{base}_{counter}"
+        if candidate not in existing_ids:
+            return candidate
+        counter += 1
+
+
 @router.put("/scenes/{scene_id}", response_model=Scene)
 def api_update_scene(scene_id: str, request: SceneUpdateRequest):
     scene = get_scene(scene_id)
     if scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
 
-    target_id = request.new_id.strip() if request.new_id else scene.id
-    if target_id != scene_id and get_scene(target_id) is not None:
-        raise HTTPException(status_code=409, detail="Target scene id already exists")
+    name = request.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Scene name cannot be empty")
+    if _scene_name_exists(name, ignore_id=scene_id):
+        raise HTTPException(status_code=409, detail="Scene name already exists")
 
     updated = Scene(
-        id=target_id,
-        name=request.name,
+        id=scene.id,
+        name=name,
         universes=scene.universes,
-        fade_in=request.fade_in,
-        fade_out=request.fade_out,
     )
     save_scene(updated)
-
-    if target_id != scene_id:
-        delete_scene(scene_id)
-        if ACTIVE_SCENE_ID == scene_id:
-            _set_active_scene(target_id)
-
+    _broadcast_event("scenes", {"action": "updated", "scene_id": scene.id})
     return updated
 
 
@@ -172,7 +202,15 @@ def api_delete_scene(scene_id: str):
     delete_scene(scene_id)
     if ACTIVE_SCENE_ID == scene_id:
         _set_active_scene(None)
+    _broadcast_event("scenes", {"action": "deleted", "scene_id": scene_id})
     return {"status": "deleted", "scene_id": scene_id}
+
+
+@router.post("/scenes/reorder")
+def api_reorder_scenes(request: SceneReorderRequest):
+    order = set_scene_order(request.scene_ids)
+    _broadcast_event("scenes", {"action": "reordered", "scene_ids": order})
+    return {"status": "ok", "scene_ids": order}
 
 
 @router.post("/scenes/{scene_id}/play")
@@ -193,17 +231,22 @@ def api_play_scene(scene_id: str):
 
 @router.post("/scenes/record", response_model=Scene)
 def api_record_scene(request: SceneRecordRequest):
+    name = request.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Scene name cannot be empty")
+    if _scene_name_exists(name):
+        raise HTTPException(status_code=409, detail="Scene name already exists")
+
     snapshot = record_snapshot(request.universe, request.duration)
     dmx_values = snapshot.get(request.universe, [0] * 512)
 
     scene = Scene(
-        id=request.id,
-        name=request.name,
+        id=_build_unique_scene_id(name),
+        name=name,
         universes={request.universe: dmx_values},
-        fade_in=request.fade_in,
-        fade_out=request.fade_out,
     )
     save_scene(scene)
+    _broadcast_event("scenes", {"action": "created", "scene_id": scene.id})
     return scene
 
 
