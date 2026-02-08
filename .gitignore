@@ -1,0 +1,35 @@
+# ========================
+# Python
+# ========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv/
+venv/
+
+# ========================
+# Node / Frontend
+# ========================
+node_modules/
+dist/
+frontend/dist/
+
+# ========================
+# Build / Runtime
+# ========================
+backend/frontend_dist/
+*.log
+
+# ========================
+# OS / Editor
+# ========================
+.DS_Store
+Thumbs.db
+.vscode/
+
+# ========================
+# Scenes / Runtime Data
+# ========================
+backend/scenes/
