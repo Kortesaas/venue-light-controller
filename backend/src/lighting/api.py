@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+
+from .artnet_core import start_stream, stop_stream
 from .config import settings
 
 router = APIRouter()
@@ -15,3 +17,21 @@ def get_status():
         "local_ip": settings.local_ip,
         "node_ip": settings.node_ip,
     }
+
+
+@router.post("/test/all-on")
+def test_all_on():
+    """
+    Test: Universe 0 alle Kanaele auf 255.
+    """
+    start_stream({0: bytes([255] * 512)})
+    return {"status": "started", "universe": 0}
+
+
+@router.post("/test/stop")
+def test_stop():
+    """
+    Test: Stream stoppen.
+    """
+    stop_stream()
+    return {"status": "stopped"}
