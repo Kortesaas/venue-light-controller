@@ -3,6 +3,10 @@
 Touch-optimierte Lichtsteuerungs-App für feste Venue-Installationen, mit klarem Fokus auf das Speichern und Abrufen von Art-Net-Szenen.
 Die Szenen werden im Vorfeld mit beliebigen Art-Net-fähigen Lichtsteuerungssystemen (z. B. MA-Systemen) erstellt und als Art-Net-Daten aufgezeichnet.
 
+<p align="center">
+  <img src="./docs/MatriX_Saal_Light.png" alt="MatriX Saal Lichtszenen – Operator Panel" width="200" />
+</p>
+
 Die App ermöglicht das sichere, reproduzierbare Abrufen dieser gespeicherten Art-Net-Szenen über ein intuitives Operator-Panel, ohne dass tiefgehende Kenntnisse eines Lichtpults erforderlich sind.
 
 ## Features
