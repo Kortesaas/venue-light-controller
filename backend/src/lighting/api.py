@@ -338,7 +338,8 @@ def api_record_scene(request: SceneRecordRequest):
     if _scene_name_exists(name):
         raise HTTPException(status_code=409, detail="Scene name already exists")
 
-    target_universes = list(range(1, settings.universe_count + 1))
+    # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
+    target_universes = list(range(settings.universe_count))
     snapshot = record_snapshots(target_universes, request.duration)
 
     scene = Scene(
@@ -355,9 +356,10 @@ def api_record_scene(request: SceneRecordRequest):
 @router.post("/blackout")
 def api_blackout():
     _assert_panel_mode()
+    # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
     universe_to_dmx = {
         universe: bytes([0] * 512)
-        for universe in range(1, settings.universe_count + 1)
+        for universe in range(settings.universe_count)
     }
     start_stream(universe_to_dmx)
     _set_active_scene("__blackout__")
