@@ -11,7 +11,12 @@ function App() {
 
   return (
     <div className="relative">
-      {isAdmin ? <AdminPanel /> : <OperatorDashboard />}
+      <div className={isAdmin ? "hidden" : "block"}>
+        <OperatorDashboard />
+      </div>
+      <div className={isAdmin ? "block" : "hidden"}>
+        <AdminPanel />
+      </div>
       <button
         className="fixed bottom-4 right-4 rounded-full bg-slate-800/90 px-5 py-3 text-sm font-semibold text-slate-100 shadow-lg backdrop-blur transition hover:bg-slate-700"
         onClick={() => setMode(isAdmin ? "operator" : "admin")}

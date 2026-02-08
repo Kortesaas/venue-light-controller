@@ -1,6 +1,10 @@
-from typing import Dict, List
+import asyncio
+import json
+import threading
+from typing import Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from .artnet_core import record_snapshot, start_stream, stop_stream
@@ -8,6 +12,33 @@ from .config import settings
 from .scenes import Scene, delete_scene, get_scene, list_scenes, save_scene
 
 router = APIRouter()
+
+ACTIVE_SCENE_ID: Optional[str] = None
+_subscribers: set[asyncio.Queue[str]] = set()
+_subscribers_lock = threading.Lock()
+_event_loop: Optional[asyncio.AbstractEventLoop] = None
+
+
+def _format_sse(event: str, data: dict) -> str:
+    payload = json.dumps(data, separators=(",", ":"))
+    return f"event: {event}\ndata: {payload}\n\n"
+
+
+def _broadcast_event(event: str, data: dict) -> None:
+    message = _format_sse(event, data)
+    with _subscribers_lock:
+        subscribers = list(_subscribers)
+        loop = _event_loop
+    if loop is None:
+        return
+    for queue in subscribers:
+        loop.call_soon_threadsafe(queue.put_nowait, message)
+
+
+def _set_active_scene(scene_id: Optional[str]) -> None:
+    global ACTIVE_SCENE_ID
+    ACTIVE_SCENE_ID = scene_id
+    _broadcast_event("status", {"active_scene_id": ACTIVE_SCENE_ID})
 
 
 @router.get("/status")
@@ -20,7 +51,42 @@ def get_status():
         "status": "ok",
         "local_ip": settings.local_ip,
         "node_ip": settings.node_ip,
+        "active_scene_id": ACTIVE_SCENE_ID,
     }
+
+
+@router.get("/events")
+async def api_events():
+    async def event_stream():
+        queue: asyncio.Queue[str] = asyncio.Queue()
+        with _subscribers_lock:
+            _subscribers.add(queue)
+            global _event_loop
+            if _event_loop is None:
+                _event_loop = asyncio.get_running_loop()
+
+        try:
+            yield _format_sse("status", {"active_scene_id": ACTIVE_SCENE_ID})
+            while True:
+                try:
+                    message = await asyncio.wait_for(queue.get(), timeout=15.0)
+                except asyncio.TimeoutError:
+                    yield ": keep-alive\n\n"
+                    continue
+                yield message
+        finally:
+            with _subscribers_lock:
+                _subscribers.discard(queue)
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.post("/test/all-on")
@@ -75,6 +141,7 @@ def api_play_scene(scene_id: str):
     }
 
     start_stream(universe_to_dmx)
+    _set_active_scene(scene_id)
     return {"status": "playing", "scene_id": scene_id}
 
 
@@ -98,10 +165,12 @@ def api_record_scene(request: SceneRecordRequest):
 def api_blackout():
     universe_to_dmx = {0: bytes([0] * 512)}
     start_stream(universe_to_dmx)
+    _set_active_scene("__blackout__")
     return {"status": "blackout"}
 
 
 @router.post("/stop")
 def api_stop():
     stop_stream()
+    _set_active_scene(None)
     return {"status": "stopped"}

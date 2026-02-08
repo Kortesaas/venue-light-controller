@@ -6,6 +6,7 @@ type StatusResponse = {
   status: string;
   local_ip: string;
   node_ip: string;
+  active_scene_id?: string | null;
 };
 
 type Scene = {
@@ -66,52 +67,73 @@ export default function OperatorDashboard() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showBlackoutConfirm, setShowBlackoutConfirm] = useState(false);
 
+  const loadStatus = async () => {
+    setErrorMessage(null);
+
+    try {
+      const statusRes = await fetch(`${API_BASE}/api/status`);
+      if (!statusRes.ok) {
+        throw new Error("Failed to load status");
+      }
+
+      const statusData = (await statusRes.json()) as StatusResponse;
+      setStatus(statusData);
+
+      if (typeof statusData.active_scene_id !== "undefined") {
+        setActiveSceneId(statusData.active_scene_id ?? null);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      setErrorMessage(message);
+    }
+  };
+
+  const loadScenes = async () => {
+    setIsLoadingScenes(true);
+    setErrorMessage(null);
+
+    try {
+      const scenesRes = await fetch(`${API_BASE}/api/scenes`);
+      if (!scenesRes.ok) {
+        throw new Error("Failed to load scenes");
+      }
+
+      const scenesData = (await scenesRes.json()) as Scene[];
+      setScenes(scenesData);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      setErrorMessage(message);
+    } finally {
+      setIsLoadingScenes(false);
+    }
+  };
+
   useEffect(() => {
-    let alive = true;
+    void loadStatus();
+    void loadScenes();
+  }, []);
 
-    const loadData = async () => {
-      setIsLoadingScenes(true);
-      setErrorMessage(null);
+  useEffect(() => {
+    const source = new EventSource(`${API_BASE}/api/events`);
 
+    const handleStatusEvent = (event: MessageEvent) => {
       try {
-        const [statusRes, scenesRes] = await Promise.all([
-          fetch(`${API_BASE}/api/status`),
-          fetch(`${API_BASE}/api/scenes`),
-        ]);
-
-        if (!statusRes.ok) {
-          throw new Error("Failed to load status");
+        const data = JSON.parse(event.data) as {
+          active_scene_id?: string | null;
+        };
+        if (typeof data.active_scene_id !== "undefined") {
+          setActiveSceneId(data.active_scene_id ?? null);
         }
-        if (!scenesRes.ok) {
-          throw new Error("Failed to load scenes");
-        }
-
-        const statusData = (await statusRes.json()) as StatusResponse;
-        const scenesData = (await scenesRes.json()) as Scene[];
-
-        if (!alive) {
-          return;
-        }
-
-        setStatus(statusData);
-        setScenes(scenesData);
-      } catch (err) {
-        if (!alive) {
-          return;
-        }
-        const message = err instanceof Error ? err.message : "Unknown error";
-        setErrorMessage(message);
-      } finally {
-        if (alive) {
-          setIsLoadingScenes(false);
-        }
+      } catch {
+        // Ignore malformed event payloads.
       }
     };
 
-    void loadData();
+    source.addEventListener("status", handleStatusEvent);
 
     return () => {
-      alive = false;
+      source.removeEventListener("status", handleStatusEvent);
+      source.close();
     };
   }, []);
 
@@ -164,6 +186,11 @@ export default function OperatorDashboard() {
   };
 
   const activeScene = scenes.find((scene) => scene.id === activeSceneId);
+  const activeSceneLabel = activeSceneId
+    ? activeSceneId === "__blackout__"
+      ? "Blackout"
+      : activeScene?.name ?? activeSceneId
+    : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-900 text-slate-100">
@@ -175,15 +202,15 @@ export default function OperatorDashboard() {
           <div className="text-right text-xs uppercase tracking-wide text-slate-400">
             <div className="font-mono">MODE: Panel</div>
             <div className="font-mono text-slate-300">
-              NODE: {status?.node_ip ?? "â€”"}
+              NODE: {status?.node_ip ?? "-"}
             </div>
           </div>
         </div>
-        {activeSceneId && (
+        {activeSceneLabel && (
           <div className="mt-2 text-sm text-slate-300">
             Aktive Szene:{" "}
             <span className="font-semibold text-slate-100">
-              {activeScene?.name ?? activeSceneId}
+              {activeSceneLabel}
             </span>
           </div>
         )}
