@@ -1,6 +1,32 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import StopRoundedIcon from "@mui/icons-material/StopRounded";
+import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 
 const API_BASE = "";
+
+type StatusResponse = {
+  status: string;
+  local_ip: string;
+  node_ip: string;
+};
 
 type Scene = {
   id: string;
@@ -12,100 +38,60 @@ type Scene = {
 
 type OperatorDashboardProps = {
   activeSceneId: string | null;
-  nodeIp: string | null;
   onActiveSceneChange: (sceneId: string | null) => void;
 };
 
-type SceneCardProps = {
-  scene: Scene;
-  isActive: boolean;
-  isPending: boolean;
-  onPlay: (sceneId: string) => void;
-};
-
-function SceneCard({ scene, isActive, isPending, onPlay }: SceneCardProps) {
-  return (
-    <button
-      type="button"
-      onClick={() => onPlay(scene.id)}
-      disabled={isPending}
-      className={`min-h-[136px] w-full rounded-2xl border p-5 text-left transition ${
-        isActive
-          ? "border-emerald-400/70 bg-slate-900/90 shadow-lg shadow-emerald-900/20"
-          : "border-slate-800/80 bg-slate-900/70 hover:border-slate-700/80 hover:bg-slate-900"
-      } ${isPending ? "cursor-wait" : ""}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="truncate text-xl font-semibold text-slate-100">
-            {scene.name}
-          </div>
-          <div className="mt-2 font-mono text-xs uppercase tracking-wide text-slate-400">
-            {scene.id}
-          </div>
-        </div>
-        {isActive && (
-          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-200">
-            Active
-          </span>
-        )}
-        {isPending && (
-          <span className="rounded-full border border-slate-600/70 bg-slate-800/70 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200">
-            Sending
-          </span>
-        )}
-      </div>
-    </button>
-  );
-}
-
 export default function OperatorDashboard({
   activeSceneId,
-  nodeIp,
   onActiveSceneChange,
 }: OperatorDashboardProps) {
+  const [status, setStatus] = useState<StatusResponse | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
-  const [isLoadingScenes, setIsLoadingScenes] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [isPerformingAction, setIsPerformingAction] = useState(false);
   const [pendingSceneId, setPendingSceneId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showBlackoutConfirm, setShowBlackoutConfirm] = useState(false);
 
-  const loadScenes = async () => {
-    setIsLoadingScenes(true);
+  const loadData = async () => {
+    setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      const scenesRes = await fetch(`${API_BASE}/api/scenes`);
-      if (!scenesRes.ok) {
-        throw new Error("Failed to load scenes");
+      const [statusRes, scenesRes] = await Promise.all([
+        fetch(`${API_BASE}/api/status`),
+        fetch(`${API_BASE}/api/scenes`),
+      ]);
+
+      if (!statusRes.ok || !scenesRes.ok) {
+        throw new Error("Failed to load data");
       }
 
+      const statusData = (await statusRes.json()) as StatusResponse;
       const scenesData = (await scenesRes.json()) as Scene[];
+      setStatus(statusData);
       setScenes(scenesData);
     } catch {
-      setErrorMessage("Szenen konnten nicht geladen werden.");
+      setErrorMessage("Status oder Szenen konnten nicht geladen werden.");
     } finally {
-      setIsLoadingScenes(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    void loadScenes();
+    void loadData();
   }, []);
 
-  const postAction = async (path: string) => {
-    setErrorMessage(null);
-    const res = await fetch(`${API_BASE}${path}`, { method: "POST" });
-    if (!res.ok) {
-      throw new Error(`Request failed: ${path}`);
-    }
-  };
-
-  const handlePlay = async (sceneId: string) => {
+  const handlePlayScene = async (sceneId: string) => {
     setPendingSceneId(sceneId);
+    setErrorMessage(null);
     try {
-      await postAction(`/api/scenes/${sceneId}/play`);
+      const res = await fetch(`${API_BASE}/api/scenes/${sceneId}/play`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        throw new Error("Scene play failed");
+      }
       onActiveSceneChange(sceneId);
     } catch {
       setErrorMessage("Szene konnte nicht gestartet werden.");
@@ -116,8 +102,12 @@ export default function OperatorDashboard({
 
   const handleBlackout = async () => {
     setIsPerformingAction(true);
+    setErrorMessage(null);
     try {
-      await postAction("/api/blackout");
+      const res = await fetch(`${API_BASE}/api/blackout`, { method: "POST" });
+      if (!res.ok) {
+        throw new Error("Blackout failed");
+      }
       onActiveSceneChange("__blackout__");
       setShowBlackoutConfirm(false);
     } catch {
@@ -129,8 +119,12 @@ export default function OperatorDashboard({
 
   const handleStop = async () => {
     setIsPerformingAction(true);
+    setErrorMessage(null);
     try {
-      await postAction("/api/stop");
+      const res = await fetch(`${API_BASE}/api/stop`, { method: "POST" });
+      if (!res.ok) {
+        throw new Error("Stop failed");
+      }
       onActiveSceneChange(null);
     } catch {
       setErrorMessage("Stop konnte nicht ausgefuehrt werden.");
@@ -139,127 +133,150 @@ export default function OperatorDashboard({
     }
   };
 
-  const activeScene = scenes.find((scene) => scene.id === activeSceneId);
-  const activeSceneLabel = activeSceneId
-    ? activeSceneId === "__blackout__"
-      ? "Blackout"
-      : activeScene?.name ?? activeSceneId
-    : "Keine";
+  const activeSceneName = useMemo(() => {
+    if (!activeSceneId) {
+      return "Keine";
+    }
+    if (activeSceneId === "__blackout__") {
+      return "Blackout";
+    }
+    return scenes.find((scene) => scene.id === activeSceneId)?.name ?? activeSceneId;
+  }, [activeSceneId, scenes]);
 
   return (
-    <div className="space-y-5">
-      <section className="panel px-5 py-4">
-        <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-slate-400">
-          <span className="rounded-full border border-slate-700/80 bg-slate-900/70 px-3 py-1 font-mono">
-            Node: {nodeIp ?? "-"}
-          </span>
-          <span className="rounded-full border border-slate-700/80 bg-slate-900/70 px-3 py-1">
-            Scenes: {scenes.length}
-          </span>
-          <span className="rounded-full border border-emerald-500/35 bg-emerald-500/10 px-3 py-1 text-emerald-200">
-            Active: {activeSceneLabel}
-          </span>
-        </div>
-      </section>
-
-      {errorMessage && (
-        <div className="rounded-xl border border-red-600/70 bg-red-900/35 px-4 py-2 text-sm text-red-100">
-          {errorMessage}
-        </div>
-      )}
-
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="section-title">Szenen</h2>
-          <button
-            type="button"
-            onClick={loadScenes}
-            className="ui-btn rounded-lg border border-slate-700/80 text-xs uppercase tracking-wide text-slate-300 hover:bg-slate-800/80"
-          >
+    <Stack spacing={2.5}>
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          alignItems={{ sm: "center" }}
+          justifyContent="space-between"
+        >
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            <Chip size="small" label={`NODE: ${status?.node_ip ?? "-"}`} />
+            <Chip size="small" label={`SCENES: ${scenes.length}`} />
+            <Chip size="small" color="primary" label={`AKTIV: ${activeSceneName}`} />
+          </Stack>
+          <Button variant="outlined" size="small" onClick={loadData}>
             Reload
-          </button>
-        </div>
+          </Button>
+        </Stack>
+      </Paper>
 
-        {isLoadingScenes && (
-          <div className="rounded-xl border border-slate-800/80 bg-slate-900/55 px-4 py-5 text-sm text-slate-400">
-            Szenen werden geladen...
-          </div>
-        )}
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
-        {!isLoadingScenes && scenes.length === 0 && !errorMessage && (
-          <div className="rounded-xl border border-slate-800/80 bg-slate-900/55 px-4 py-5 text-sm text-slate-400">
-            Noch keine Szenen gespeichert.
-          </div>
-        )}
-
-        {scenes.length > 0 && (
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {scenes.map((scene) => (
-              <SceneCard
+      {isLoading ? (
+        <Box display="flex" justifyContent="center" py={6}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(3, minmax(0, 1fr))",
+            },
+            gap: 2,
+          }}
+        >
+          {scenes.map((scene) => {
+            const isActive = scene.id === activeSceneId;
+            const isPending = pendingSceneId === scene.id;
+            return (
+              <Card
                 key={scene.id}
-                scene={scene}
-                isActive={scene.id === activeSceneId}
-                isPending={pendingSceneId === scene.id}
-                onPlay={handlePlay}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {showBlackoutConfirm && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/82 px-6">
-          <div className="panel w-full max-w-md p-6 shadow-xl">
-            <div className="text-lg font-semibold text-slate-100">
-              Blackout wirklich ausloesen?
-            </div>
-            <div className="mt-2 text-sm text-slate-300">
-              Alle Kanaele werden auf 0 gesetzt.
-            </div>
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={handleBlackout}
-                disabled={isPerformingAction}
-                className="ui-btn flex-1 rounded-xl bg-red-600 px-4 py-3 text-base text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                variant="outlined"
+                sx={{
+                  borderColor: isActive ? "primary.main" : "divider",
+                  borderWidth: isActive ? 2 : 1,
+                  height: "100%",
+                }}
               >
-                Blackout
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowBlackoutConfirm(false)}
-                disabled={isPerformingAction}
-                className="ui-btn flex-1 rounded-xl border border-slate-600/80 px-4 py-3 text-base text-slate-200 hover:bg-slate-800/80 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </div>
+                <CardActionArea
+                  onClick={() => handlePlayScene(scene.id)}
+                  disabled={isPending}
+                  sx={{ minHeight: 140 }}
+                >
+                  <CardContent>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      spacing={1}
+                    >
+                      <Box minWidth={0}>
+                        <Typography variant="h6" noWrap>
+                          {scene.name}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontFamily: "monospace" }}
+                        >
+                          {scene.id}
+                        </Typography>
+                      </Box>
+                      {isPending && <CircularProgress size={18} />}
+                    </Stack>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            );
+          })}
+        </Box>
       )}
 
-      <div className="h-28" aria-hidden="true" />
-
-      <div className="fixed bottom-20 left-0 right-0 z-30 px-5 sm:px-6">
-        <div className="panel mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
-          <button
-            type="button"
+      <Paper
+        variant="outlined"
+        sx={{
+          position: "sticky",
+          bottom: 72,
+          p: 1.5,
+          bgcolor: "background.paper",
+        }}
+      >
+        <Stack direction="row" spacing={1.5}>
+          <Button
+            fullWidth
+            size="large"
+            color="error"
+            variant="contained"
+            startIcon={<WarningRoundedIcon />}
             onClick={() => setShowBlackoutConfirm(true)}
             disabled={isPerformingAction}
-            className="ui-btn flex-1 rounded-xl bg-red-600 px-6 py-3 text-base text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Blackout
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            fullWidth
+            size="large"
+            color="primary"
+            variant="outlined"
+            startIcon={<StopRoundedIcon />}
             onClick={handleStop}
             disabled={isPerformingAction}
-            className="ui-btn flex-1 rounded-xl bg-slate-700 px-6 py-3 text-base text-white hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isPerformingAction ? "Wird ausgefuehrt..." : "Stop"}
-          </button>
-        </div>
-      </div>
-    </div>
+            Stop
+          </Button>
+        </Stack>
+      </Paper>
+
+      <Dialog open={showBlackoutConfirm} onClose={() => setShowBlackoutConfirm(false)}>
+        <DialogTitle>Blackout ausloesen?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Alle Kanaele werden sofort auf 0 gesetzt.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowBlackoutConfirm(false)}>Abbrechen</Button>
+          <Button color="error" variant="contained" onClick={handleBlackout}>
+            Blackout
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
   );
 }

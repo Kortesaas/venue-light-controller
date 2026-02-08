@@ -1,4 +1,15 @@
 ﻿import { useEffect, useState } from "react";
+import {
+  AppBar,
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Container,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import AdminPanel from "./pages/AdminPanel";
 import OperatorDashboard from "./pages/OperatorDashboard";
 
@@ -18,31 +29,28 @@ function App() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [activeSceneId, setActiveSceneId] = useState<string | null>(null);
 
-  const isAdmin = mode === "admin";
-
-  const loadStatus = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/status`);
-      if (!res.ok) {
-        throw new Error("Failed to load status");
-      }
-      const data = (await res.json()) as StatusResponse;
-      setStatus(data);
-      if (typeof data.active_scene_id !== "undefined") {
-        setActiveSceneId(data.active_scene_id ?? null);
-      }
-    } catch {
-      // Status is optional for UI rendering; ignore errors here.
-    }
-  };
-
   useEffect(() => {
+    const loadStatus = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/status`);
+        if (!res.ok) {
+          throw new Error("Failed to load status");
+        }
+        const data = (await res.json()) as StatusResponse;
+        setStatus(data);
+        if (typeof data.active_scene_id !== "undefined") {
+          setActiveSceneId(data.active_scene_id ?? null);
+        }
+      } catch {
+        // Ignore status fetch errors for initial render.
+      }
+    };
+
     void loadStatus();
   }, []);
 
   useEffect(() => {
     const source = new EventSource(`${API_BASE}/api/events`);
-
     const handleStatusEvent = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data) as {
@@ -52,12 +60,11 @@ function App() {
           setActiveSceneId(data.active_scene_id ?? null);
         }
       } catch {
-        // Ignore malformed event payloads.
+        // Ignore malformed SSE payloads.
       }
     };
 
     source.addEventListener("status", handleStatusEvent);
-
     return () => {
       source.removeEventListener("status", handleStatusEvent);
       source.close();
@@ -65,70 +72,69 @@ function App() {
   }, []);
 
   return (
-    <div className="app-shell">
-      <div className="app-layer">
-        <header className="sticky top-0 z-30 border-b border-slate-800/60 bg-slate-950/70 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-6">
-            <div>
-              <div className="text-xl font-semibold tracking-tight text-slate-100">
-                Venue Light Controller
-              </div>
-              <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
-                MatriX Control
-              </div>
-            </div>
-            <div className="text-right text-[11px] uppercase tracking-[0.14em] text-slate-400">
-              <div className="font-mono opacity-90">
-                MODE: {isAdmin ? "Admin" : "Panel"}
-              </div>
-              <div className="font-mono text-slate-300/90">
-                NODE: {status?.node_ip ?? "-"}
-              </div>
-            </div>
-          </div>
-        </header>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+      <AppBar position="sticky" color="default" elevation={0}>
+        <Toolbar sx={{ justifyContent: "space-between", py: 0.5 }}>
+          <Box>
+            <Typography variant="h6" fontWeight={700}>
+              Venue Light Controller
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              MatriX Licht Szenen
+            </Typography>
+          </Box>
+          <Box textAlign="right">
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+              MODE: {mode === "admin" ? "Admin" : "Panel"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              NODE: {status?.node_ip ?? "-"}
+            </Typography>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
-        <main className="mx-auto max-w-7xl px-5 pb-32 pt-6 sm:px-6">
-          <div className={isAdmin ? "hidden" : "block"}>
-            <OperatorDashboard
-              activeSceneId={activeSceneId}
-              nodeIp={status?.node_ip ?? null}
-              onActiveSceneChange={setActiveSceneId}
-            />
-          </div>
-          <div className={isAdmin ? "block" : "hidden"}>
-            <AdminPanel />
-          </div>
-        </main>
+      <Container maxWidth="xl" sx={{ py: 3, pb: 12 }}>
+        {mode === "operator" ? (
+          <OperatorDashboard
+            activeSceneId={activeSceneId}
+            onActiveSceneChange={setActiveSceneId}
+          />
+        ) : (
+          <AdminPanel />
+        )}
+      </Container>
 
-        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-800/70 bg-slate-950/82 backdrop-blur">
-          <div className="mx-auto flex max-w-md items-center justify-between gap-2 px-5 py-3 sm:px-6">
-            <button
-              className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                !isAdmin
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
-                  : "bg-slate-800/80 text-slate-200 hover:bg-slate-700/90"
-              }`}
-              onClick={() => setMode("operator")}
-              type="button"
-            >
-              Operator
-            </button>
-            <button
-              className={`flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                isAdmin
-                  ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
-                  : "bg-slate-800/80 text-slate-200 hover:bg-slate-700/90"
-              }`}
-              onClick={() => setMode("admin")}
-              type="button"
-            >
-              Admin
-            </button>
-          </div>
-        </nav>
-      </div>
-    </div>
+      <Box
+        sx={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderTop: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          zIndex: (theme) => theme.zIndex.appBar,
+        }}
+      >
+        <BottomNavigation
+          showLabels
+          value={mode}
+          onChange={(_event, newValue: Mode) => setMode(newValue)}
+        >
+          <BottomNavigationAction
+            label="Operator"
+            value="operator"
+            icon={<DashboardRoundedIcon />}
+          />
+          <BottomNavigationAction
+            label="Admin"
+            value="admin"
+            icon={<SettingsRoundedIcon />}
+          />
+        </BottomNavigation>
+      </Box>
+    </Box>
   );
 }
 

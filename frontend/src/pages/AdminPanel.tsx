@@ -1,4 +1,24 @@
 ﻿import { useEffect, useMemo, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemSecondaryAction,
+  ListItemText,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
 const API_BASE = "";
 
@@ -56,9 +76,7 @@ export default function AdminPanel() {
   const [isPerformingAction, setIsPerformingAction] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [selectedSceneId, setSelectedSceneId] = useState<string | null>(null);
-  const [detailsScene, setDetailsScene] = useState<Scene | null>(null);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
-  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [form, setForm] = useState<SceneFormState>(initialFormState);
@@ -85,29 +103,14 @@ export default function AdminPanel() {
     void loadScenes();
   }, []);
 
-  const loadSceneDetails = async (sceneId: string) => {
-    setSelectedSceneId(sceneId);
-    setIsLoadingDetails(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch(`${API_BASE}/api/scenes/${sceneId}`);
-      if (!res.ok) {
-        throw new Error("Failed to load scene details");
-      }
-      const data = (await res.json()) as Scene;
-      setDetailsScene(data);
-      setEditForm({
-        id: data.id,
-        name: data.name,
-        fadeIn: data.fade_in ?? 0,
-        fadeOut: data.fade_out ?? 0,
-      });
-    } catch {
-      setErrorMessage("Scene-Details konnten nicht geladen werden.");
-    } finally {
-      setIsLoadingDetails(false);
-    }
+  const handleSelectScene = (scene: Scene) => {
+    setSelectedSceneId(scene.id);
+    setEditForm({
+      id: scene.id,
+      name: scene.name,
+      fadeIn: scene.fade_in ?? 0,
+      fadeOut: scene.fade_out ?? 0,
+    });
   };
 
   const handlePlay = async (sceneId: string) => {
@@ -123,9 +126,6 @@ export default function AdminPanel() {
         throw new Error("Failed to play scene");
       }
       setActionMessage("Szene gesendet.");
-      if (selectedSceneId === sceneId && detailsScene == null) {
-        await loadSceneDetails(sceneId);
-      }
     } catch {
       setErrorMessage("Szene konnte nicht gestartet werden.");
     } finally {
@@ -135,8 +135,8 @@ export default function AdminPanel() {
 
   const handleDelete = async (sceneId: string) => {
     setIsPerformingAction(true);
-    setActionMessage(null);
     setErrorMessage(null);
+    setActionMessage(null);
 
     try {
       const res = await fetch(`${API_BASE}/api/scenes/${sceneId}`, {
@@ -147,7 +147,6 @@ export default function AdminPanel() {
       }
       if (selectedSceneId === sceneId) {
         setSelectedSceneId(null);
-        setDetailsScene(null);
         setEditForm(null);
       }
       setActionMessage("Szene geloescht.");
@@ -159,7 +158,7 @@ export default function AdminPanel() {
     }
   };
 
-  const handleEditSave = async () => {
+  const handleSaveEdit = async () => {
     if (!selectedSceneId || !editForm) {
       return;
     }
@@ -185,7 +184,6 @@ export default function AdminPanel() {
 
       const updated = (await res.json()) as Scene;
       setSelectedSceneId(updated.id);
-      setDetailsScene(updated);
       setEditForm({
         id: updated.id,
         name: updated.name,
@@ -196,42 +194,6 @@ export default function AdminPanel() {
       await loadScenes();
     } catch {
       setErrorMessage("Szene konnte nicht aktualisiert werden.");
-    } finally {
-      setIsPerformingAction(false);
-    }
-  };
-
-  const handleTestAllOn = async () => {
-    setIsPerformingAction(true);
-    setErrorMessage(null);
-    setActionMessage(null);
-
-    try {
-      const res = await fetch(`${API_BASE}/api/test/all-on`, { method: "POST" });
-      if (!res.ok) {
-        throw new Error("Failed to send all-on test");
-      }
-      setActionMessage("Test All-On gesendet.");
-    } catch {
-      setErrorMessage("Test All-On fehlgeschlagen.");
-    } finally {
-      setIsPerformingAction(false);
-    }
-  };
-
-  const handleTestStop = async () => {
-    setIsPerformingAction(true);
-    setErrorMessage(null);
-    setActionMessage(null);
-
-    try {
-      const res = await fetch(`${API_BASE}/api/test/stop`, { method: "POST" });
-      if (!res.ok) {
-        throw new Error("Failed to stop test");
-      }
-      setActionMessage("Test Stop gesendet.");
-    } catch {
-      setErrorMessage("Test Stop fehlgeschlagen.");
     } finally {
       setIsPerformingAction(false);
     }
@@ -254,7 +216,7 @@ export default function AdminPanel() {
     });
   };
 
-  const canSubmit = useMemo(
+  const canRecord = useMemo(
     () =>
       form.name.trim().length > 0 &&
       form.id.trim().length > 0 &&
@@ -264,7 +226,7 @@ export default function AdminPanel() {
   );
 
   const handleRecord = async () => {
-    if (!canSubmit) {
+    if (!canRecord) {
       return;
     }
 
@@ -303,308 +265,222 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="section-title">Admin Panel</h2>
-          <p className="mt-1 text-sm text-slate-400">
-            Szenen verwalten, testen und aufnehmen.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={loadScenes}
-          disabled={isLoadingScenes}
-          className="rounded-lg border border-slate-700/80 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-300 transition hover:bg-slate-800/80 disabled:cursor-not-allowed disabled:opacity-60"
-        >
+    <Stack spacing={2.5}>
+      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5}>
+        <Box>
+          <Typography variant="h6" fontWeight={700}>
+            Admin Panel
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Szenen verwalten, bearbeiten und aufnehmen.
+          </Typography>
+        </Box>
+        <Button variant="outlined" onClick={loadScenes} disabled={isLoadingScenes}>
           Reload
-        </button>
-      </div>
+        </Button>
+      </Stack>
 
-      {errorMessage && (
-        <div className="rounded-xl border border-red-600/70 bg-red-900/35 px-4 py-2 text-sm text-red-100">
-          {errorMessage}
-        </div>
-      )}
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      {actionMessage && <Alert severity="success">{actionMessage}</Alert>}
 
-      {actionMessage && (
-        <div className="rounded-xl border border-emerald-500/45 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
-          {actionMessage}
-        </div>
-      )}
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section className="panel p-5 sm:p-6">
-          <div className="section-title mb-4">Szenenliste</div>
-
-          {isLoadingScenes && (
-            <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 px-4 py-5 text-sm text-slate-400">
-              Szenen werden geladen...
-            </div>
-          )}
-
-          {!isLoadingScenes && scenes.length === 0 && !errorMessage && (
-            <div className="rounded-xl border border-slate-800/80 bg-slate-900/50 px-4 py-5 text-sm text-slate-400">
-              Noch keine Szenen gespeichert.
-            </div>
-          )}
-
-          <div className="space-y-3">
-            {scenes.map((scene) => {
-              const isSelected = selectedSceneId === scene.id;
-              return (
-                <div
-                  key={scene.id}
-                  className={`rounded-xl border p-4 transition ${
-                    isSelected
-                      ? "border-emerald-500/50 bg-slate-900/85"
-                      : "border-slate-800/80 bg-slate-900/55"
-                  }`}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <button
-                      type="button"
-                      onClick={() => loadSceneDetails(scene.id)}
-                      className="min-w-0 text-left"
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "1.4fr 1fr" },
+          gap: 2,
+        }}
+      >
+        <Paper variant="outlined" sx={{ p: 1 }}>
+          {isLoadingScenes ? (
+            <Box display="flex" justifyContent="center" py={6}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <List>
+              {scenes.map((scene, index) => (
+                <Box key={scene.id}>
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      selected={selectedSceneId === scene.id}
+                      onClick={() => handleSelectScene(scene)}
                     >
-                      <div className="truncate text-base font-semibold text-slate-100">
-                        {scene.name}
-                      </div>
-                      <div className="mt-1 font-mono text-xs text-slate-400">
-                        {scene.id}
-                      </div>
-                      <div className="mt-2 text-xs text-slate-400">
-                        {formatUniverses(scene.universes) || "-"}
-                      </div>
-                    </button>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handlePlay(scene.id)}
-                        disabled={isPerformingAction}
-                        className="rounded-lg bg-slate-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Testen
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(scene.id)}
-                        disabled={isPerformingAction}
-                        className="rounded-lg bg-red-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Loeschen
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                      <ListItemText
+                        primary={scene.name}
+                        secondary={`${scene.id} | ${formatUniverses(scene.universes) || "-"}`}
+                      />
+                    </ListItemButton>
+                    <ListItemSecondaryAction>
+                      <Stack direction="row" spacing={0.5}>
+                        <IconButton
+                          edge="end"
+                          aria-label="testen"
+                          onClick={() => handlePlay(scene.id)}
+                          disabled={isPerformingAction}
+                        >
+                          <PlayArrowRoundedIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          aria-label="loeschen"
+                          onClick={() => handleDelete(scene.id)}
+                          disabled={isPerformingAction}
+                        >
+                          <DeleteOutlineRoundedIcon color="error" />
+                        </IconButton>
+                      </Stack>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                  {index < scenes.length - 1 && <Divider component="li" />}
+                </Box>
+              ))}
+            </List>
+          )}
+        </Paper>
 
-        <div className="space-y-5">
-          <section className="panel p-5">
-            <div className="section-title">Neue Szene aufnehmen</div>
-            <div className="mt-4 space-y-3">
-              <div>
-                <label className="ui-label">Name</label>
-                <input
-                  className="ui-input mt-1.5"
-                  value={form.name}
-                  placeholder="Warm House"
-                  onChange={(event) => handleNameChange(event.target.value)}
+        <Stack spacing={2}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+              Neue Szene aufnehmen
+            </Typography>
+            <Stack spacing={1.5}>
+              <TextField
+                label="Name"
+                value={form.name}
+                onChange={(event) => handleNameChange(event.target.value)}
+                size="small"
+                fullWidth
+              />
+              <TextField
+                label="ID"
+                value={form.id}
+                onChange={(event) => handleFormChange("id", event.target.value)}
+                size="small"
+                fullWidth
+              />
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                <TextField
+                  label="Universe"
+                  type="number"
+                  value={form.universe}
+                  onChange={(event) =>
+                    handleFormChange("universe", Number(event.target.value))
+                  }
+                  size="small"
+                  fullWidth
                 />
-              </div>
-              <div>
-                <label className="ui-label">ID</label>
-                <input
-                  className="ui-input mt-1.5 font-mono"
-                  value={form.id}
-                  placeholder="warm_house"
-                  onChange={(event) => handleFormChange("id", event.target.value)}
+                <TextField
+                  label="Duration"
+                  type="number"
+                  value={form.duration}
+                  onChange={(event) =>
+                    handleFormChange("duration", Number(event.target.value))
+                  }
+                  size="small"
+                  fullWidth
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="ui-label">Universe</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={3}
-                    className="ui-input mt-1.5"
-                    value={form.universe}
-                    onChange={(event) =>
-                      handleFormChange("universe", Number(event.target.value))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="ui-label">Dauer (s)</label>
-                  <input
-                    type="number"
-                    min={0.1}
-                    step={0.1}
-                    className="ui-input mt-1.5"
-                    value={form.duration}
-                    onChange={(event) =>
-                      handleFormChange("duration", Number(event.target.value))
-                    }
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="ui-label">Fade-In</label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.1}
-                    className="ui-input mt-1.5"
-                    value={form.fadeIn}
-                    onChange={(event) =>
-                      handleFormChange("fadeIn", Number(event.target.value))
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="ui-label">Fade-Out</label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.1}
-                    className="ui-input mt-1.5"
-                    value={form.fadeOut}
-                    onChange={(event) =>
-                      handleFormChange("fadeOut", Number(event.target.value))
-                    }
-                  />
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleRecord}
-                disabled={!canSubmit}
-                className="ui-btn w-full rounded-xl bg-emerald-600 px-5 py-3 text-sm text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
+                <TextField
+                  label="Fade-In"
+                  type="number"
+                  value={form.fadeIn}
+                  onChange={(event) =>
+                    handleFormChange("fadeIn", Number(event.target.value))
+                  }
+                  size="small"
+                  fullWidth
+                />
+                <TextField
+                  label="Fade-Out"
+                  type="number"
+                  value={form.fadeOut}
+                  onChange={(event) =>
+                    handleFormChange("fadeOut", Number(event.target.value))
+                  }
+                  size="small"
+                  fullWidth
+                />
+              </Box>
+              <Button variant="contained" onClick={handleRecord} disabled={!canRecord}>
                 {isRecording ? "Aufnahme laeuft..." : "Szene aufnehmen"}
-              </button>
-            </div>
-          </section>
+              </Button>
+            </Stack>
+          </Paper>
 
-          <section className="panel p-5">
-            <div className="section-title">Scene Details</div>
-            {isLoadingDetails && (
-              <div className="mt-3 text-sm text-slate-400">Details werden geladen...</div>
-            )}
-            {!isLoadingDetails && !detailsScene && (
-              <div className="mt-3 text-sm text-slate-400">
-                Eine Szene in der Liste auswaehlen.
-              </div>
-            )}
-            {!isLoadingDetails && detailsScene && editForm && (
-              <div className="mt-3 space-y-3">
-                <div>
-                  <label className="ui-label">ID</label>
-                  <input
-                    className="ui-input mt-1.5 font-mono"
-                    value={editForm.id}
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+              Szene bearbeiten
+            </Typography>
+            {!editForm ? (
+              <Typography variant="body2" color="text.secondary">
+                Waehle eine Szene aus der Liste.
+              </Typography>
+            ) : (
+              <Stack spacing={1.5}>
+                <TextField
+                  label="ID"
+                  value={editForm.id}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, id: event.target.value } : prev
+                    )
+                  }
+                  size="small"
+                  fullWidth
+                />
+                <TextField
+                  label="Name"
+                  value={editForm.name}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, name: event.target.value } : prev
+                    )
+                  }
+                  size="small"
+                  fullWidth
+                />
+                <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                  <TextField
+                    label="Fade-In"
+                    type="number"
+                    value={editForm.fadeIn}
                     onChange={(event) =>
                       setEditForm((prev) =>
-                        prev ? { ...prev, id: event.target.value } : prev
+                        prev ? { ...prev, fadeIn: Number(event.target.value) } : prev
                       )
                     }
+                    size="small"
+                    fullWidth
                   />
-                </div>
-                <div>
-                  <label className="ui-label">Name</label>
-                  <input
-                    className="ui-input mt-1.5"
-                    value={editForm.name}
+                  <TextField
+                    label="Fade-Out"
+                    type="number"
+                    value={editForm.fadeOut}
                     onChange={(event) =>
                       setEditForm((prev) =>
-                        prev ? { ...prev, name: event.target.value } : prev
+                        prev ? { ...prev, fadeOut: Number(event.target.value) } : prev
                       )
                     }
+                    size="small"
+                    fullWidth
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="ui-label">Fade-In</label>
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.1}
-                      className="ui-input mt-1.5"
-                      value={editForm.fadeIn}
-                      onChange={(event) =>
-                        setEditForm((prev) =>
-                          prev
-                            ? { ...prev, fadeIn: Number(event.target.value) }
-                            : prev
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="ui-label">Fade-Out</label>
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.1}
-                      className="ui-input mt-1.5"
-                      value={editForm.fadeOut}
-                      onChange={(event) =>
-                        setEditForm((prev) =>
-                          prev
-                            ? { ...prev, fadeOut: Number(event.target.value) }
-                            : prev
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="rounded-lg border border-slate-700/70 bg-slate-900/60 px-3 py-2 text-xs text-slate-300">
-                  Universes: {formatUniverses(detailsScene.universes) || "-"}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleEditSave}
+                </Box>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  startIcon={<SaveRoundedIcon />}
+                  onClick={handleSaveEdit}
                   disabled={
                     isPerformingAction ||
-                    editForm.name.trim().length === 0 ||
-                    editForm.id.trim().length === 0
+                    editForm.id.trim().length === 0 ||
+                    editForm.name.trim().length === 0
                   }
-                  className="ui-btn w-full rounded-xl bg-sky-600 px-4 py-2.5 text-white hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Szene speichern
-                </button>
-              </div>
+                  Speichern
+                </Button>
+              </Stack>
             )}
-          </section>
-
-          <section className="panel p-5">
-            <div className="section-title">Diagnostics</div>
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={handleTestAllOn}
-                disabled={isPerformingAction}
-                className="flex-1 rounded-lg bg-amber-500/90 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Test All-On
-              </button>
-              <button
-                type="button"
-                onClick={handleTestStop}
-                disabled={isPerformingAction}
-                className="flex-1 rounded-lg bg-slate-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Test Stop
-              </button>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
+          </Paper>
+        </Stack>
+      </Box>
+    </Stack>
   );
 }
