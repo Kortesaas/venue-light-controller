@@ -22,6 +22,7 @@ type StatusResponse = {
   local_ip: string;
   node_ip: string;
   active_scene_id?: string | null;
+  control_mode?: "panel" | "external";
 };
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [activeSceneId, setActiveSceneId] = useState<string | null>(null);
   const [sceneVersion, setSceneVersion] = useState(0);
+  const [controlMode, setControlMode] = useState<"panel" | "external">("panel");
 
   useEffect(() => {
     const loadStatus = async () => {
@@ -41,6 +43,9 @@ function App() {
         setStatus(data);
         if (typeof data.active_scene_id !== "undefined") {
           setActiveSceneId(data.active_scene_id ?? null);
+        }
+        if (typeof data.control_mode !== "undefined") {
+          setControlMode(data.control_mode);
         }
       } catch {
         // Ignore status fetch errors for initial render.
@@ -56,9 +61,13 @@ function App() {
       try {
         const data = JSON.parse(event.data) as {
           active_scene_id?: string | null;
+          control_mode?: "panel" | "external";
         };
         if (typeof data.active_scene_id !== "undefined") {
           setActiveSceneId(data.active_scene_id ?? null);
+        }
+        if (data.control_mode === "panel" || data.control_mode === "external") {
+          setControlMode(data.control_mode);
         }
       } catch {
         // Ignore malformed SSE payloads.
@@ -69,10 +78,22 @@ function App() {
     const handleScenesEvent = () => {
       setSceneVersion((prev) => prev + 1);
     };
+    const handleSettingsEvent = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data) as {
+          node_ip: string;
+        };
+        setStatus((prev) => (prev ? { ...prev, node_ip: data.node_ip } : prev));
+      } catch {
+        // Ignore malformed SSE payloads.
+      }
+    };
     source.addEventListener("scenes", handleScenesEvent);
+    source.addEventListener("settings", handleSettingsEvent);
     return () => {
       source.removeEventListener("status", handleStatusEvent);
       source.removeEventListener("scenes", handleScenesEvent);
+      source.removeEventListener("settings", handleSettingsEvent);
       source.close();
     };
   }, []);
@@ -83,15 +104,15 @@ function App() {
         <Toolbar sx={{ justifyContent: "space-between", py: 0.5 }}>
           <Box>
             <Typography variant="h6" fontWeight={700}>
-              Venue Light Controller
+              MatriX Saal Lichtszenen
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              MatriX Licht Szenen
+              Art-Net Snapshot Controller
             </Typography>
           </Box>
           <Box textAlign="right">
             <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-              MODE: {mode === "admin" ? "Admin" : "Panel"}
+              MODE: {controlMode === "panel" ? "PANEL" : "MA"}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               NODE: {status?.node_ip ?? "-"}
@@ -106,9 +127,14 @@ function App() {
             activeSceneId={activeSceneId}
             onActiveSceneChange={setActiveSceneId}
             sceneVersion={sceneVersion}
+            controlMode={controlMode}
           />
         ) : (
-          <AdminPanel sceneVersion={sceneVersion} />
+          <AdminPanel
+            sceneVersion={sceneVersion}
+            controlMode={controlMode}
+            onControlModeChange={setControlMode}
+          />
         )}
       </Container>
 

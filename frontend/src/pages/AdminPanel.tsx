@@ -5,14 +5,17 @@ import {
   Button,
   CircularProgress,
   Divider,
+  FormControlLabel,
   IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
+  MenuItem,
   Paper,
   Stack,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -20,7 +23,7 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 
 const API_BASE = "";
 
@@ -36,10 +39,6 @@ type SceneFormState = {
   duration: number;
 };
 
-type EditFormState = {
-  name: string;
-};
-
 const initialFormState: SceneFormState = {
   name: "",
   universe: 0,
@@ -48,7 +47,20 @@ const initialFormState: SceneFormState = {
 
 type AdminPanelProps = {
   sceneVersion: number;
+  controlMode: "panel" | "external";
+  onControlModeChange: (mode: "panel" | "external") => void;
 };
+
+type SettingsState = {
+  local_ip: string;
+  node_ip: string;
+  dmx_fps: number;
+  poll_interval: number;
+};
+
+const FPS_OPTIONS = [15, 24, 30, 40, 44, 60];
+const IPV4_REGEX =
+  /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
 
 function formatUniverses(universes: Record<string, number[]>) {
   return Object.keys(universes ?? {})
@@ -57,16 +69,28 @@ function formatUniverses(universes: Record<string, number[]>) {
     .join(", ");
 }
 
-export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
+export default function AdminPanel({
+  sceneVersion,
+  controlMode,
+  onControlModeChange,
+}: AdminPanelProps) {
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [isLoadingScenes, setIsLoadingScenes] = useState(true);
   const [isPerformingAction, setIsPerformingAction] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [selectedSceneId, setSelectedSceneId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<EditFormState | null>(null);
+  const [renameSceneId, setRenameSceneId] = useState<string | null>(null);
+  const [renameName, setRenameName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [form, setForm] = useState<SceneFormState>(initialFormState);
+  const [settingsForm, setSettingsForm] = useState<SettingsState>({
+    local_ip: "",
+    node_ip: "",
+    dmx_fps: 30,
+    poll_interval: 5,
+  });
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [isApplyingSettings, setIsApplyingSettings] = useState(false);
 
   const loadScenes = async () => {
     setIsLoadingScenes(true);
@@ -90,12 +114,24 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
     void loadScenes();
   }, [sceneVersion]);
 
-  const handleSelectScene = (scene: Scene) => {
-    setSelectedSceneId(scene.id);
-    setEditForm({
-      name: scene.name,
-    });
-  };
+  useEffect(() => {
+    const loadSettings = async () => {
+      setIsLoadingSettings(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/settings`);
+        if (!res.ok) {
+          throw new Error("Failed to load settings");
+        }
+        const data = (await res.json()) as SettingsState;
+        setSettingsForm(data);
+      } catch {
+        setErrorMessage("Settings konnten nicht geladen werden.");
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+    void loadSettings();
+  }, []);
 
   const handlePlay = async (sceneId: string) => {
     setIsPerformingAction(true);
@@ -129,9 +165,9 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
       if (!res.ok) {
         throw new Error("Failed to delete scene");
       }
-      if (selectedSceneId === sceneId) {
-        setSelectedSceneId(null);
-        setEditForm(null);
+      if (renameSceneId === sceneId) {
+        setRenameSceneId(null);
+        setRenameName("");
       }
       setActionMessage("Szene geloescht.");
       await loadScenes();
@@ -180,8 +216,8 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
     }
   };
 
-  const handleSaveEdit = async () => {
-    if (!selectedSceneId || !editForm) {
+  const handleSaveRename = async (sceneId: string) => {
+    if (!renameName.trim()) {
       return;
     }
 
@@ -190,22 +226,19 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
     setActionMessage(null);
 
     try {
-      const res = await fetch(`${API_BASE}/api/scenes/${selectedSceneId}`, {
+      const res = await fetch(`${API_BASE}/api/scenes/${sceneId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: editForm.name.trim(),
+          name: renameName.trim(),
         }),
       });
       if (!res.ok) {
         throw new Error("Failed to update scene");
       }
 
-      const updated = (await res.json()) as Scene;
-      setSelectedSceneId(updated.id);
-      setEditForm({
-        name: updated.name,
-      });
+      setRenameSceneId(null);
+      setRenameName("");
       setActionMessage("Szene aktualisiert.");
       await loadScenes();
     } catch {
@@ -266,6 +299,65 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
     }
   };
 
+  const handleControlModeToggle = async (checked: boolean) => {
+    const nextMode = checked ? "panel" : "external";
+    setIsPerformingAction(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/control-mode`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ control_mode: nextMode }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to change control mode");
+      }
+      onControlModeChange(nextMode);
+      setActionMessage(nextMode === "panel" ? "Panel aktiv." : "MA aktiv.");
+    } catch {
+      setErrorMessage("Control-Mode konnte nicht umgeschaltet werden.");
+    } finally {
+      setIsPerformingAction(false);
+    }
+  };
+
+  const canApplySettings =
+    IPV4_REGEX.test(settingsForm.node_ip.trim()) &&
+    FPS_OPTIONS.includes(Number(settingsForm.dmx_fps)) &&
+    settingsForm.poll_interval > 0 &&
+    !isApplyingSettings;
+
+  const handleApplySettings = async () => {
+    if (!canApplySettings) {
+      return;
+    }
+    setIsApplyingSettings(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          node_ip: settingsForm.node_ip.trim(),
+          dmx_fps: Number(settingsForm.dmx_fps),
+          poll_interval: Number(settingsForm.poll_interval),
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to update settings");
+      }
+      const data = (await res.json()) as SettingsState;
+      setSettingsForm(data);
+      setActionMessage("Settings angewendet.");
+    } catch {
+      setErrorMessage("Settings konnten nicht gespeichert werden.");
+    } finally {
+      setIsApplyingSettings(false);
+    }
+  };
+
   return (
     <Stack spacing={2.5}>
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5}>
@@ -277,6 +369,16 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
             Szenen verwalten, bearbeiten und aufnehmen.
           </Typography>
         </Box>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={controlMode === "panel"}
+              onChange={(_event, checked) => void handleControlModeToggle(checked)}
+              disabled={isPerformingAction}
+            />
+          }
+          label="Panel aktiv"
+        />
       </Stack>
 
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
@@ -299,10 +401,7 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
               {scenes.map((scene, index) => (
                 <Box key={scene.id}>
                   <ListItem disablePadding>
-                    <ListItemButton
-                      selected={selectedSceneId === scene.id}
-                      onClick={() => handleSelectScene(scene)}
-                    >
+                    <ListItemButton>
                       <ListItemText
                         primary={scene.name}
                         secondary={formatUniverses(scene.universes) || "-"}
@@ -328,6 +427,17 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
                         </IconButton>
                         <IconButton
                           edge="end"
+                          aria-label="umbenennen"
+                          onClick={() => {
+                            setRenameSceneId(scene.id);
+                            setRenameName(scene.name);
+                          }}
+                          disabled={isPerformingAction}
+                        >
+                          <EditRoundedIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
                           aria-label="testen"
                           onClick={() => handlePlay(scene.id)}
                           disabled={isPerformingAction}
@@ -345,6 +455,26 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
                       </Stack>
                     </ListItemSecondaryAction>
                   </ListItem>
+                  {renameSceneId === scene.id && (
+                    <Box sx={{ px: 2, pb: 1.5 }}>
+                      <Stack direction="row" spacing={1}>
+                        <TextField
+                          size="small"
+                          fullWidth
+                          label="Neuer Name"
+                          value={renameName}
+                          onChange={(event) => setRenameName(event.target.value)}
+                        />
+                        <Button
+                          variant="contained"
+                          onClick={() => void handleSaveRename(scene.id)}
+                          disabled={isPerformingAction || renameName.trim().length === 0}
+                        >
+                          Rename
+                        </Button>
+                      </Stack>
+                    </Box>
+                  )}
                   {index < scenes.length - 1 && <Divider component="li" />}
                 </Box>
               ))}
@@ -395,36 +525,70 @@ export default function AdminPanel({ sceneVersion }: AdminPanelProps) {
 
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-              Szene bearbeiten
+              System Settings
             </Typography>
-            {!editForm ? (
-              <Typography variant="body2" color="text.secondary">
-                Waehle eine Szene aus der Liste.
-              </Typography>
+            {isLoadingSettings ? (
+              <Box display="flex" justifyContent="center" py={2}>
+                <CircularProgress size={24} />
+              </Box>
             ) : (
               <Stack spacing={1.5}>
                 <TextField
-                  label="Name"
-                  value={editForm.name}
+                  label="Local IP"
+                  value={settingsForm.local_ip}
+                  size="small"
+                  fullWidth
+                  InputProps={{ readOnly: true }}
+                />
+                <TextField
+                  label="Node IP"
+                  value={settingsForm.node_ip}
                   onChange={(event) =>
-                    setEditForm((prev) =>
-                      prev ? { ...prev, name: event.target.value } : prev
-                    )
+                    setSettingsForm((prev) => ({ ...prev, node_ip: event.target.value }))
+                  }
+                  size="small"
+                  fullWidth
+                  error={settingsForm.node_ip.length > 0 && !IPV4_REGEX.test(settingsForm.node_ip)}
+                  helperText="IPv4, z.B. 2.0.0.10"
+                />
+                <TextField
+                  select
+                  label="DMX FPS"
+                  value={settingsForm.dmx_fps}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      dmx_fps: Number(event.target.value),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                >
+                  {FPS_OPTIONS.map((fps) => (
+                    <MenuItem key={fps} value={fps}>
+                      {fps}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  label="Poll Interval (s)"
+                  type="number"
+                  value={settingsForm.poll_interval}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      poll_interval: Number(event.target.value),
+                    }))
                   }
                   size="small"
                   fullWidth
                 />
                 <Button
                   variant="contained"
-                  color="secondary"
-                  startIcon={<SaveRoundedIcon />}
-                  onClick={handleSaveEdit}
-                  disabled={
-                    isPerformingAction ||
-                    editForm.name.trim().length === 0
-                  }
+                  onClick={handleApplySettings}
+                  disabled={!canApplySettings}
                 >
-                  Speichern
+                  Apply Settings
                 </Button>
               </Stack>
             )}

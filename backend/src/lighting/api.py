@@ -22,6 +22,7 @@ from .scenes import (
 router = APIRouter()
 
 ACTIVE_SCENE_ID: Optional[str] = None
+CONTROL_MODE: str = "panel"
 _subscribers: set[asyncio.Queue[str]] = set()
 _subscribers_lock = threading.Lock()
 _event_loop: Optional[asyncio.AbstractEventLoop] = None
@@ -49,6 +50,20 @@ def _set_active_scene(scene_id: Optional[str]) -> None:
     _broadcast_event("status", {"active_scene_id": ACTIVE_SCENE_ID})
 
 
+def _set_control_mode(mode: str) -> None:
+    global CONTROL_MODE
+    CONTROL_MODE = mode
+    _broadcast_event("status", {"control_mode": CONTROL_MODE})
+
+
+def _assert_panel_mode() -> None:
+    if CONTROL_MODE != "panel":
+        raise HTTPException(
+            status_code=409,
+            detail="Panel control is disabled while external control mode is active",
+        )
+
+
 @router.get("/status")
 def get_status():
     """
@@ -60,6 +75,7 @@ def get_status():
         "local_ip": settings.local_ip,
         "node_ip": settings.node_ip,
         "active_scene_id": ACTIVE_SCENE_ID,
+        "control_mode": CONTROL_MODE,
     }
 
 
@@ -74,7 +90,13 @@ async def api_events():
                 _event_loop = asyncio.get_running_loop()
 
         try:
-            yield _format_sse("status", {"active_scene_id": ACTIVE_SCENE_ID})
+            yield _format_sse(
+                "status",
+                {
+                    "active_scene_id": ACTIVE_SCENE_ID,
+                    "control_mode": CONTROL_MODE,
+                },
+            )
             while True:
                 try:
                     message = await asyncio.wait_for(queue.get(), timeout=15.0)
@@ -102,6 +124,7 @@ def test_all_on():
     """
     Test: Universe 0 alle Kanaele auf 255.
     """
+    _assert_panel_mode()
     start_stream({0: bytes([255] * 512)})
     return {"status": "started", "universe": 0}
 
@@ -127,6 +150,36 @@ class SceneUpdateRequest(BaseModel):
 
 class SceneReorderRequest(BaseModel):
     scene_ids: List[str]
+
+
+class SettingsResponse(BaseModel):
+    local_ip: str
+    node_ip: str
+    dmx_fps: float
+    poll_interval: float
+
+
+class SettingsUpdateRequest(BaseModel):
+    node_ip: str
+    dmx_fps: float
+    poll_interval: float
+
+
+class ControlModeResponse(BaseModel):
+    control_mode: str
+
+
+class ControlModeUpdateRequest(BaseModel):
+    control_mode: str
+
+
+def _get_settings_payload() -> SettingsResponse:
+    return SettingsResponse(
+        local_ip=settings.local_ip,
+        node_ip=settings.node_ip,
+        dmx_fps=settings.dmx_fps,
+        poll_interval=settings.poll_interval,
+    )
 
 
 @router.get("/scenes", response_model=list[Scene])
@@ -213,8 +266,46 @@ def api_reorder_scenes(request: SceneReorderRequest):
     return {"status": "ok", "scene_ids": order}
 
 
+@router.get("/settings", response_model=SettingsResponse)
+def api_get_settings():
+    return _get_settings_payload()
+
+
+@router.post("/settings", response_model=SettingsResponse)
+def api_update_settings(request: SettingsUpdateRequest):
+    settings.node_ip = request.node_ip
+    settings.dmx_fps = request.dmx_fps
+    settings.poll_interval = request.poll_interval
+
+    # Force reconnect/re-init with updated runtime settings on next play.
+    stop_stream()
+    _set_active_scene(None)
+    _broadcast_event("settings", _get_settings_payload().model_dump())
+    return _get_settings_payload()
+
+
+@router.get("/control-mode", response_model=ControlModeResponse)
+def api_get_control_mode():
+    return ControlModeResponse(control_mode=CONTROL_MODE)
+
+
+@router.post("/control-mode", response_model=ControlModeResponse)
+def api_set_control_mode(request: ControlModeUpdateRequest):
+    mode = request.control_mode.strip().lower()
+    if mode not in {"panel", "external"}:
+        raise HTTPException(status_code=400, detail="Invalid control mode")
+
+    if mode == "external":
+        stop_stream()
+        _set_active_scene(None)
+
+    _set_control_mode(mode)
+    return ControlModeResponse(control_mode=CONTROL_MODE)
+
+
 @router.post("/scenes/{scene_id}/play")
 def api_play_scene(scene_id: str):
+    _assert_panel_mode()
     scene = get_scene(scene_id)
     if scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
@@ -252,6 +343,7 @@ def api_record_scene(request: SceneRecordRequest):
 
 @router.post("/blackout")
 def api_blackout():
+    _assert_panel_mode()
     universe_to_dmx = {0: bytes([0] * 512)}
     start_stream(universe_to_dmx)
     _set_active_scene("__blackout__")

@@ -38,12 +38,14 @@ type OperatorDashboardProps = {
   activeSceneId: string | null;
   onActiveSceneChange: (sceneId: string | null) => void;
   sceneVersion: number;
+  controlMode: "panel" | "external";
 };
 
 export default function OperatorDashboard({
   activeSceneId,
   onActiveSceneChange,
   sceneVersion,
+  controlMode,
 }: OperatorDashboardProps) {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
@@ -83,6 +85,9 @@ export default function OperatorDashboard({
   }, [sceneVersion]);
 
   const handlePlayScene = async (sceneId: string) => {
+    if (controlMode !== "panel") {
+      return;
+    }
     setPendingSceneId(sceneId);
     setErrorMessage(null);
     try {
@@ -90,11 +95,18 @@ export default function OperatorDashboard({
         method: "POST",
       });
       if (!res.ok) {
+        if (res.status === 409) {
+          throw new Error("locked");
+        }
         throw new Error("Scene play failed");
       }
       onActiveSceneChange(sceneId);
     } catch {
-      setErrorMessage("Szene konnte nicht gestartet werden.");
+      setErrorMessage(
+        controlMode !== "panel"
+          ? "Panel gesperrt - MA aktiv."
+          : "Szene konnte nicht gestartet werden."
+      );
     } finally {
       setPendingSceneId(null);
     }
@@ -161,6 +173,9 @@ export default function OperatorDashboard({
       </Paper>
 
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      {controlMode !== "panel" && (
+        <Alert severity="warning">Panel gesperrt - MA aktiv</Alert>
+      )}
 
       {isLoading ? (
         <Box display="flex" justifyContent="center" py={6}>
@@ -193,7 +208,7 @@ export default function OperatorDashboard({
               >
                 <CardActionArea
                   onClick={() => handlePlayScene(scene.id)}
-                  disabled={isPending}
+                  disabled={isPending || controlMode !== "panel"}
                   sx={{ minHeight: 140 }}
                 >
                   <CardContent>
@@ -235,7 +250,7 @@ export default function OperatorDashboard({
             variant="contained"
             startIcon={<WarningRoundedIcon />}
             onClick={() => setShowBlackoutConfirm(true)}
-            disabled={isPerformingAction}
+            disabled={isPerformingAction || controlMode !== "panel"}
           >
             Blackout
           </Button>
