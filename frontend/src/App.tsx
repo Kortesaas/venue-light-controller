@@ -99,7 +99,20 @@ function App() {
   }, []);
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", position: "relative" }}>
+      <Box
+        sx={{
+          position: "fixed",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+          opacity: 0.2,
+          backgroundImage: "url('/MatriX_Saal_Light_BG.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
       <AppBar position="sticky" color="default" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between", py: 0.5 }}>
           <Box>
@@ -121,7 +134,7 @@ function App() {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="xl" sx={{ py: 3, pb: 12 }}>
+      <Container maxWidth="xl" sx={{ py: 3, pb: 12, position: "relative", zIndex: 1 }}>
         {mode === "operator" ? (
           <OperatorDashboard
             activeSceneId={activeSceneId}
