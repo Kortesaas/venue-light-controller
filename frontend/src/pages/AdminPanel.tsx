@@ -29,6 +29,7 @@ import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
 
 const API_BASE = "";
 
@@ -92,6 +93,7 @@ export default function AdminPanel({
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isApplyingSettings, setIsApplyingSettings] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState<Scene | null>(null);
+  const [rerecordCandidate, setRerecordCandidate] = useState<Scene | null>(null);
 
   const loadScenes = async () => {
     setIsLoadingScenes(true);
@@ -213,6 +215,27 @@ export default function AdminPanel({
     } catch {
       setErrorMessage("Reihenfolge konnte nicht gespeichert werden.");
       await loadScenes();
+    } finally {
+      setIsPerformingAction(false);
+    }
+  };
+
+  const handleRerecord = async (sceneId: string) => {
+    setIsPerformingAction(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/scenes/${sceneId}/rerecord`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to update scene content");
+      }
+      setActionMessage("Szeneninhalt aktualisiert.");
+      await loadScenes();
+    } catch {
+      setErrorMessage("Szeneninhalt konnte nicht aktualisiert werden.");
     } finally {
       setIsPerformingAction(false);
     }
@@ -465,6 +488,14 @@ export default function AdminPanel({
                         </IconButton>
                         <IconButton
                           edge="end"
+                          aria-label="inhalt aktualisieren"
+                          onClick={() => setRerecordCandidate(scene)}
+                          disabled={isPerformingAction}
+                        >
+                          <AutorenewRoundedIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
                           aria-label="löschen"
                           onClick={() => setDeleteCandidate(scene)}
                           disabled={isPerformingAction}
@@ -647,6 +678,35 @@ export default function AdminPanel({
             }}
           >
             Löschen
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={rerecordCandidate !== null}
+        onClose={() => setRerecordCandidate(null)}
+      >
+        <DialogTitle>Szene neu aufnehmen?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Soll der Inhalt der Szene "{rerecordCandidate?.name ?? ""}" mit den
+            aktuellen Art-Net-Daten überschrieben werden?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRerecordCandidate(null)}>Abbrechen</Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              if (!rerecordCandidate) {
+                return;
+              }
+              const sceneId = rerecordCandidate.id;
+              setRerecordCandidate(null);
+              await handleRerecord(sceneId);
+            }}
+          >
+            Aktualisieren
           </Button>
         </DialogActions>
       </Dialog>

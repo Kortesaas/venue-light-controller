@@ -144,6 +144,10 @@ class SceneRecordRequest(BaseModel):
     duration: float = 1.0
 
 
+class SceneRerecordRequest(BaseModel):
+    duration: float = 1.0
+
+
 class SceneUpdateRequest(BaseModel):
     name: str
     description: str = ""
@@ -226,6 +230,12 @@ def _build_unique_scene_id(scene_name: str) -> str:
         if candidate not in existing_ids:
             return candidate
         counter += 1
+
+
+def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
+    # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
+    target_universes = list(range(settings.universe_count))
+    return record_snapshots(target_universes, duration)
 
 
 @router.put("/scenes/{scene_id}", response_model=Scene)
@@ -338,9 +348,7 @@ def api_record_scene(request: SceneRecordRequest):
     if _scene_name_exists(name):
         raise HTTPException(status_code=409, detail="Scene name already exists")
 
-    # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
-    target_universes = list(range(settings.universe_count))
-    snapshot = record_snapshots(target_universes, request.duration)
+    snapshot = _record_scene_snapshot(request.duration)
 
     scene = Scene(
         id=_build_unique_scene_id(name),
@@ -351,6 +359,28 @@ def api_record_scene(request: SceneRecordRequest):
     save_scene(scene)
     _broadcast_event("scenes", {"action": "created", "scene_id": scene.id})
     return scene
+
+
+@router.post("/scenes/{scene_id}/rerecord", response_model=Scene)
+def api_rerecord_scene(
+    scene_id: str, request: Optional[SceneRerecordRequest] = None
+):
+    scene = get_scene(scene_id)
+    if scene is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    duration = request.duration if request is not None else 1.0
+    snapshot = _record_scene_snapshot(duration)
+
+    updated = Scene(
+        id=scene.id,
+        name=scene.name,
+        description=scene.description,
+        universes=snapshot,
+    )
+    save_scene(updated)
+    _broadcast_event("scenes", {"action": "updated", "scene_id": scene.id})
+    return updated
 
 
 @router.post("/blackout")
