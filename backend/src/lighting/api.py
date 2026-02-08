@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from .artnet_core import record_snapshot, start_stream, stop_stream
+from .artnet_core import record_snapshots, start_stream, stop_stream
 from .config import settings
 from .scenes import (
     Scene,
@@ -140,12 +140,13 @@ def test_stop():
 
 class SceneRecordRequest(BaseModel):
     name: str
-    universe: int = 0
+    description: str = ""
     duration: float = 1.0
 
 
 class SceneUpdateRequest(BaseModel):
     name: str
+    description: str = ""
 
 
 class SceneReorderRequest(BaseModel):
@@ -157,12 +158,14 @@ class SettingsResponse(BaseModel):
     node_ip: str
     dmx_fps: float
     poll_interval: float
+    universe_count: int
 
 
 class SettingsUpdateRequest(BaseModel):
     node_ip: str
     dmx_fps: float
     poll_interval: float
+    universe_count: int
 
 
 class ControlModeResponse(BaseModel):
@@ -179,6 +182,7 @@ def _get_settings_payload() -> SettingsResponse:
         node_ip=settings.node_ip,
         dmx_fps=settings.dmx_fps,
         poll_interval=settings.poll_interval,
+        universe_count=settings.universe_count,
     )
 
 
@@ -239,6 +243,7 @@ def api_update_scene(scene_id: str, request: SceneUpdateRequest):
     updated = Scene(
         id=scene.id,
         name=name,
+        description=request.description.strip(),
         universes=scene.universes,
     )
     save_scene(updated)
@@ -273,9 +278,13 @@ def api_get_settings():
 
 @router.post("/settings", response_model=SettingsResponse)
 def api_update_settings(request: SettingsUpdateRequest):
+    if request.universe_count < 1:
+        raise HTTPException(status_code=400, detail="universe_count must be >= 1")
+
     settings.node_ip = request.node_ip
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
+    settings.universe_count = request.universe_count
 
     # Force reconnect/re-init with updated runtime settings on next play.
     stop_stream()
@@ -328,13 +337,14 @@ def api_record_scene(request: SceneRecordRequest):
     if _scene_name_exists(name):
         raise HTTPException(status_code=409, detail="Scene name already exists")
 
-    snapshot = record_snapshot(request.universe, request.duration)
-    dmx_values = snapshot.get(request.universe, [0] * 512)
+    target_universes = list(range(1, settings.universe_count + 1))
+    snapshot = record_snapshots(target_universes, request.duration)
 
     scene = Scene(
         id=_build_unique_scene_id(name),
         name=name,
-        universes={request.universe: dmx_values},
+        description=request.description.strip(),
+        universes=snapshot,
     )
     save_scene(scene)
     _broadcast_event("scenes", {"action": "created", "scene_id": scene.id})
@@ -344,7 +354,10 @@ def api_record_scene(request: SceneRecordRequest):
 @router.post("/blackout")
 def api_blackout():
     _assert_panel_mode()
-    universe_to_dmx = {0: bytes([0] * 512)}
+    universe_to_dmx = {
+        universe: bytes([0] * 512)
+        for universe in range(1, settings.universe_count + 1)
+    }
     start_stream(universe_to_dmx)
     _set_active_scene("__blackout__")
     return {"status": "blackout"}

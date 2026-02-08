@@ -4,6 +4,11 @@ import {
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   FormControlLabel,
   IconButton,
@@ -30,19 +35,18 @@ const API_BASE = "";
 type Scene = {
   id: string;
   name: string;
+  description?: string;
   universes: Record<string, number[]>;
 };
 
 type SceneFormState = {
   name: string;
-  universe: number;
-  duration: number;
+  description: string;
 };
 
 const initialFormState: SceneFormState = {
   name: "",
-  universe: 0,
-  duration: 1,
+  description: "",
 };
 
 type AdminPanelProps = {
@@ -56,18 +60,12 @@ type SettingsState = {
   node_ip: string;
   dmx_fps: number;
   poll_interval: number;
+  universe_count: number;
 };
 
 const FPS_OPTIONS = [15, 24, 30, 40, 44, 60];
 const IPV4_REGEX =
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
-
-function formatUniverses(universes: Record<string, number[]>) {
-  return Object.keys(universes ?? {})
-    .sort((a, b) => Number(a) - Number(b))
-    .map((value) => `U${value}`)
-    .join(", ");
-}
 
 export default function AdminPanel({
   sceneVersion,
@@ -80,6 +78,7 @@ export default function AdminPanel({
   const [isRecording, setIsRecording] = useState(false);
   const [renameSceneId, setRenameSceneId] = useState<string | null>(null);
   const [renameName, setRenameName] = useState("");
+  const [renameDescription, setRenameDescription] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [form, setForm] = useState<SceneFormState>(initialFormState);
@@ -88,9 +87,11 @@ export default function AdminPanel({
     node_ip: "",
     dmx_fps: 30,
     poll_interval: 5,
+    universe_count: 1,
   });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isApplyingSettings, setIsApplyingSettings] = useState(false);
+  const [deleteCandidate, setDeleteCandidate] = useState<Scene | null>(null);
 
   const loadScenes = async () => {
     setIsLoadingScenes(true);
@@ -168,11 +169,12 @@ export default function AdminPanel({
       if (renameSceneId === sceneId) {
         setRenameSceneId(null);
         setRenameName("");
+        setRenameDescription("");
       }
-      setActionMessage("Szene geloescht.");
+      setActionMessage("Szene gelöscht.");
       await loadScenes();
     } catch {
-      setErrorMessage("Szene konnte nicht geloescht werden.");
+      setErrorMessage("Szene konnte nicht gelöscht werden.");
     } finally {
       setIsPerformingAction(false);
     }
@@ -231,6 +233,7 @@ export default function AdminPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: renameName.trim(),
+          description: renameDescription.trim(),
         }),
       });
       if (!res.ok) {
@@ -239,6 +242,7 @@ export default function AdminPanel({
 
       setRenameSceneId(null);
       setRenameName("");
+      setRenameDescription("");
       setActionMessage("Szene aktualisiert.");
       await loadScenes();
     } catch {
@@ -258,7 +262,6 @@ export default function AdminPanel({
   const canRecord = useMemo(
     () =>
       form.name.trim().length > 0 &&
-      form.duration > 0 &&
       !isRecording,
     [form, isRecording]
   );
@@ -275,8 +278,7 @@ export default function AdminPanel({
     try {
       const payload = {
         name: form.name.trim(),
-        universe: form.universe,
-        duration: form.duration,
+        description: form.description.trim(),
       };
 
       const res = await fetch(`${API_BASE}/api/scenes/record`, {
@@ -325,6 +327,8 @@ export default function AdminPanel({
   const canApplySettings =
     IPV4_REGEX.test(settingsForm.node_ip.trim()) &&
     FPS_OPTIONS.includes(Number(settingsForm.dmx_fps)) &&
+    Number.isInteger(Number(settingsForm.universe_count)) &&
+    Number(settingsForm.universe_count) > 0 &&
     settingsForm.poll_interval > 0 &&
     !isApplyingSettings;
 
@@ -343,6 +347,7 @@ export default function AdminPanel({
           node_ip: settingsForm.node_ip.trim(),
           dmx_fps: Number(settingsForm.dmx_fps),
           poll_interval: Number(settingsForm.poll_interval),
+          universe_count: Number(settingsForm.universe_count),
         }),
       });
       if (!res.ok) {
@@ -404,7 +409,9 @@ export default function AdminPanel({
                     <ListItemButton>
                       <ListItemText
                         primary={scene.name}
-                        secondary={formatUniverses(scene.universes) || "-"}
+                        secondary={
+                          scene.description?.trim() ? scene.description : "-"
+                        }
                       />
                     </ListItemButton>
                     <ListItemSecondaryAction>
@@ -431,6 +438,7 @@ export default function AdminPanel({
                           onClick={() => {
                             setRenameSceneId(scene.id);
                             setRenameName(scene.name);
+                            setRenameDescription(scene.description ?? "");
                           }}
                           disabled={isPerformingAction}
                         >
@@ -446,8 +454,8 @@ export default function AdminPanel({
                         </IconButton>
                         <IconButton
                           edge="end"
-                          aria-label="loeschen"
-                          onClick={() => handleDelete(scene.id)}
+                          aria-label="löschen"
+                          onClick={() => setDeleteCandidate(scene)}
                           disabled={isPerformingAction}
                         >
                           <DeleteOutlineRoundedIcon color="error" />
@@ -457,13 +465,20 @@ export default function AdminPanel({
                   </ListItem>
                   {renameSceneId === scene.id && (
                     <Box sx={{ px: 2, pb: 1.5 }}>
-                      <Stack direction="row" spacing={1}>
+                      <Stack spacing={1}>
                         <TextField
                           size="small"
                           fullWidth
                           label="Neuer Name"
                           value={renameName}
                           onChange={(event) => setRenameName(event.target.value)}
+                        />
+                        <TextField
+                          size="small"
+                          fullWidth
+                          label="Beschreibung"
+                          value={renameDescription}
+                          onChange={(event) => setRenameDescription(event.target.value)}
                         />
                         <Button
                           variant="contained"
@@ -495,30 +510,15 @@ export default function AdminPanel({
                 size="small"
                 fullWidth
               />
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-                <TextField
-                  label="Universe"
-                  type="number"
-                  value={form.universe}
-                  onChange={(event) =>
-                    handleFormChange("universe", Number(event.target.value))
-                  }
-                  size="small"
-                  fullWidth
-                />
-                <TextField
-                  label="Duration"
-                  type="number"
-                  value={form.duration}
-                  onChange={(event) =>
-                    handleFormChange("duration", Number(event.target.value))
-                  }
-                  size="small"
-                  fullWidth
-                />
-              </Box>
+              <TextField
+                label="Beschreibung"
+                value={form.description}
+                onChange={(event) => handleFormChange("description", event.target.value)}
+                size="small"
+                fullWidth
+              />
               <Button variant="contained" onClick={handleRecord} disabled={!canRecord}>
-                {isRecording ? "Aufnahme laeuft..." : "Szene aufnehmen"}
+                {isRecording ? "Aufnahme läuft..." : "Szene aufnehmen"}
               </Button>
             </Stack>
           </Paper>
@@ -583,6 +583,20 @@ export default function AdminPanel({
                   size="small"
                   fullWidth
                 />
+                <TextField
+                  label="Universes in use"
+                  type="number"
+                  value={settingsForm.universe_count}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      universe_count: Number(event.target.value),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="z.B. 2 => Universe 1 und 2"
+                />
                 <Button
                   variant="contained"
                   onClick={handleApplySettings}
@@ -595,6 +609,36 @@ export default function AdminPanel({
           </Paper>
         </Stack>
       </Box>
+
+      <Dialog
+        open={deleteCandidate !== null}
+        onClose={() => setDeleteCandidate(null)}
+      >
+        <DialogTitle>Szene löschen?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Soll die Szene "{deleteCandidate?.name ?? ""}" wirklich gelöscht werden?
+            Dieser Schritt kann nicht rueckgängig gemacht werden.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteCandidate(null)}>Abbrechen</Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={async () => {
+              if (!deleteCandidate) {
+                return;
+              }
+              const sceneId = deleteCandidate.id;
+              setDeleteCandidate(null);
+              await handleDelete(sceneId);
+            }}
+          >
+            Löschen
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }

@@ -31,6 +31,7 @@ type StatusResponse = {
 type Scene = {
   id: string;
   name: string;
+  description?: string;
   universes: Record<string, number[]>;
 };
 
@@ -222,6 +223,22 @@ export default function OperatorDashboard({
                         <Typography variant="h6" noWrap>
                           {scene.name}
                         </Typography>
+                        {scene.description ? (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              mt: 0.5,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                            }}
+                          >
+                            {scene.description}
+                          </Typography>
+                        ) : null}
                       </Box>
                       {isPending && <CircularProgress size={18} />}
                     </Stack>
@@ -269,10 +286,10 @@ export default function OperatorDashboard({
       </Paper>
 
       <Dialog open={showBlackoutConfirm} onClose={() => setShowBlackoutConfirm(false)}>
-        <DialogTitle>Blackout ausloesen?</DialogTitle>
+        <DialogTitle>Blackout auslösen?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Alle Kanaele werden sofort auf 0 gesetzt.
+            Alle Kanäle werden sofort auf 0 gesetzt.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

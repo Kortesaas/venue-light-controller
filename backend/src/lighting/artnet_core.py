@@ -180,11 +180,25 @@ def record_snapshot(universe: int, duration: float) -> dict[int, list[int]]:
     Nimmt fuer `duration` Sekunden ArtNet-Daten auf dem angegebenen Universe auf
     und gibt ein Mapping {universe: [512 DMX-Werte]} zurueck.
     """
+    return record_snapshots([universe], duration)
+
+
+def record_snapshots(universes: List[int], duration: float) -> dict[int, list[int]]:
+    """
+    Nimmt fuer `duration` Sekunden ArtNet-Daten auf mehreren Universes auf und
+    gibt ein Mapping {universe: [512 DMX-Werte]} zurueck.
+    """
+    target_universes = sorted(set(universes))
+    if not target_universes:
+        return {}
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("", ARTNET_PORT))
     sock.settimeout(1.0)
 
-    buffer: List[int] = [0] * DMX_CHANNELS
+    buffers: Dict[int, List[int]] = {
+        universe: [0] * DMX_CHANNELS for universe in target_universes
+    }
     start = time.monotonic()
 
     try:
@@ -198,16 +212,17 @@ def record_snapshot(universe: int, duration: float) -> dict[int, list[int]]:
             if not parsed:
                 continue
 
-            u, dmx = parsed
-            if u != universe:
+            universe, dmx = parsed
+            if universe not in buffers:
                 continue
 
+            buffer = buffers[universe]
             for i in range(min(len(dmx), DMX_CHANNELS)):
                 buffer[i] = dmx[i]
     finally:
         sock.close()
 
-    return {universe: buffer}
+    return buffers
 
 
 def start_stream(universe_to_dmx: dict[int, bytes]) -> None:

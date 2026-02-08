@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     dmx_fps: float = 30.0
     poll_interval: float = 5.0
+    universe_count: int = 1
 
     # Ordner für Szenen (kannst du später nutzen)
     scenes_path: str = "./scenes"

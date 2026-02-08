@@ -18,6 +18,7 @@ ORDER_FILE = "_order.json"
 class Scene(BaseModel):
     id: str
     name: str
+    description: str = ""
     universes: Dict[int, List[int]]
 
     @field_validator("universes")
