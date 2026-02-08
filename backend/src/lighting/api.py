@@ -116,6 +116,13 @@ class SceneRecordRequest(BaseModel):
     fade_out: float = 0.0
 
 
+class SceneUpdateRequest(BaseModel):
+    name: str
+    fade_in: float = 0.0
+    fade_out: float = 0.0
+    new_id: Optional[str] = None
+
+
 @router.get("/scenes", response_model=list[Scene])
 def api_list_scenes():
     return list_scenes()
@@ -127,6 +134,45 @@ def api_get_scene(scene_id: str):
     if scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
     return scene
+
+
+@router.put("/scenes/{scene_id}", response_model=Scene)
+def api_update_scene(scene_id: str, request: SceneUpdateRequest):
+    scene = get_scene(scene_id)
+    if scene is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    target_id = request.new_id.strip() if request.new_id else scene.id
+    if target_id != scene_id and get_scene(target_id) is not None:
+        raise HTTPException(status_code=409, detail="Target scene id already exists")
+
+    updated = Scene(
+        id=target_id,
+        name=request.name,
+        universes=scene.universes,
+        fade_in=request.fade_in,
+        fade_out=request.fade_out,
+    )
+    save_scene(updated)
+
+    if target_id != scene_id:
+        delete_scene(scene_id)
+        if ACTIVE_SCENE_ID == scene_id:
+            _set_active_scene(target_id)
+
+    return updated
+
+
+@router.delete("/scenes/{scene_id}")
+def api_delete_scene(scene_id: str):
+    scene = get_scene(scene_id)
+    if scene is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    delete_scene(scene_id)
+    if ACTIVE_SCENE_ID == scene_id:
+        _set_active_scene(None)
+    return {"status": "deleted", "scene_id": scene_id}
 
 
 @router.post("/scenes/{scene_id}/play")
