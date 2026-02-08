@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from .artnet_core import record_snapshots, start_stream, stop_stream
-from .config import settings
+from .config import persist_runtime_settings, settings
 from .scenes import (
     Scene,
     delete_scene,
@@ -285,6 +285,7 @@ def api_update_settings(request: SettingsUpdateRequest):
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
     settings.universe_count = request.universe_count
+    persist_runtime_settings()
 
     # Force reconnect/re-init with updated runtime settings on next play.
     stop_stream()

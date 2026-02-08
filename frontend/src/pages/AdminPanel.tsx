@@ -332,6 +332,17 @@ export default function AdminPanel({
     settingsForm.poll_interval > 0 &&
     !isApplyingSettings;
 
+  const universeExampleText = (() => {
+    const count = Number(settingsForm.universe_count);
+    if (!Number.isInteger(count) || count < 1) {
+      return "Bitte eine ganze Zahl >= 1 eingeben.";
+    }
+    if (count === 1) {
+      return "Erfasst wird: Universe 1";
+    }
+    return `Erfasst werden: Universe 1 bis ${count}`;
+  })();
+
   const handleApplySettings = async () => {
     if (!canApplySettings) {
       return;
@@ -595,7 +606,7 @@ export default function AdminPanel({
                   }
                   size="small"
                   fullWidth
-                  helperText="z.B. 2 => Universe 1 und 2"
+                  helperText={universeExampleText}
                 />
                 <Button
                   variant="contained"

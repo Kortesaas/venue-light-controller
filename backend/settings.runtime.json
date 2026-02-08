@@ -1,0 +1,6 @@
+{
+  "node_ip": "2.0.0.10",
+  "dmx_fps": 30.0,
+  "poll_interval": 5.0,
+  "universe_count": 1
+}
