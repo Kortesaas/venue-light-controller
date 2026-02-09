@@ -19,7 +19,8 @@ export type SceneStyleMeta = {
     | "violet"
     | "amber"
     | "rose"
-    | "red";
+    | "red"
+    | "rainbow";
   variant?: "default" | "solid" | "soft" | "outline";
   icon?:
     | "none"
@@ -43,6 +44,7 @@ export const SCENE_COLOR_OPTIONS: Array<NonNullable<SceneStyleMeta["color"]>> = 
   "amber",
   "rose",
   "red",
+  "rainbow",
 ];
 export const SCENE_ICON_OPTIONS: Array<NonNullable<SceneStyleMeta["icon"]>> = [
   "none",
@@ -65,6 +67,7 @@ const COLOR_MAP = {
   amber: "#ffb300",
   rose: "#f06292",
   red: "#ef5350",
+  rainbow: "#f06292",
 } as const;
 
 const SOFT_ALPHA = 0.16;
@@ -79,6 +82,7 @@ const COLOR_RGBA = {
   amber: (a: number) => `rgba(255, 179, 0, ${a})`,
   rose: (a: number) => `rgba(240, 98, 146, ${a})`,
   red: (a: number) => `rgba(239, 83, 80, ${a})`,
+  rainbow: (a: number) => `rgba(240, 98, 146, ${a})`,
 } as const;
 
 export const SCENE_STYLE_LABELS = {
@@ -92,6 +96,7 @@ export const SCENE_STYLE_LABELS = {
     amber: "Amber",
     rose: "Rose",
     red: "Red",
+    rainbow: "Rainbow",
   },
   icon: {
     none: "No icon",
@@ -154,7 +159,14 @@ export function getSceneCardSx(
     borderColor,
     borderWidth,
     height: "100%",
-    backgroundColor: COLOR_RGBA[colorKey](SOFT_ALPHA),
+    ...(colorKey === "rainbow"
+      ? {
+          backgroundImage:
+            "linear-gradient(135deg, rgba(255, 84, 84, 0.16) 0%, rgba(255, 171, 64, 0.16) 18%, rgba(255, 238, 88, 0.16) 36%, rgba(102, 187, 106, 0.16) 54%, rgba(66, 165, 245, 0.16) 72%, rgba(171, 71, 188, 0.16) 100%)",
+        }
+      : {
+          backgroundColor: COLOR_RGBA[colorKey](SOFT_ALPHA),
+        }),
     boxShadow: glow,
   };
 }

@@ -29,6 +29,7 @@ class SceneStyle(BaseModel):
             "amber",
             "rose",
             "red",
+            "rainbow",
         ]
     ] = None
     variant: Optional[Literal["default", "solid", "soft", "outline"]] = None

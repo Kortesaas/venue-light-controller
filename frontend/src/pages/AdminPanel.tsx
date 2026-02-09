@@ -840,6 +840,33 @@ export default function AdminPanel({
   };
 
   const previewCreatedAt = new Date().toLocaleDateString();
+  const getColorSwatchSx = (color: NonNullable<SceneStyleMeta["color"]>) => ({
+    width: 18,
+    height: 18,
+    borderRadius: 0.8,
+    border: "1px solid",
+    borderColor: "divider",
+    flexShrink: 0,
+    ...(color === "rainbow"
+      ? {
+          backgroundImage:
+            "linear-gradient(135deg, #ff5252 0%, #ffb74d 20%, #ffee58 40%, #66bb6a 60%, #42a5f5 80%, #ab47bc 100%)",
+        }
+      : {
+          background:
+            {
+              default: "#00bcd4",
+              cyan: "#00bcd4",
+              blue: "#42a5f5",
+              teal: "#26c6da",
+              green: "#66bb6a",
+              violet: "#7e57c2",
+              amber: "#ffb300",
+              rose: "#f06292",
+              red: "#ef5350",
+            }[color] ?? "#00bcd4",
+        }),
+  });
 
   const renderScenePreview = (name: string, description: string, style: SceneStyleMeta) => (
     <Card variant="outlined" sx={getSceneCardSx(style, false)}>
@@ -1124,7 +1151,10 @@ export default function AdminPanel({
                           >
                             {SCENE_COLOR_OPTIONS.map((option) => (
                               <MenuItem key={option} value={option}>
-                                {SCENE_STYLE_LABELS.color[option]}
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                  <Box sx={getColorSwatchSx(option)} />
+                                  <span>{SCENE_STYLE_LABELS.color[option]}</span>
+                                </Stack>
                               </MenuItem>
                             ))}
                           </TextField>
@@ -1186,7 +1216,10 @@ export default function AdminPanel({
                 >
                   {SCENE_COLOR_OPTIONS.map((option) => (
                     <MenuItem key={option} value={option}>
-                      {SCENE_STYLE_LABELS.color[option]}
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Box sx={getColorSwatchSx(option)} />
+                        <span>{SCENE_STYLE_LABELS.color[option]}</span>
+                      </Stack>
                     </MenuItem>
                   ))}
                 </TextField>
