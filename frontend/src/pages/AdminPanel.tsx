@@ -21,6 +21,7 @@ import {
   ListItemText,
   MenuItem,
   Paper,
+  Snackbar,
   Stack,
   Switch,
   TextField,
@@ -583,8 +584,29 @@ export default function AdminPanel({
         />
       </Stack>
 
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-      {actionMessage && <Alert severity="success">{actionMessage}</Alert>}
+      <Snackbar
+        open={Boolean(errorMessage) || Boolean(actionMessage)}
+        autoHideDuration={2200}
+        onClose={() => {
+          setErrorMessage(null);
+          setActionMessage(null);
+        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.tooltip + 100,
+          bottom: { xs: 86, sm: 92 },
+        }}
+      >
+        <Alert
+          severity={errorMessage ? "error" : "success"}
+          onClose={() => {
+            setErrorMessage(null);
+            setActionMessage(null);
+          }}
+        >
+          {errorMessage ?? actionMessage ?? ""}
+        </Alert>
+      </Snackbar>
 
       <Box
         sx={{
@@ -987,3 +1009,4 @@ export default function AdminPanel({
     </Stack>
   );
 }
+

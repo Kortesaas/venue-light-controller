@@ -14,6 +14,7 @@ import {
   DialogContentText,
   DialogTitle,
   Paper,
+  Snackbar,
   Stack,
   Tooltip,
   Typography,
@@ -200,7 +201,20 @@ export default function OperatorDashboard({
         </Stack>
       </Paper>
 
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      <Snackbar
+        open={Boolean(errorMessage)}
+        autoHideDuration={2200}
+        onClose={() => setErrorMessage(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.tooltip + 100,
+          bottom: { xs: 86, sm: 92 },
+        }}
+      >
+        <Alert severity="error" onClose={() => setErrorMessage(null)}>
+          {errorMessage ?? ""}
+        </Alert>
+      </Snackbar>
       {controlMode !== "panel" && (
         <Alert severity="warning">Panel gesperrt - MA aktiv</Alert>
       )}
@@ -357,3 +371,4 @@ export default function OperatorDashboard({
     </Stack>
   );
 }
+

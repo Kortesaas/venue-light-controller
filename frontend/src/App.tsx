@@ -404,9 +404,10 @@ function App() {
 
       <Snackbar
         open={snackbar !== null}
-        autoHideDuration={1600}
+        autoHideDuration={2200}
         onClose={() => setSnackbar(null)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{ zIndex: (theme) => theme.zIndex.tooltip + 100 }}
       >
         <Alert severity={snackbar?.severity ?? "info"} onClose={() => setSnackbar(null)}>
           {snackbar?.message ?? ""}
@@ -417,3 +418,4 @@ function App() {
 }
 
 export default App;
+
