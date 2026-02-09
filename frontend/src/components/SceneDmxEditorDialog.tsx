@@ -66,15 +66,17 @@ function cloneUniverses(universes: Record<string, number[]>): Record<string, num
   return next;
 }
 
-async function stopLiveSessionRequest(restorePrevious: boolean): Promise<void> {
+async function stopLiveSessionRequest(restorePrevious: boolean): Promise<boolean> {
   try {
-    await fetch(`${API_BASE}/api/scene-editor/live/stop`, {
+    const res = await fetch(`${API_BASE}/api/scene-editor/live/stop`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ restore_previous: restorePrevious }),
     });
+    return res.ok;
   } catch {
     // Keep close/unmount resilient.
+    return false;
   }
 }
 
@@ -263,7 +265,11 @@ export default function SceneDmxEditorDialog({
     if (!isLiveSessionRef.current) {
       return;
     }
-    await stopLiveSessionRequest(restorePrevious);
+    const stopped = await stopLiveSessionRequest(restorePrevious);
+    if (!stopped) {
+      setErrorMessage("Live Edit stop could not be confirmed. Please retry.");
+      return;
+    }
     setIsLiveSession(false);
     setEditMode("silent");
     isLiveSessionRef.current = false;
@@ -278,8 +284,8 @@ export default function SceneDmxEditorDialog({
       return false;
     }
 
-    try {
-      const res = await fetch(`${API_BASE}/api/scene-editor/live/start`, {
+    const startRequest = () =>
+      fetch(`${API_BASE}/api/scene-editor/live/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -287,6 +293,16 @@ export default function SceneDmxEditorDialog({
           universes: draftUniverses,
         }),
       });
+
+    try {
+      let res = await startRequest();
+
+      // Recover from stale/conflicting sessions: stop once, then retry start once.
+      if (res.status === 409) {
+        await stopLiveSessionRequest(true);
+        res = await startRequest();
+      }
+
       if (!res.ok) {
         throw new Error("Live session could not be started");
       }
@@ -296,7 +312,10 @@ export default function SceneDmxEditorDialog({
       setActionMessage("Live Edit enabled.");
       return true;
     } catch {
-      setErrorMessage("Live Edit could not be started.");
+      setIsLiveSession(false);
+      isLiveSessionRef.current = false;
+      setEditMode("silent");
+      setErrorMessage("Live Edit could not be started. If another editor is active, close it and retry.");
       return false;
     }
   };
@@ -313,11 +332,21 @@ export default function SceneDmxEditorDialog({
     livePushTimerRef.current = window.setTimeout(async () => {
       livePushTimerRef.current = null;
       try {
-        await fetch(`${API_BASE}/api/scene-editor/live/update`, {
+        const res = await fetch(`${API_BASE}/api/scene-editor/live/update`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ universes: liveDraftRef.current }),
         });
+        if (!res.ok) {
+          if (res.status === 409) {
+            setIsLiveSession(false);
+            isLiveSessionRef.current = false;
+            setEditMode("silent");
+            setErrorMessage("Live Edit session was lost. Switched back to Silent Edit.");
+            return;
+          }
+          throw new Error("live update failed");
+        }
       } catch {
         setErrorMessage("Live update failed.");
       }
@@ -423,18 +452,29 @@ export default function SceneDmxEditorDialog({
 
       <Box sx={{ p: 2, pb: 13, overflowY: "auto" }}>
         <Stack spacing={2}>
-          <ToggleButtonGroup
-            exclusive
-            value={editMode}
-            onChange={handleEditModeChange}
-            fullWidth
-            color="primary"
+          <Paper
+            variant="outlined"
+            sx={{
+              position: "sticky",
+              top: -8,
+              zIndex: 3,
+              p: 0.75,
+              bgcolor: "background.default",
+            }}
           >
-            <ToggleButton value="silent">Silent Edit</ToggleButton>
-            <ToggleButton value="live" disabled={controlMode !== "panel"}>
-              Live Edit
-            </ToggleButton>
-          </ToggleButtonGroup>
+            <ToggleButtonGroup
+              exclusive
+              value={editMode}
+              onChange={handleEditModeChange}
+              fullWidth
+              color="primary"
+            >
+              <ToggleButton value="silent">Silent Edit</ToggleButton>
+              <ToggleButton value="live" disabled={controlMode !== "panel"}>
+                Live Edit
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Paper>
 
           {editMode === "silent" ? (
             <Alert severity="info">Silent - fixtures will not react while editing.</Alert>

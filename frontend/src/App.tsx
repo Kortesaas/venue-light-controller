@@ -27,6 +27,7 @@ type StatusResponse = {
   local_ip: string;
   node_ip: string;
   active_scene_id?: string | null;
+  live_edit_scene_name?: string | null;
   control_mode?: "panel" | "external";
 };
 
@@ -36,6 +37,7 @@ function App() {
   const [mode, setMode] = useState<Mode>("operator");
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [activeSceneId, setActiveSceneId] = useState<string | null>(null);
+  const [liveEditSceneName, setLiveEditSceneName] = useState<string | null>(null);
   const [sceneVersion, setSceneVersion] = useState(0);
   const [controlMode, setControlMode] = useState<"panel" | "external">("panel");
   const [panelLocked, setPanelLocked] = useState<boolean>(() => {
@@ -65,6 +67,9 @@ function App() {
         if (typeof data.active_scene_id !== "undefined") {
           setActiveSceneId(data.active_scene_id ?? null);
         }
+        if (typeof data.live_edit_scene_name !== "undefined") {
+          setLiveEditSceneName(data.live_edit_scene_name ?? null);
+        }
         if (typeof data.control_mode !== "undefined") {
           setControlMode(data.control_mode);
         }
@@ -82,10 +87,14 @@ function App() {
       try {
         const data = JSON.parse(event.data) as {
           active_scene_id?: string | null;
+          live_edit_scene_name?: string | null;
           control_mode?: "panel" | "external";
         };
         if (typeof data.active_scene_id !== "undefined") {
           setActiveSceneId(data.active_scene_id ?? null);
+        }
+        if (typeof data.live_edit_scene_name !== "undefined") {
+          setLiveEditSceneName(data.live_edit_scene_name ?? null);
         }
         if (data.control_mode === "panel" || data.control_mode === "external") {
           setControlMode(data.control_mode);
@@ -250,6 +259,7 @@ function App() {
         {mode === "operator" ? (
           <OperatorDashboard
             activeSceneId={activeSceneId}
+            liveEditSceneName={liveEditSceneName}
             onActiveSceneChange={setActiveSceneId}
             sceneVersion={sceneVersion}
             controlMode={controlMode}

@@ -51,6 +51,7 @@ type Scene = {
 
 type OperatorDashboardProps = {
   activeSceneId: string | null;
+  liveEditSceneName: string | null;
   onActiveSceneChange: (sceneId: string | null) => void;
   sceneVersion: number;
   controlMode: "panel" | "external";
@@ -59,6 +60,7 @@ type OperatorDashboardProps = {
 
 export default function OperatorDashboard({
   activeSceneId,
+  liveEditSceneName,
   onActiveSceneChange,
   sceneVersion,
   controlMode,
@@ -261,11 +263,16 @@ export default function OperatorDashboard({
     if (!activeSceneId) {
       return "Keine";
     }
+    if (activeSceneId === "__editor_live__") {
+      return liveEditSceneName ?? "Unknown";
+    }
     if (activeSceneId === "__blackout__") {
       return "Blackout";
     }
     return scenes.find((scene) => scene.id === activeSceneId)?.name ?? activeSceneId;
-  }, [activeSceneId, scenes]);
+  }, [activeSceneId, liveEditSceneName, scenes]);
+
+  const isLiveEditActive = activeSceneId === "__editor_live__";
 
   const formatCreatedAt = (value?: string) => {
     if (!value) {
@@ -292,7 +299,20 @@ export default function OperatorDashboard({
           <Stack direction="row" spacing={1} flexWrap="wrap">
             <Chip size="small" label={`NODE: ${status?.node_ip ?? "-"}`} />
             <Chip size="small" label={`SCENES: ${scenes.length}`} />
-            <Chip size="small" color="primary" label={`AKTIV: ${activeSceneName}`} />
+            <Chip
+              size="small"
+              color={isLiveEditActive ? "default" : "primary"}
+              label={isLiveEditActive ? `LIVE EDIT: ${activeSceneName}` : `AKTIV: ${activeSceneName}`}
+              sx={
+                isLiveEditActive
+                  ? {
+                      bgcolor: "warning.main",
+                      color: "warning.contrastText",
+                      "& .MuiChip-label": { fontWeight: 700 },
+                    }
+                  : undefined
+              }
+            />
           </Stack>
         </Stack>
       </Paper>

@@ -68,7 +68,13 @@ def _broadcast_event(event: str, data: dict) -> None:
 def _set_active_scene(scene_id: Optional[str]) -> None:
     global ACTIVE_SCENE_ID
     ACTIVE_SCENE_ID = scene_id
-    _broadcast_event("status", {"active_scene_id": ACTIVE_SCENE_ID})
+    _broadcast_event(
+        "status",
+        {
+            "active_scene_id": ACTIVE_SCENE_ID,
+            "live_edit_scene_name": _get_live_editor_scene_name(),
+        },
+    )
 
 
 def _set_control_mode(mode: str) -> None:
@@ -80,6 +86,25 @@ def _set_control_mode(mode: str) -> None:
 def _set_master_dimmer_percent(value: int) -> None:
     global MASTER_DIMMER_PERCENT
     MASTER_DIMMER_PERCENT = max(0, min(100, int(value)))
+
+
+def _get_live_editor_scene_id() -> Optional[str]:
+    with _playback_state_lock:
+        state = _LIVE_EDITOR_STATE
+        if not isinstance(state, dict):
+            return None
+        scene_id = state.get("scene_id")
+        return scene_id if isinstance(scene_id, str) else None
+
+
+def _get_live_editor_scene_name() -> Optional[str]:
+    scene_id = _get_live_editor_scene_id()
+    if not scene_id:
+        return None
+    scene = get_scene(scene_id)
+    if scene is None:
+        return None
+    return scene.name
 
 
 def _clone_payload(payload: Dict[int, bytes]) -> Dict[int, bytes]:
@@ -195,6 +220,7 @@ def get_status():
         "local_ip": settings.local_ip,
         "node_ip": settings.node_ip,
         "active_scene_id": ACTIVE_SCENE_ID,
+        "live_edit_scene_name": _get_live_editor_scene_name(),
         "control_mode": CONTROL_MODE,
         "master_dimmer_percent": MASTER_DIMMER_PERCENT,
         "master_dimmer_mode": _get_master_dimmer_mode(),
@@ -216,6 +242,7 @@ async def api_events():
                 "status",
                 {
                     "active_scene_id": ACTIVE_SCENE_ID,
+                    "live_edit_scene_name": _get_live_editor_scene_name(),
                     "control_mode": CONTROL_MODE,
                     "master_dimmer_percent": MASTER_DIMMER_PERCENT,
                     "master_dimmer_mode": _get_master_dimmer_mode(),
