@@ -24,6 +24,7 @@ from .config import hash_pin, persist_runtime_settings, settings
 from .fixture_plan import (
     activate_fixture_plan,
     clear_fixture_plan,
+    get_intensity_groups,
     get_intensity_addresses,
     get_fixture_plan_details,
     get_fixture_plan_summary,
@@ -48,6 +49,8 @@ CONTROL_MODE: str = "panel"
 MASTER_DIMMER_PERCENT: int = 100
 HAZE_PERCENT: int = 0
 FOG_FLASH_ACTIVE: bool = False
+GROUP_DIMMER_VALUES: Dict[str, int] = {}
+GROUP_DIMMER_MUTED: set[str] = set()
 _BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
 _LIVE_EDITOR_STATE: Optional[dict] = None
 _ANIMATED_PLAYBACK_STATE: Optional[dict] = None
@@ -113,8 +116,76 @@ def _has_haze_channel_configured() -> bool:
     return settings.haze_channel > 0 and settings.haze_universe > 0
 
 
-def _build_status_payload() -> dict:
+def _get_group_dimmer_layout() -> Optional[List[dict]]:
+    groups = get_intensity_groups()
+    with _playback_state_lock:
+        global GROUP_DIMMER_VALUES, GROUP_DIMMER_MUTED
+        if groups is None:
+            GROUP_DIMMER_VALUES = {}
+            GROUP_DIMMER_MUTED = set()
+            return None
+
+        keys = {group["key"] for group in groups}
+        GROUP_DIMMER_VALUES = {
+            key: max(0, min(100, int(GROUP_DIMMER_VALUES.get(key, 100))))
+            for key in keys
+        }
+        GROUP_DIMMER_MUTED = {key for key in GROUP_DIMMER_MUTED if key in keys}
+        values = dict(GROUP_DIMMER_VALUES)
+        muted = set(GROUP_DIMMER_MUTED)
+
+    layout: List[dict] = []
+    for group in groups:
+        key = group["key"]
+        layout.append(
+            {
+                "key": key,
+                "name": group["name"],
+                "fixture_count": group["fixture_count"],
+                "channel_count": group["channel_count"],
+                "addresses": group["addresses"],
+                "value_percent": values.get(key, 100),
+                "muted": key in muted,
+            }
+        )
+    return layout
+
+
+def _build_group_dimmer_status() -> dict:
+    layout = _get_group_dimmer_layout()
+    if layout is None:
+        return {"group_dimmer_available": False, "group_dimmers": []}
     return {
+        "group_dimmer_available": True,
+        "group_dimmers": [
+            {
+                "key": group["key"],
+                "name": group["name"],
+                "fixture_count": group["fixture_count"],
+                "channel_count": group["channel_count"],
+                "value_percent": group["value_percent"],
+                "muted": group["muted"],
+            }
+            for group in layout
+        ],
+    }
+
+
+def _find_group_dimmer_or_raise(group_key: str) -> dict:
+    layout = _get_group_dimmer_layout()
+    if layout is None:
+        raise HTTPException(
+            status_code=409,
+            detail="Group dimmer mixer requires an active fixture plan",
+        )
+    for group in layout:
+        if group["key"] == group_key:
+            return group
+    raise HTTPException(status_code=404, detail="Group dimmer group not found")
+
+
+def _build_status_payload() -> dict:
+    payload = {
         "active_scene_id": ACTIVE_SCENE_ID,
         "live_edit_scene_name": _get_live_editor_scene_name(),
         "control_mode": CONTROL_MODE,
@@ -130,6 +201,8 @@ def _build_status_payload() -> dict:
         "haze_configured": _has_haze_channel_configured(),
         "show_scene_created_at_on_operator": settings.show_scene_created_at_on_operator,
     }
+    payload.update(_build_group_dimmer_status())
+    return payload
 
 
 def _parse_artdmx_packet(data: bytes) -> Optional[tuple[int, bytes]]:
@@ -383,6 +456,45 @@ def _apply_master_dimmer(
     return scaled_payload, "parameter-aware"
 
 
+def _apply_group_dimmers(payload: Dict[int, bytes]) -> Dict[int, bytes]:
+    layout = _get_group_dimmer_layout()
+    if layout is None:
+        return payload
+
+    per_channel_percent: Dict[tuple[int, int], int] = {}
+    for group in layout:
+        percent = 0 if group["muted"] else max(0, min(100, int(group["value_percent"])))
+        if percent >= 100:
+            continue
+        for universe, channel in group["addresses"]:
+            if channel < 1 or channel > 512:
+                continue
+            key = (int(universe), channel - 1)
+            existing = per_channel_percent.get(key, 100)
+            per_channel_percent[key] = min(existing, percent)
+
+    if not per_channel_percent:
+        return payload
+
+    output = _clone_payload(payload)
+    by_universe: Dict[int, List[tuple[int, int]]] = {}
+    for (universe, channel_index), percent in per_channel_percent.items():
+        by_universe.setdefault(universe, []).append((channel_index, percent))
+
+    for universe, entries in by_universe.items():
+        dmx = output.get(universe)
+        if dmx is None:
+            continue
+        values = bytearray(bytes(dmx[:512]).ljust(512, b"\x00"))
+        for channel_index, percent in entries:
+            values[channel_index] = max(
+                0, min(255, round((values[channel_index] * percent) / 100))
+            )
+        output[universe] = bytes(values)
+
+    return output
+
+
 def _apply_atmosphere_controls(payload: Dict[int, bytes]) -> Dict[int, bytes]:
     output = _clone_payload(payload)
 
@@ -424,7 +536,8 @@ def _refresh_stream_from_base_payload(*, broadcast_status: bool = True) -> None:
         dimmer_percent = MASTER_DIMMER_PERCENT
 
     scaled_payload, mode = _apply_master_dimmer(base_payload, dimmer_percent)
-    effective_payload = _apply_atmosphere_controls(scaled_payload)
+    grouped_payload = _apply_group_dimmers(scaled_payload)
+    effective_payload = _apply_atmosphere_controls(grouped_payload)
 
     if effective_payload:
         if is_stream_running():
@@ -635,6 +748,14 @@ class FogFlashUpdateRequest(BaseModel):
     active: bool
 
 
+class GroupDimmerValueUpdateRequest(BaseModel):
+    value_percent: int
+
+
+class GroupDimmerMuteUpdateRequest(BaseModel):
+    active: bool
+
+
 class SceneEditorLiveStartRequest(BaseModel):
     scene_id: str
     universes: Dict[int, List[int]]
@@ -767,6 +888,51 @@ def api_set_master_dimmer(request: MasterDimmerUpdateRequest):
     return {
         "value_percent": MASTER_DIMMER_PERCENT,
         "mode": _get_master_dimmer_mode(),
+    }
+
+
+@router.get("/group-dimmers")
+def api_get_group_dimmers():
+    return _build_group_dimmer_status()
+
+
+@router.post("/group-dimmers/{group_key}")
+def api_set_group_dimmer(group_key: str, request: GroupDimmerValueUpdateRequest):
+    _assert_panel_mode()
+    if request.value_percent < 0 or request.value_percent > 100:
+        raise HTTPException(status_code=400, detail="value_percent must be in range 0..100")
+
+    group = _find_group_dimmer_or_raise(group_key)
+    with _playback_state_lock:
+        GROUP_DIMMER_VALUES[group["key"]] = max(0, min(100, int(request.value_percent)))
+
+    _refresh_stream_from_base_payload()
+    updated_group = _find_group_dimmer_or_raise(group_key)
+    return {
+        "key": updated_group["key"],
+        "name": updated_group["name"],
+        "value_percent": updated_group["value_percent"],
+        "muted": updated_group["muted"],
+    }
+
+
+@router.post("/group-dimmers/{group_key}/mute")
+def api_set_group_dimmer_mute(group_key: str, request: GroupDimmerMuteUpdateRequest):
+    _assert_panel_mode()
+    group = _find_group_dimmer_or_raise(group_key)
+    with _playback_state_lock:
+        if request.active:
+            GROUP_DIMMER_MUTED.add(group["key"])
+        else:
+            GROUP_DIMMER_MUTED.discard(group["key"])
+
+    _refresh_stream_from_base_payload()
+    updated_group = _find_group_dimmer_or_raise(group_key)
+    return {
+        "key": updated_group["key"],
+        "name": updated_group["name"],
+        "value_percent": updated_group["value_percent"],
+        "muted": updated_group["muted"],
     }
 
 

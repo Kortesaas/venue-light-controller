@@ -302,6 +302,80 @@ def get_intensity_addresses() -> Optional[set[tuple[int, int]]]:
     return addresses
 
 
+def _fixture_type_from_label(label: str) -> str:
+    cleaned = label.strip()
+    if not cleaned:
+        return "Unknown"
+    without_instance = re.sub(r"\s+\d+$", "", cleaned).strip()
+    return without_instance or cleaned
+
+
+def _fixture_type_key(label: str) -> str:
+    key = re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")
+    return key or "group"
+
+
+def get_intensity_groups() -> Optional[List[dict]]:
+    """
+    Liefert Intensitaetsgruppen nach Fixture-Typ.
+    Rueckgabeformat pro Gruppe:
+      {
+        "key": str,
+        "name": str,
+        "fixture_count": int,
+        "channel_count": int,
+        "addresses": list[tuple[int, int]],
+      }
+    `None` bedeutet: kein aktiver Plan.
+    """
+    with _state_lock:
+        plan = _active_plan
+    if plan is None:
+        return None
+
+    grouped: Dict[str, dict] = {}
+    for fixture in plan.fixtures:
+        intensity_params = [parameter for parameter in fixture.parameters if parameter.role == "intensity"]
+        if not intensity_params:
+            continue
+
+        group_name = _fixture_type_from_label(fixture.fixture)
+        base_key = _fixture_type_key(group_name)
+        key = base_key
+        suffix = 2
+        while key in grouped and grouped[key]["name"] != group_name:
+            key = f"{base_key}_{suffix}"
+            suffix += 1
+
+        entry = grouped.setdefault(
+            key,
+            {
+                "key": key,
+                "name": group_name,
+                "fixtures": set(),
+                "addresses": set(),
+            },
+        )
+        entry["fixtures"].add(fixture.fixture)
+        for parameter in intensity_params:
+            entry["addresses"].add((parameter.universe, parameter.channel))
+
+    result: List[dict] = []
+    for key in sorted(grouped.keys(), key=lambda value: grouped[value]["name"].lower()):
+        entry = grouped[key]
+        addresses = sorted(entry["addresses"], key=lambda item: (item[0], item[1]))
+        result.append(
+            {
+                "key": entry["key"],
+                "name": entry["name"],
+                "fixture_count": len(entry["fixtures"]),
+                "channel_count": len(addresses),
+                "addresses": addresses,
+            }
+        )
+    return result
+
+
 def _load_fixture_plan_on_startup() -> None:
     path = _plan_path()
     if not path.exists():
