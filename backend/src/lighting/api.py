@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from .artnet_core import record_snapshots, start_stream, stop_stream
-from .config import persist_runtime_settings, settings
+from .config import hash_pin, persist_runtime_settings, settings
 from .scenes import (
     Scene,
     delete_scene,
@@ -62,6 +62,14 @@ def _assert_panel_mode() -> None:
             status_code=409,
             detail="Panel control is disabled while external control mode is active",
         )
+
+
+def _is_valid_pin(pin: str) -> bool:
+    return bool(re.fullmatch(r"\d{4}", pin))
+
+
+def _verify_pin(pin: str) -> bool:
+    return hash_pin(pin) == settings.operator_pin_hash
 
 
 @router.get("/status")
@@ -180,6 +188,16 @@ class ControlModeUpdateRequest(BaseModel):
     control_mode: str
 
 
+class UnlockRequest(BaseModel):
+    pin: str
+
+
+class PinChangeRequest(BaseModel):
+    current_pin: str
+    new_pin: str
+    confirm_pin: str
+
+
 def _get_settings_payload() -> SettingsResponse:
     return SettingsResponse(
         local_ip=settings.local_ip,
@@ -188,6 +206,36 @@ def _get_settings_payload() -> SettingsResponse:
         poll_interval=settings.poll_interval,
         universe_count=settings.universe_count,
     )
+
+
+@router.post("/unlock")
+def api_unlock_panel(request: UnlockRequest):
+    pin = request.pin.strip()
+    if not _is_valid_pin(pin):
+        raise HTTPException(status_code=400, detail="PIN must be exactly 4 digits")
+    if not _verify_pin(pin):
+        raise HTTPException(status_code=401, detail="Invalid PIN")
+    return {"status": "ok"}
+
+
+@router.post("/pin/change")
+def api_change_pin(request: PinChangeRequest):
+    current_pin = request.current_pin.strip()
+    new_pin = request.new_pin.strip()
+    confirm_pin = request.confirm_pin.strip()
+
+    if not _is_valid_pin(current_pin):
+        raise HTTPException(status_code=400, detail="Current PIN must be exactly 4 digits")
+    if not _is_valid_pin(new_pin):
+        raise HTTPException(status_code=400, detail="New PIN must be exactly 4 digits")
+    if new_pin != confirm_pin:
+        raise HTTPException(status_code=400, detail="PIN confirmation mismatch")
+    if not _verify_pin(current_pin):
+        raise HTTPException(status_code=401, detail="Invalid current PIN")
+
+    settings.operator_pin_hash = hash_pin(new_pin)
+    persist_runtime_settings()
+    return {"status": "updated"}
 
 
 @router.get("/scenes", response_model=list[Scene])
@@ -232,10 +280,52 @@ def _build_unique_scene_id(scene_name: str) -> str:
         counter += 1
 
 
+def _build_stream_payload_from_scene(scene: Scene) -> Dict[int, bytes]:
+    return {
+        universe: bytes(values[:512]).ljust(512, b"\x00")
+        for universe, values in scene.universes.items()
+    }
+
+
+def _build_blackout_payload() -> Dict[int, bytes]:
+    # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
+    return {
+        universe: bytes([0] * 512)
+        for universe in range(settings.universe_count)
+    }
+
+
 def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
     # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
     target_universes = list(range(settings.universe_count))
-    return record_snapshots(target_universes, duration)
+    active_before = ACTIVE_SCENE_ID
+    restore_payload: Optional[Dict[int, bytes]] = None
+    restore_scene_id: Optional[str] = None
+
+    if active_before == "__blackout__":
+        restore_payload = _build_blackout_payload()
+        restore_scene_id = "__blackout__"
+    elif active_before:
+        active_scene = get_scene(active_before)
+        if active_scene is not None:
+            restore_payload = _build_stream_payload_from_scene(active_scene)
+            restore_scene_id = active_before
+
+    # Ensure port 6454 is free for snapshot recording.
+    stop_stream()
+    try:
+        return record_snapshots(target_universes, duration)
+    except OSError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail="Art-Net port 6454 is already in use",
+        ) from exc
+    finally:
+        if restore_payload is not None and CONTROL_MODE == "panel":
+            start_stream(restore_payload)
+            _set_active_scene(restore_scene_id)
+        else:
+            _set_active_scene(None)
 
 
 @router.put("/scenes/{scene_id}", response_model=Scene)
@@ -330,12 +420,7 @@ def api_play_scene(scene_id: str):
     if scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
 
-    universe_to_dmx: Dict[int, bytes] = {
-        universe: bytes(values[:512]).ljust(512, b"\x00")
-        for universe, values in scene.universes.items()
-    }
-
-    start_stream(universe_to_dmx)
+    start_stream(_build_stream_payload_from_scene(scene))
     _set_active_scene(scene_id)
     return {"status": "playing", "scene_id": scene_id}
 
@@ -386,12 +471,7 @@ def api_rerecord_scene(
 @router.post("/blackout")
 def api_blackout():
     _assert_panel_mode()
-    # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
-    universe_to_dmx = {
-        universe: bytes([0] * 512)
-        for universe in range(settings.universe_count)
-    }
-    start_stream(universe_to_dmx)
+    start_stream(_build_blackout_payload())
     _set_active_scene("__blackout__")
     return {"status": "blackout"}
 

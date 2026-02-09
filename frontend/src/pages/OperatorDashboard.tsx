@@ -40,6 +40,7 @@ type OperatorDashboardProps = {
   onActiveSceneChange: (sceneId: string | null) => void;
   sceneVersion: number;
   controlMode: "panel" | "external";
+  panelLocked: boolean;
 };
 
 export default function OperatorDashboard({
@@ -47,6 +48,7 @@ export default function OperatorDashboard({
   onActiveSceneChange,
   sceneVersion,
   controlMode,
+  panelLocked,
 }: OperatorDashboardProps) {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
@@ -86,7 +88,7 @@ export default function OperatorDashboard({
   }, [sceneVersion]);
 
   const handlePlayScene = async (sceneId: string) => {
-    if (controlMode !== "panel") {
+    if (controlMode !== "panel" || panelLocked) {
       return;
     }
     setPendingSceneId(sceneId);
@@ -114,6 +116,9 @@ export default function OperatorDashboard({
   };
 
   const handleBlackout = async () => {
+    if (panelLocked) {
+      return;
+    }
     setIsPerformingAction(true);
     setErrorMessage(null);
     try {
@@ -131,6 +136,9 @@ export default function OperatorDashboard({
   };
 
   const handleStop = async () => {
+    if (panelLocked) {
+      return;
+    }
     setIsPerformingAction(true);
     setErrorMessage(null);
     try {
@@ -209,7 +217,7 @@ export default function OperatorDashboard({
               >
                 <CardActionArea
                   onClick={() => handlePlayScene(scene.id)}
-                  disabled={isPending || controlMode !== "panel"}
+                  disabled={isPending || controlMode !== "panel" || panelLocked}
                   sx={{ minHeight: 140 }}
                 >
                   <CardContent>
@@ -267,7 +275,7 @@ export default function OperatorDashboard({
             variant="contained"
             startIcon={<WarningRoundedIcon />}
             onClick={() => setShowBlackoutConfirm(true)}
-            disabled={isPerformingAction || controlMode !== "panel"}
+            disabled={isPerformingAction || controlMode !== "panel" || panelLocked}
           >
             Blackout
           </Button>
@@ -278,7 +286,7 @@ export default function OperatorDashboard({
             variant="outlined"
             startIcon={<StopRoundedIcon />}
             onClick={handleStop}
-            disabled={isPerformingAction}
+            disabled={isPerformingAction || panelLocked}
           >
             Stop
           </Button>

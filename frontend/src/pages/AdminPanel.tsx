@@ -92,6 +92,10 @@ export default function AdminPanel({
   });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isApplyingSettings, setIsApplyingSettings] = useState(false);
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [isApplyingPin, setIsApplyingPin] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState<Scene | null>(null);
   const [rerecordCandidate, setRerecordCandidate] = useState<Scene | null>(null);
 
@@ -397,6 +401,47 @@ export default function AdminPanel({
     }
   };
 
+  const isValidPin = (value: string) => /^\d{4}$/.test(value);
+  const canApplyPin =
+    isValidPin(currentPin) &&
+    isValidPin(newPin) &&
+    isValidPin(confirmPin) &&
+    !isApplyingPin;
+
+  const handleApplyPin = async () => {
+    if (!canApplyPin) {
+      return;
+    }
+    setIsApplyingPin(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/pin/change`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          current_pin: currentPin,
+          new_pin: newPin,
+          confirm_pin: confirmPin,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to update PIN");
+      }
+      setCurrentPin("");
+      setNewPin("");
+      setConfirmPin("");
+      setActionMessage("PIN aktualisiert.");
+    } catch {
+      setErrorMessage("PIN konnte nicht geändert werden.");
+      setCurrentPin("");
+      setNewPin("");
+      setConfirmPin("");
+    } finally {
+      setIsApplyingPin(false);
+    }
+  };
+
   return (
     <Stack spacing={2.5}>
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5}>
@@ -645,6 +690,51 @@ export default function AdminPanel({
                   disabled={!canApplySettings}
                 >
                   Apply Settings
+                </Button>
+
+                <Divider />
+
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Screen Lock PIN
+                </Typography>
+                <TextField
+                  label="Current PIN"
+                  type="password"
+                  value={currentPin}
+                  onChange={(event) => setCurrentPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                  size="small"
+                  fullWidth
+                  helperText="4 digits"
+                />
+                <TextField
+                  label="New PIN"
+                  type="password"
+                  value={newPin}
+                  onChange={(event) => setNewPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                  size="small"
+                  fullWidth
+                  helperText="exactly 4 digits"
+                />
+                <TextField
+                  label="Confirm New PIN"
+                  type="password"
+                  value={confirmPin}
+                  onChange={(event) => setConfirmPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                  size="small"
+                  fullWidth
+                  error={confirmPin.length > 0 && newPin.length > 0 && confirmPin !== newPin}
+                  helperText={
+                    confirmPin.length > 0 && newPin.length > 0 && confirmPin !== newPin
+                      ? "PINs do not match"
+                      : "repeat new PIN"
+                  }
+                />
+                <Button
+                  variant="outlined"
+                  onClick={handleApplyPin}
+                  disabled={!canApplyPin}
+                >
+                  Update PIN
                 </Button>
               </Stack>
             )}
