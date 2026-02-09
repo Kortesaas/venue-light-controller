@@ -619,50 +619,63 @@ export default function SceneDmxEditorDialog({
                   View.
                 </Alert>
               ) : null}
-              {fixtureRows.map((fixture) => (
-                <Paper key={fixture.fixture} variant="outlined" sx={{ p: 1.25 }}>
-                  <Typography variant="subtitle2" fontWeight={700} gutterBottom>
-                    {fixture.fixture}
-                  </Typography>
-                  <Stack spacing={1}>
-                    {fixture.parameters.map((entry) => (
-                      <Box key={`${entry.parameter.universe}:${entry.parameter.channel}:${entry.parameter.name}`}>
-                        <Stack direction="row" justifyContent="space-between">
-                          <Typography variant="body2" fontWeight={600}>
-                            {entry.parameter.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {entry.value}
-                          </Typography>
-                        </Stack>
-                        <Slider
-                          value={entry.value}
-                          min={0}
-                          max={255}
-                          step={1}
-                          valueLabelDisplay="auto"
-                          onChange={(_event, value) =>
-                            setChannelValue(
-                              entry.universeKey,
-                              entry.channelIndex,
-                              Array.isArray(value) ? value[0] : value
-                            )
-                          }
-                          sx={{
-                            py: 1,
-                            "& .MuiSlider-thumb": {
-                              width: 0,
-                              height: 0,
-                              opacity: 0,
-                              boxShadow: "none",
-                            },
-                          }}
-                        />
-                      </Box>
-                    ))}
-                  </Stack>
-                </Paper>
-              ))}
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(auto-fit, minmax(320px, 1fr))",
+                  },
+                  gap: 1.25,
+                }}
+              >
+                {fixtureRows.map((fixture) => (
+                  <Paper key={fixture.fixture} variant="outlined" sx={{ p: 1.25 }}>
+                    <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                      {fixture.fixture}
+                    </Typography>
+                    <Stack spacing={1}>
+                      {fixture.parameters.map((entry) => (
+                        <Box key={`${entry.parameter.universe}:${entry.parameter.channel}:${entry.parameter.name}`}>
+                          <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="body2" fontWeight={600}>
+                              {entry.parameter.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {entry.value}
+                            </Typography>
+                          </Stack>
+                          <Slider
+                            value={entry.value}
+                            min={0}
+                            max={255}
+                            step={1}
+                            valueLabelDisplay="auto"
+                            onChange={(_event, value) =>
+                              setChannelValue(
+                                entry.universeKey,
+                                entry.channelIndex,
+                                Array.isArray(value) ? value[0] : value
+                              )
+                            }
+                            sx={{
+                              py: 1,
+                              width: { xs: "100%", sm: "86%" },
+                              mx: { xs: 0, sm: "auto" },
+                              "& .MuiSlider-thumb": {
+                                width: 0,
+                                height: 0,
+                                opacity: 0,
+                                boxShadow: "none",
+                              },
+                            }}
+                          />
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Paper>
+                ))}
+              </Box>
             </Stack>
           )}
 
