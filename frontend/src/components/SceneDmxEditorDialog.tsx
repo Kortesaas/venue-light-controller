@@ -139,6 +139,9 @@ export default function SceneDmxEditorDialog({
         const parameters = fixture.parameters
           .map((parameter) => {
             const universeKey = String(parameter.universe);
+            if (universeKey !== selectedUniverse) {
+              return null;
+            }
             const values = draftUniverses[universeKey];
             if (!values) {
               return null;
@@ -160,7 +163,24 @@ export default function SceneDmxEditorDialog({
         return { fixture: fixture.fixture, parameters };
       })
       .filter((entry) => entry.parameters.length > 0);
-  }, [fixturePlan, draftUniverses]);
+  }, [fixturePlan, draftUniverses, selectedUniverse]);
+
+  const selectedUniverseIndex = useMemo(
+    () => universeKeys.findIndex((value) => value === selectedUniverse),
+    [universeKeys, selectedUniverse]
+  );
+
+  const canSelectPreviousUniverse = selectedUniverseIndex > 0;
+  const canSelectNextUniverse =
+    selectedUniverseIndex >= 0 && selectedUniverseIndex < universeKeys.length - 1;
+
+  const selectUniverseAtIndex = (index: number) => {
+    if (index < 0 || index >= universeKeys.length) {
+      return;
+    }
+    setSelectedUniverse(universeKeys[index]);
+    setChannelPage(0);
+  };
 
   useEffect(() => {
     isLiveSessionRef.current = isLiveSession;
@@ -441,27 +461,33 @@ export default function SceneDmxEditorDialog({
 
           {isLoadingPlan ? <Typography variant="body2">Loading fixture plan...</Typography> : null}
 
+          {universeKeys.length > 0 ? (
+            <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+              <Button
+                variant="outlined"
+                onClick={() => selectUniverseAtIndex(selectedUniverseIndex - 1)}
+                disabled={!canSelectPreviousUniverse}
+              >
+                Previous Universe
+              </Button>
+              <Typography variant="body2" fontWeight={700}>
+                {`Universe ${Number(selectedUniverse) + 1}`}
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => selectUniverseAtIndex(selectedUniverseIndex + 1)}
+                disabled={!canSelectNextUniverse}
+              >
+                Next Universe
+              </Button>
+            </Stack>
+          ) : null}
+
           {viewMode === "raw" || !fixturePlan?.active ? (
             <Stack spacing={1.25}>
               <Typography variant="subtitle1" fontWeight={700}>
                 Raw DMX
               </Typography>
-
-              <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(92px,1fr))", gap: 1 }}>
-                {universeKeys.map((universe) => (
-                  <Button
-                    key={universe}
-                    variant={selectedUniverse === universe ? "contained" : "outlined"}
-                    onClick={() => {
-                      setSelectedUniverse(universe);
-                      setChannelPage(0);
-                    }}
-                    sx={{ minHeight: 44 }}
-                  >
-                    {`Universe ${Number(universe) + 1}`}
-                  </Button>
-                ))}
-              </Box>
 
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Button
@@ -486,23 +512,37 @@ export default function SceneDmxEditorDialog({
                 </Button>
               </Stack>
 
-              {rawViewChannels.map((entry) => (
-                <Paper key={entry.channel} variant="outlined" sx={{ p: 1.25 }}>
-                  <Stack spacing={0.8}>
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="body2" fontWeight={700}>
-                        {`Ch ${entry.channel}`}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {entry.value}
-                      </Typography>
-                    </Stack>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(62px, 1fr))",
+                  gap: 0.9,
+                }}
+              >
+                {rawViewChannels.map((entry) => (
+                  <Paper
+                    key={entry.channel}
+                    variant="outlined"
+                    sx={{
+                      px: 0.6,
+                      py: 0.75,
+                      minHeight: 148,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Typography variant="caption" fontWeight={700}>
+                      {`Ch ${entry.channel}`}
+                    </Typography>
                     <Slider
+                      orientation="vertical"
                       value={entry.value}
                       min={0}
                       max={255}
                       step={1}
-                      valueLabelDisplay="auto"
+                      valueLabelDisplay="off"
                       onChange={(_event, value) =>
                         setChannelValue(
                           selectedUniverse,
@@ -511,7 +551,8 @@ export default function SceneDmxEditorDialog({
                         )
                       }
                       sx={{
-                        py: 1,
+                        height: 92,
+                        my: 0.5,
                         "& .MuiSlider-thumb": {
                           width: 0,
                           height: 0,
@@ -520,9 +561,12 @@ export default function SceneDmxEditorDialog({
                         },
                       }}
                     />
-                  </Stack>
-                </Paper>
-              ))}
+                    <Typography variant="caption" color="text.secondary">
+                      {entry.value}
+                    </Typography>
+                  </Paper>
+                ))}
+              </Box>
             </Stack>
           ) : (
             <Stack spacing={1.25}>
