@@ -2,7 +2,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import RecordVoiceOverRoundedIcon from "@mui/icons-material/RecordVoiceOverRounded";
 import CelebrationRoundedIcon from "@mui/icons-material/CelebrationRounded";
 import NightlightRoundedIcon from "@mui/icons-material/NightlightRounded";
-import RestaurantRoundedIcon from "@mui/icons-material/RestaurantRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import TheaterComedyRoundedIcon from "@mui/icons-material/TheaterComedyRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
@@ -117,7 +117,7 @@ export function getSceneIcon(icon: SceneStyleMeta["icon"]): ReactNode {
     case "chill":
       return <NightlightRoundedIcon fontSize="inherit" />;
     case "dinner":
-      return <RestaurantRoundedIcon fontSize="inherit" />;
+      return <StarRoundedIcon fontSize="inherit" />;
     case "ceremony":
       return <FavoriteRoundedIcon fontSize="inherit" />;
     case "show":
