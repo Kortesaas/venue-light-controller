@@ -51,9 +51,30 @@ type Scene = {
   id: string;
   name: string;
   description?: string;
+  type?: "static" | "animated";
+  duration_ms?: number | null;
+  playback_mode?: "loop" | "once" | null;
   universes: Record<string, number[]>;
   created_at?: string;
   style?: SceneStyleMeta | null;
+};
+
+type AnimatedRecordSummary = {
+  status: "recorded" | "too_short";
+  duration_ms: number;
+  frame_count: number;
+  auto_stopped?: boolean;
+  warning?: string;
+  min_duration_ms: number;
+  max_duration_ms: number;
+  bpm_quantization?: {
+    bpm: number;
+    beat_ms: number;
+    bar_ms: number;
+    bars: number;
+    quantized_duration_ms: number;
+    source_duration_ms: number;
+  } | null;
 };
 
 type SceneFormState = {
@@ -121,6 +142,14 @@ export default function AdminPanel({
   const [isLoadingScenes, setIsLoadingScenes] = useState(true);
   const [isPerformingAction, setIsPerformingAction] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [isAnimatedRecordOpen, setIsAnimatedRecordOpen] = useState(false);
+  const [animatedRecordState, setAnimatedRecordState] = useState<"waiting" | "recording" | "summary">("waiting");
+  const [animatedName, setAnimatedName] = useState("");
+  const [animatedDescription, setAnimatedDescription] = useState("");
+  const [animatedStyle, setAnimatedStyle] = useState<SceneStyleMeta>(initialFormState.style);
+  const [animatedBpm, setAnimatedBpm] = useState("120");
+  const [animatedSummary, setAnimatedSummary] = useState<AnimatedRecordSummary | null>(null);
+  const [isAnimatedBusy, setIsAnimatedBusy] = useState(false);
   const [renameSceneId, setRenameSceneId] = useState<string | null>(null);
   const [renameName, setRenameName] = useState("");
   const [renameDescription, setRenameDescription] = useState("");
@@ -434,6 +463,127 @@ export default function AdminPanel({
       setErrorMessage("Szene konnte nicht aufgenommen werden.");
     } finally {
       setIsRecording(false);
+    }
+  };
+
+  const openAnimatedRecorder = () => {
+    setAnimatedName(form.name.trim());
+    setAnimatedDescription(form.description.trim());
+    setAnimatedStyle(form.style);
+    setAnimatedBpm("120");
+    setAnimatedSummary(null);
+    setAnimatedRecordState("waiting");
+    setIsAnimatedRecordOpen(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+  };
+
+  const parsedAnimatedBpm = Number(animatedBpm);
+  const hasAnimatedBpmInput = animatedBpm.trim().length > 0;
+  const isAnimatedBpmValid =
+    Number.isFinite(parsedAnimatedBpm) && parsedAnimatedBpm >= 40 && parsedAnimatedBpm <= 240;
+  const activeAnimatedBpm = isAnimatedBpmValid ? parsedAnimatedBpm : null;
+  const beatDurationSeconds = activeAnimatedBpm ? 60 / activeAnimatedBpm : 0.5;
+  const barDurationSeconds = beatDurationSeconds * 4;
+
+  const handleAnimatedStart = async () => {
+    setIsAnimatedBusy(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/scenes/animated/start`, { method: "POST" });
+      if (!res.ok) {
+        throw new Error("Animated recording could not be started.");
+      }
+      setAnimatedRecordState("recording");
+    } catch {
+      setErrorMessage("Animated recording could not be started.");
+    } finally {
+      setIsAnimatedBusy(false);
+    }
+  };
+
+  const handleAnimatedStop = async () => {
+    setIsAnimatedBusy(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+    try {
+      const bpmPayload =
+        hasAnimatedBpmInput && isAnimatedBpmValid
+          ? { bpm: parsedAnimatedBpm }
+          : {};
+      const res = await fetch(`${API_BASE}/api/scenes/animated/stop`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bpmPayload),
+      });
+      if (!res.ok) {
+        throw new Error("Animated recording could not be stopped.");
+      }
+      const data = (await res.json()) as AnimatedRecordSummary;
+      setAnimatedSummary(data);
+      setAnimatedRecordState("summary");
+      if (data.status === "too_short") {
+        setErrorMessage(
+          data.warning ?? "Recording is too short. Please record at least 1.5 seconds."
+        );
+      }
+    } catch {
+      setErrorMessage("Animated recording could not be stopped.");
+    } finally {
+      setIsAnimatedBusy(false);
+    }
+  };
+
+  const handleAnimatedCancel = async (closeDialog: boolean) => {
+    setIsAnimatedBusy(true);
+    try {
+      await fetch(`${API_BASE}/api/scenes/animated/cancel`, { method: "POST" });
+    } catch {
+      // Keep cancel resilient.
+    } finally {
+      setIsAnimatedBusy(false);
+      if (closeDialog) {
+        setIsAnimatedRecordOpen(false);
+      } else {
+        setAnimatedSummary(null);
+        setAnimatedRecordState("waiting");
+      }
+    }
+  };
+
+  const handleAnimatedSave = async () => {
+    const name = animatedName.trim();
+    if (!name || !animatedSummary || animatedSummary.status !== "recorded") {
+      return;
+    }
+    setIsAnimatedBusy(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/scenes/animated/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          description: animatedDescription.trim(),
+          style: normalizeSceneStyleForPayload(animatedStyle),
+          mode: "loop",
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Animated scene could not be saved.");
+      }
+      setIsAnimatedRecordOpen(false);
+      setAnimatedSummary(null);
+      setAnimatedRecordState("waiting");
+      setForm(initialFormState);
+      await loadScenes();
+      setActionMessage("Animated scene saved.");
+    } catch {
+      setErrorMessage("Animated scene could not be saved.");
+    } finally {
+      setIsAnimatedBusy(false);
     }
   };
 
@@ -834,9 +984,11 @@ export default function AdminPanel({
                           ? new Date(scene.created_at).toLocaleDateString()
                           : null;
                         const descriptionText = scene.description?.trim() ? scene.description : "-";
-                        const secondary = createdText
+                        const typeLabel = scene.type === "animated" ? "Animated" : "Static";
+                        const secondaryBase = createdText
                           ? `${descriptionText} • Created ${createdText}`
                           : descriptionText;
+                        const secondary = `${typeLabel} • ${secondaryBase}`;
                         return (
                       <ListItemText
                         primary={scene.name}
@@ -904,7 +1056,7 @@ export default function AdminPanel({
                           edge="end"
                           aria-label="dmx bearbeiten"
                           onClick={() => setEditorScene(scene)}
-                          disabled={isPerformingAction}
+                          disabled={isPerformingAction || scene.type === "animated"}
                         >
                           <TuneRoundedIcon />
                         </IconButton>
@@ -920,7 +1072,7 @@ export default function AdminPanel({
                           edge="end"
                           aria-label="inhalt aktualisieren"
                           onClick={() => setRerecordCandidate(scene)}
-                          disabled={isPerformingAction}
+                          disabled={isPerformingAction || scene.type === "animated"}
                         >
                           <AutorenewRoundedIcon />
                         </IconButton>
@@ -1042,9 +1194,19 @@ export default function AdminPanel({
                 handleFormStyleChange("icon", next)
               )}
               {renderScenePreview(form.name, form.description, form.style)}
-              <Button variant="contained" onClick={handleRecord} disabled={!canRecord}>
-                {isRecording ? "Aufnahme läuft..." : "Szene aufnehmen"}
-              </Button>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                <Button variant="contained" onClick={handleRecord} disabled={!canRecord} fullWidth>
+                  {isRecording ? "Recording..." : "Record Static Scene"}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={openAnimatedRecorder}
+                  disabled={isRecording}
+                  fullWidth
+                >
+                  Record Animated Scene
+                </Button>
+              </Stack>
             </Stack>
           </Paper>
 
@@ -1323,6 +1485,211 @@ export default function AdminPanel({
           </Paper>
         </Stack>
       </Box>
+
+      <Dialog
+        fullScreen
+        open={isAnimatedRecordOpen}
+        onClose={() => {
+          void handleAnimatedCancel(true);
+        }}
+      >
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+            <Typography variant="h5" fontWeight={800}>
+              Record Animated Scene
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                void handleAnimatedCancel(true);
+              }}
+              disabled={isAnimatedBusy}
+            >
+              Close
+            </Button>
+          </Stack>
+        </Box>
+        <Box sx={{ p: 2, pb: 12 }}>
+          <Stack spacing={2}>
+            <TextField
+              label="Scene Name"
+              value={animatedName}
+              onChange={(event) => setAnimatedName(event.target.value)}
+              fullWidth
+            />
+            <TextField
+              label="Description"
+              value={animatedDescription}
+              onChange={(event) => setAnimatedDescription(event.target.value)}
+              fullWidth
+            />
+
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1.25,
+                borderColor: "divider",
+                "@keyframes bpmPulseStep": {
+                  "0%, 14%, 100%": { transform: "scale(1)", opacity: 0.35 },
+                  "4%, 10%": { transform: "scale(1.12)", opacity: 1 },
+                },
+              }}
+            >
+              <Stack spacing={1}>
+                <TextField
+                  label="BPM (optional, 40-240)"
+                  value={animatedBpm}
+                  onChange={(event) =>
+                    setAnimatedBpm(event.target.value.replace(/[^\d.]/g, "").slice(0, 6))
+                  }
+                  size="small"
+                  fullWidth
+                  error={hasAnimatedBpmInput && !isAnimatedBpmValid}
+                  helperText={
+                    hasAnimatedBpmInput && !isAnimatedBpmValid
+                      ? "Enter a BPM between 40 and 240."
+                      : "When set, loop end snaps to the nearest full 4-beat bar."
+                  }
+                />
+                <Stack direction="row" spacing={0.9} justifyContent="center">
+                  {[0, 1, 2, 3].map((index) => (
+                    <Box
+                      key={`bpm-square-${index}`}
+                      sx={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 0.9,
+                        border: "1px solid",
+                        borderColor: "divider",
+                        bgcolor: "primary.main",
+                        animation: `bpmPulseStep ${barDurationSeconds.toFixed(3)}s ease-in-out infinite`,
+                        animationDelay: `${(index * beatDurationSeconds).toFixed(3)}s`,
+                      }}
+                    />
+                  ))}
+                </Stack>
+                <Typography variant="caption" color="text.secondary" textAlign="center">
+                  {activeAnimatedBpm
+                    ? `${activeAnimatedBpm.toFixed(1)} BPM • ${beatDurationSeconds.toFixed(
+                        2
+                      )}s/beat • ${barDurationSeconds.toFixed(2)}s/bar`
+                    : "No BPM quantization (raw stop timing)."}
+                </Typography>
+              </Stack>
+            </Paper>
+
+            {animatedRecordState === "waiting" ? (
+              <Alert severity="info">Waiting for loop start</Alert>
+            ) : null}
+            {animatedRecordState === "recording" ? (
+              <Alert severity="warning">Recording loop...</Alert>
+            ) : null}
+            {animatedRecordState === "summary" && animatedSummary ? (
+              <Paper variant="outlined" sx={{ p: 1.5 }}>
+                <Stack spacing={0.7}>
+                  <Typography variant="subtitle1" fontWeight={700}>
+                    Capture Summary
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {`Duration: ${(animatedSummary.duration_ms / 1000).toFixed(1)} s`}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {`Frames: ${animatedSummary.frame_count}`}
+                  </Typography>
+                  {animatedSummary.bpm_quantization ? (
+                    <Typography variant="body2" color="text.secondary">
+                      {`BPM Snap: ${animatedSummary.bpm_quantization.bpm} BPM • ${animatedSummary.bpm_quantization.bars} bar(s)`}
+                    </Typography>
+                  ) : null}
+                  {animatedSummary.bpm_quantization &&
+                  animatedSummary.bpm_quantization.quantized_duration_ms !==
+                    animatedSummary.bpm_quantization.source_duration_ms ? (
+                    <Typography variant="caption" color="text.secondary">
+                      {`Cut from ${(animatedSummary.bpm_quantization.source_duration_ms / 1000).toFixed(
+                        2
+                      )}s to ${(animatedSummary.bpm_quantization.quantized_duration_ms / 1000).toFixed(
+                        2
+                      )}s to fit BPM.`}
+                    </Typography>
+                  ) : null}
+                  {animatedSummary.auto_stopped ? (
+                    <Typography variant="caption" color="warning.main">
+                      Auto-stopped at maximum duration.
+                    </Typography>
+                  ) : null}
+                  {animatedSummary.status === "too_short" ? (
+                    <Typography variant="caption" color="error.main">
+                      Loop too short. Please re-record with at least 1.5s.
+                    </Typography>
+                  ) : null}
+                </Stack>
+              </Paper>
+            ) : null}
+
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+              <Button
+                size="large"
+                variant="contained"
+                onClick={() => void handleAnimatedStart()}
+                disabled={isAnimatedBusy || animatedRecordState === "recording"}
+                fullWidth
+              >
+                Start Loop
+              </Button>
+              <Button
+                size="large"
+                variant="contained"
+                color="warning"
+                onClick={() => void handleAnimatedStop()}
+                disabled={isAnimatedBusy || animatedRecordState !== "recording"}
+                fullWidth
+              >
+                End Loop
+              </Button>
+              <Button
+                size="large"
+                variant="outlined"
+                color="inherit"
+                onClick={() => {
+                  void handleAnimatedCancel(true);
+                }}
+                disabled={isAnimatedBusy}
+                fullWidth
+              >
+                Cancel
+              </Button>
+            </Stack>
+
+            {animatedRecordState === "summary" ? (
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={() => void handleAnimatedSave()}
+                  disabled={
+                    isAnimatedBusy ||
+                    animatedName.trim().length === 0 ||
+                    animatedSummary?.status !== "recorded"
+                  }
+                  fullWidth
+                >
+                  Save Animated Scene
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    void handleAnimatedCancel(false);
+                  }}
+                  disabled={isAnimatedBusy}
+                  fullWidth
+                >
+                  Discard & Re-record
+                </Button>
+              </Stack>
+            ) : null}
+          </Stack>
+        </Box>
+      </Dialog>
 
       <Dialog
         open={deleteCandidate !== null}

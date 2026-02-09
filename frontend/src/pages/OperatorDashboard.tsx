@@ -48,6 +48,7 @@ type Scene = {
   id: string;
   name: string;
   description?: string;
+  type?: "static" | "animated";
   universes: Record<string, number[]>;
   created_at?: string;
   style?: SceneStyleMeta | null;
@@ -87,8 +88,21 @@ export default function OperatorDashboard({
   const [isMasterDimmerExpandedMobile, setIsMasterDimmerExpandedMobile] = useState(false);
   const masterDimmerTargetRef = useRef(100);
   const masterDimmerTimerRef = useRef<number | null>(null);
+  const masterDimmerRequestSeqRef = useRef(0);
+  const masterDimmerLocalHoldUntilRef = useRef(0);
   const hazeTargetRef = useRef(0);
   const hazeTimerRef = useRef<number | null>(null);
+
+  const holdMasterDimmerRemoteSync = (durationMs: number) => {
+    const nextUntil = Date.now() + durationMs;
+    if (nextUntil > masterDimmerLocalHoldUntilRef.current) {
+      masterDimmerLocalHoldUntilRef.current = nextUntil;
+    }
+  };
+
+  const shouldIgnoreRemoteMasterDimmer = (incomingValue: number) =>
+    Date.now() < masterDimmerLocalHoldUntilRef.current &&
+    incomingValue !== masterDimmerTargetRef.current;
 
   const loadData = async () => {
     setIsLoading(true);
@@ -145,8 +159,10 @@ export default function OperatorDashboard({
           fog_flash_configured?: boolean;
         };
         if (typeof data.master_dimmer_percent === "number") {
-          setMasterDimmerPercent(data.master_dimmer_percent);
-          masterDimmerTargetRef.current = data.master_dimmer_percent;
+          if (!shouldIgnoreRemoteMasterDimmer(data.master_dimmer_percent)) {
+            setMasterDimmerPercent(data.master_dimmer_percent);
+            masterDimmerTargetRef.current = data.master_dimmer_percent;
+          }
         }
         if (typeof data.haze_percent === "number") {
           setHazePercent(data.haze_percent);
@@ -184,6 +200,8 @@ export default function OperatorDashboard({
   }, []);
 
   const pushMasterDimmer = async (valuePercent: number) => {
+    const requestSeq = masterDimmerRequestSeqRef.current + 1;
+    masterDimmerRequestSeqRef.current = requestSeq;
     try {
       const res = await fetch(`${API_BASE}/api/master-dimmer`, {
         method: "POST",
@@ -197,6 +215,9 @@ export default function OperatorDashboard({
         value_percent: number;
         mode: "parameter-aware" | "raw";
       };
+      if (requestSeq !== masterDimmerRequestSeqRef.current) {
+        return;
+      }
       setMasterDimmerPercent(data.value_percent);
       masterDimmerTargetRef.current = data.value_percent;
     } catch {
@@ -218,12 +239,23 @@ export default function OperatorDashboard({
   const handleMasterDimmerChange = (_event: Event, value: number | number[]) => {
     const next = Array.isArray(value) ? value[0] : value;
     setMasterDimmerPercent(next);
+    holdMasterDimmerRemoteSync(600);
     queueMasterDimmerUpdate(next);
+  };
+
+  const handleMasterDimmerCommit = () => {
+    holdMasterDimmerRemoteSync(600);
+    if (masterDimmerTimerRef.current !== null) {
+      window.clearTimeout(masterDimmerTimerRef.current);
+      masterDimmerTimerRef.current = null;
+      void pushMasterDimmer(masterDimmerTargetRef.current);
+    }
   };
 
   const handleMasterDimmerFull = () => {
     setMasterDimmerPercent(100);
     masterDimmerTargetRef.current = 100;
+    holdMasterDimmerRemoteSync(600);
     if (masterDimmerTimerRef.current !== null) {
       window.clearTimeout(masterDimmerTimerRef.current);
       masterDimmerTimerRef.current = null;
@@ -556,6 +588,7 @@ export default function OperatorDashboard({
                 max={100}
                 step={1}
                 onChange={handleMasterDimmerChange}
+                onChangeCommitted={handleMasterDimmerCommit}
                 valueLabelDisplay="auto"
                 disabled={panelLocked}
                 sx={{
@@ -661,6 +694,21 @@ export default function OperatorDashboard({
                         ) : null}
                       </Box>
                       <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            px: 0.55,
+                            py: 0.15,
+                            borderRadius: 0.6,
+                            border: "1px solid",
+                            borderColor: "divider",
+                            color: "text.secondary",
+                            fontWeight: 700,
+                            letterSpacing: 0.2,
+                          }}
+                        >
+                          {scene.type === "animated" ? "ANIM" : "STATIC"}
+                        </Typography>
                         {scene.style?.icon && scene.style.icon !== "none" ? (
                           <Box
                             color="text.secondary"

@@ -1,15 +1,19 @@
 import asyncio
 import json
 import re
+import socket
+import struct
 import threading
+import time
 from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from .artnet_core import (
+    ARTNET_PORT,
     is_stream_running,
     record_snapshots,
     start_stream,
@@ -27,6 +31,7 @@ from .fixture_plan import (
     preview_fixture_plan,
 )
 from .scenes import (
+    AnimatedFrame,
     Scene,
     SceneStyle,
     delete_scene,
@@ -45,10 +50,16 @@ HAZE_PERCENT: int = 0
 FOG_FLASH_ACTIVE: bool = False
 _BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
 _LIVE_EDITOR_STATE: Optional[dict] = None
+_ANIMATED_PLAYBACK_STATE: Optional[dict] = None
+_ANIMATED_RECORDING_STATE: Optional[dict] = None
 _playback_state_lock = threading.Lock()
+_recording_state_lock = threading.Lock()
 _subscribers: set[asyncio.Queue[str]] = set()
 _subscribers_lock = threading.Lock()
 _event_loop: Optional[asyncio.AbstractEventLoop] = None
+
+ANIMATED_RECORDING_MIN_DURATION_MS = 1500
+ANIMATED_RECORDING_MAX_DURATION_MS = 60000
 
 
 def _format_sse(event: str, data: dict) -> str:
@@ -118,6 +129,188 @@ def _build_status_payload() -> dict:
         "fog_flash_configured": _has_fog_channel_configured(),
         "haze_configured": _has_haze_channel_configured(),
     }
+
+
+def _parse_artdmx_packet(data: bytes) -> Optional[tuple[int, bytes]]:
+    if len(data) < 18 or data[0:8] != b"Art-Net\x00":
+        return None
+
+    opcode = struct.unpack("<H", data[8:10])[0]
+    if opcode != 0x5000:
+        return None
+
+    universe = struct.unpack("<H", data[14:16])[0]
+    length = struct.unpack(">H", data[16:18])[0]
+    if length < 1 or len(data) < 18 + length:
+        return None
+
+    return universe, data[18 : 18 + length]
+
+
+def _normalize_animated_frames(frames: list[dict], duration_ms: int) -> list[AnimatedFrame]:
+    if not frames:
+        return []
+
+    sorted_frames = sorted(frames, key=lambda item: int(item["timestamp_ms"]))
+    first_timestamp = int(sorted_frames[0]["timestamp_ms"])
+    normalized: list[dict] = []
+    last_signature: Optional[str] = None
+
+    for frame in sorted_frames:
+        ts = max(0, int(frame["timestamp_ms"]) - first_timestamp)
+        universes = frame["universes"]
+        signature = json.dumps(universes, separators=(",", ":"), sort_keys=True)
+        if signature == last_signature and ts != duration_ms:
+            continue
+        last_signature = signature
+        normalized.append({"timestamp_ms": ts, "universes": universes})
+
+    if not normalized:
+        return []
+
+    if int(normalized[-1]["timestamp_ms"]) < duration_ms:
+        normalized.append(
+            {
+                "timestamp_ms": duration_ms,
+                "universes": normalized[-1]["universes"],
+            }
+        )
+
+    return [AnimatedFrame.model_validate(frame) for frame in normalized]
+
+
+def _trim_animated_frames_to_duration(
+    frames: list[AnimatedFrame], duration_ms: int
+) -> list[AnimatedFrame]:
+    if not frames:
+        return []
+    if duration_ms >= frames[-1].timestamp_ms:
+        return frames
+
+    kept = [frame for frame in frames if frame.timestamp_ms <= duration_ms]
+    if not kept:
+        kept = [
+            AnimatedFrame(
+                timestamp_ms=0,
+                universes=frames[0].universes,
+            )
+        ]
+
+    last = kept[-1]
+    if last.timestamp_ms < duration_ms:
+        kept.append(
+            AnimatedFrame(
+                timestamp_ms=duration_ms,
+                universes=last.universes,
+            )
+        )
+    return kept
+
+
+def _apply_bpm_quantization(
+    frames: list[AnimatedFrame], duration_ms: int, bpm: Optional[float]
+) -> tuple[list[AnimatedFrame], int, Optional[dict]]:
+    if bpm is None:
+        return frames, duration_ms, None
+    if bpm <= 0:
+        raise HTTPException(status_code=400, detail="BPM must be > 0")
+
+    beat_ms = 60000.0 / bpm
+    bar_ms = beat_ms * 4.0
+    if bar_ms <= 0:
+        return frames, duration_ms, None
+
+    bars_nearest = max(1, int(round(duration_ms / bar_ms)))
+    quantized_target = int(round(bars_nearest * bar_ms))
+    if quantized_target > duration_ms:
+        bars_floor = max(1, int(duration_ms // bar_ms))
+        quantized_target = int(round(bars_floor * bar_ms))
+    quantized_duration = max(1, min(duration_ms, quantized_target))
+
+    quantized_frames = _trim_animated_frames_to_duration(frames, quantized_duration)
+    details = {
+        "bpm": round(float(bpm), 3),
+        "beat_ms": int(round(beat_ms)),
+        "bar_ms": int(round(bar_ms)),
+        "bars": max(1, int(round(quantized_duration / bar_ms))),
+        "quantized_duration_ms": quantized_duration,
+        "source_duration_ms": duration_ms,
+    }
+    return quantized_frames, quantized_duration, details
+
+
+def _stop_animated_playback() -> None:
+    with _playback_state_lock:
+        global _ANIMATED_PLAYBACK_STATE
+        state = _ANIMATED_PLAYBACK_STATE
+        _ANIMATED_PLAYBACK_STATE = None
+
+    if not isinstance(state, dict):
+        return
+
+    stop_event = state.get("stop_event")
+    thread = state.get("thread")
+    if isinstance(stop_event, threading.Event):
+        stop_event.set()
+    if isinstance(thread, threading.Thread) and thread.is_alive():
+        thread.join(timeout=1.0)
+
+
+def _start_animated_playback(scene: Scene) -> None:
+    if scene.type != "animated" or not scene.animated_frames:
+        return
+
+    _stop_animated_playback()
+
+    frames = sorted(scene.animated_frames, key=lambda frame: frame.timestamp_ms)
+    duration_ms = max(1, int(scene.duration_ms or frames[-1].timestamp_ms or 1))
+    mode = scene.playback_mode or "loop"
+    stop_event = threading.Event()
+
+    def worker() -> None:
+        start_time = time.monotonic()
+        last_index = -1
+        while not stop_event.is_set():
+            elapsed_ms = int((time.monotonic() - start_time) * 1000)
+            if elapsed_ms >= duration_ms:
+                if mode == "loop":
+                    elapsed_ms %= duration_ms
+                    start_time = time.monotonic() - (elapsed_ms / 1000.0)
+                    last_index = -1
+                else:
+                    break
+
+            frame_index = 0
+            for index, frame in enumerate(frames):
+                if frame.timestamp_ms <= elapsed_ms:
+                    frame_index = index
+                else:
+                    break
+
+            if frame_index != last_index:
+                payload = _build_stream_payload_from_universes(frames[frame_index].universes)
+                _set_base_stream_payload(payload)
+                _refresh_stream_from_base_payload(broadcast_status=False)
+                last_index = frame_index
+
+            if frame_index + 1 < len(frames):
+                next_timestamp = frames[frame_index + 1].timestamp_ms
+            else:
+                next_timestamp = duration_ms
+            wait_ms = max(1, next_timestamp - elapsed_ms)
+            stop_event.wait(min(0.05, wait_ms / 1000.0))
+
+        if not stop_event.is_set() and mode == "once":
+            _set_base_stream_payload(None)
+            stop_stream()
+            _set_active_scene(None)
+            _broadcast_master_dimmer_status()
+
+    thread = threading.Thread(target=worker, daemon=True)
+    with _playback_state_lock:
+        global _ANIMATED_PLAYBACK_STATE
+        _ANIMATED_PLAYBACK_STATE = {"scene_id": scene.id, "thread": thread, "stop_event": stop_event}
+    thread.start()
 
 
 def _get_live_editor_scene_id() -> Optional[str]:
@@ -224,7 +417,7 @@ def _broadcast_master_dimmer_status(mode: Optional[str] = None) -> None:
     _broadcast_event("status", payload)
 
 
-def _refresh_stream_from_base_payload() -> None:
+def _refresh_stream_from_base_payload(*, broadcast_status: bool = True) -> None:
     with _playback_state_lock:
         base_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
         dimmer_percent = MASTER_DIMMER_PERCENT
@@ -239,7 +432,8 @@ def _refresh_stream_from_base_payload() -> None:
             start_stream(effective_payload)
     else:
         stop_stream()
-    _broadcast_master_dimmer_status(mode)
+    if broadcast_status:
+        _broadcast_master_dimmer_status(mode)
 
 
 def _set_base_stream_payload(payload: Optional[Dict[int, bytes]]) -> None:
@@ -325,6 +519,7 @@ def test_all_on():
     """
     _assert_panel_mode()
     _clear_live_editor_state()
+    _stop_animated_playback()
     _set_base_stream_payload({0: bytes([255] * 512)})
     _refresh_stream_from_base_payload()
     return {"status": "started", "universe": 0}
@@ -336,6 +531,7 @@ def test_stop():
     Test: Stream stoppen.
     """
     _clear_live_editor_state()
+    _stop_animated_playback()
     _set_base_stream_payload(None)
     stop_stream()
     _broadcast_master_dimmer_status()
@@ -351,6 +547,17 @@ class SceneRecordRequest(BaseModel):
 
 class SceneRerecordRequest(BaseModel):
     duration: float = 1.0
+
+
+class AnimatedSceneSaveRequest(BaseModel):
+    name: str
+    description: str = ""
+    style: Optional[SceneStyle] = None
+    mode: Literal["loop", "once"] = "loop"
+
+
+class AnimatedSceneStopRequest(BaseModel):
+    bpm: Optional[float] = None
 
 
 class SceneUpdateRequest(BaseModel):
@@ -601,6 +808,7 @@ def api_set_fog_flash(request: FogFlashUpdateRequest):
 @router.post("/scene-editor/live/start")
 def api_scene_editor_live_start(request: SceneEditorLiveStartRequest):
     _assert_panel_mode()
+    _stop_animated_playback()
 
     scene = get_scene(request.scene_id)
     if scene is None:
@@ -651,6 +859,67 @@ def api_scene_editor_live_stop(request: SceneEditorLiveStopRequest):
     return _stop_live_editor_session(request.restore_previous)
 
 
+@router.post("/scenes/animated/start")
+def api_start_animated_scene_recording():
+    return _start_animated_recording_session()
+
+
+@router.post("/scenes/animated/stop")
+def api_stop_animated_scene_recording(request: Optional[AnimatedSceneStopRequest] = None):
+    bpm = request.bpm if request is not None else None
+    return _stop_animated_recording_session(bpm=bpm)
+
+
+@router.post("/scenes/animated/cancel")
+def api_cancel_animated_scene_recording():
+    return _cancel_animated_recording_session()
+
+
+@router.post("/scenes/animated/save", response_model=Scene)
+def api_save_animated_scene(request: AnimatedSceneSaveRequest):
+    global _ANIMATED_RECORDING_STATE
+    name = request.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Scene name cannot be empty")
+    if _scene_name_exists(name):
+        raise HTTPException(status_code=409, detail="Scene name already exists")
+
+    with _recording_state_lock:
+        state = _ANIMATED_RECORDING_STATE
+        if not isinstance(state, dict) or state.get("phase") != "ready":
+            raise HTTPException(
+                status_code=409,
+                detail="No recorded animated loop available. Start and stop an animated recording first.",
+            )
+
+    duration_ms = int(state.get("duration_ms", 0))
+    frames = state.get("animated_frames")
+    if not isinstance(frames, list) or len(frames) < 2:
+        raise HTTPException(status_code=400, detail="Animated recording is too short")
+    if duration_ms < ANIMATED_RECORDING_MIN_DURATION_MS:
+        raise HTTPException(status_code=400, detail="Animated recording is below minimum duration")
+
+    first_frame = frames[0]
+    scene = Scene(
+        id=_build_unique_scene_id(name),
+        name=name,
+        description=request.description.strip(),
+        type="animated",
+        universes=first_frame.universes,
+        duration_ms=duration_ms,
+        playback_mode=request.mode,
+        animated_frames=frames,
+        created_at=datetime.now(timezone.utc).isoformat(),
+        style=request.style,
+    )
+    save_scene(scene)
+    with _recording_state_lock:
+        if _ANIMATED_RECORDING_STATE is state:
+            _ANIMATED_RECORDING_STATE = None
+    _broadcast_event("scenes", {"action": "created", "scene_id": scene.id})
+    return scene
+
+
 @router.get("/scenes", response_model=list[Scene])
 def api_list_scenes():
     return list_scenes()
@@ -694,6 +963,11 @@ def _build_unique_scene_id(scene_name: str) -> str:
 
 
 def _build_stream_payload_from_scene(scene: Scene) -> Dict[int, bytes]:
+    if scene.type == "animated" and scene.animated_frames:
+        return {
+            universe: bytes(values[:512]).ljust(512, b"\x00")
+            for universe, values in scene.animated_frames[0].universes.items()
+        }
     return {
         universe: bytes(values[:512]).ljust(512, b"\x00")
         for universe, values in scene.universes.items()
@@ -710,6 +984,11 @@ def _build_stream_payload_from_universes(
 
 
 def _validate_scene_universes(scene: Scene, universes: Dict[int, List[int]]) -> None:
+    if scene.type != "static":
+        raise HTTPException(
+            status_code=400,
+            detail="Only static scenes support direct universe content editing",
+        )
     existing_universes = set(scene.universes.keys())
     incoming_universes = set(universes.keys())
     if incoming_universes != existing_universes:
@@ -776,6 +1055,7 @@ def _build_blackout_payload() -> Dict[int, bytes]:
 def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
     # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
     target_universes = list(range(settings.universe_count))
+    _stop_animated_playback()
     with _playback_state_lock:
         restore_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
     restore_scene_id = ACTIVE_SCENE_ID
@@ -799,6 +1079,259 @@ def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
             _set_active_scene(None)
 
 
+def _restore_after_animated_recording(state: dict) -> None:
+    if state.get("restored"):
+        return
+    restore_payload = state.get("restore_payload")
+    restore_scene_id = state.get("restore_scene_id")
+    if isinstance(restore_payload, dict) and restore_payload:
+        _set_base_stream_payload(restore_payload)
+        _refresh_stream_from_base_payload()
+    else:
+        _set_base_stream_payload(None)
+        stop_stream()
+        _broadcast_master_dimmer_status()
+    if isinstance(restore_scene_id, str):
+        _set_active_scene(restore_scene_id)
+    else:
+        _set_active_scene(None)
+    state["restored"] = True
+
+
+def _animated_recording_worker(state: dict) -> None:
+    sock = state["socket"]
+    stop_event = state["stop_event"]
+    done_event = state["done_event"]
+    target_universes = state["target_universes"]
+    max_duration_ms = state["max_duration_ms"]
+    start_time = state["start_time"]
+    buffers = state["buffers"]
+    frames: list[dict] = []
+    last_signature: Optional[str] = None
+
+    try:
+        while not stop_event.is_set():
+            elapsed_ms = int((time.monotonic() - start_time) * 1000)
+            if elapsed_ms >= max_duration_ms:
+                state["auto_stopped"] = True
+                break
+
+            try:
+                data, _addr = sock.recvfrom(2048)
+            except socket.timeout:
+                continue
+
+            parsed = _parse_artdmx_packet(data)
+            if parsed is None:
+                continue
+            universe, dmx = parsed
+            if universe not in target_universes:
+                continue
+
+            buffer = buffers[universe]
+            for index in range(min(len(dmx), 512)):
+                buffer[index] = dmx[index]
+
+            snapshot = {u: list(values) for u, values in buffers.items()}
+            signature = json.dumps(snapshot, separators=(",", ":"), sort_keys=True)
+            if signature == last_signature:
+                continue
+            last_signature = signature
+            frames.append({"timestamp_ms": elapsed_ms, "universes": snapshot})
+    except OSError as exc:
+        state["error"] = str(exc)
+    finally:
+        end_elapsed_ms = int((time.monotonic() - start_time) * 1000)
+        state["duration_ms"] = max(1, min(max_duration_ms, end_elapsed_ms))
+        state["frames_raw"] = frames
+        state["frame_count"] = len(frames)
+        try:
+            sock.close()
+        except OSError:
+            pass
+        done_event.set()
+
+
+def _start_animated_recording_session() -> dict:
+    with _recording_state_lock:
+        global _ANIMATED_RECORDING_STATE
+        existing = _ANIMATED_RECORDING_STATE
+        if isinstance(existing, dict) and existing.get("phase") == "recording":
+            raise HTTPException(status_code=409, detail="Animated recording already in progress")
+
+    with _playback_state_lock:
+        restore_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
+    restore_scene_id = ACTIVE_SCENE_ID
+
+    _stop_animated_playback()
+    stop_stream()
+
+    target_universes = list(range(settings.universe_count))
+    buffers = {universe: [0] * 512 for universe in target_universes}
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(("", ARTNET_PORT))
+        sock.settimeout(0.05)
+    except OSError as exc:
+        if restore_payload:
+            _set_base_stream_payload(restore_payload)
+            _refresh_stream_from_base_payload()
+            _set_active_scene(restore_scene_id)
+        raise HTTPException(
+            status_code=409,
+            detail="Art-Net port 6454 is already in use",
+        ) from exc
+
+    state = {
+        "phase": "recording",
+        "start_time": time.monotonic(),
+        "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
+        "stop_event": threading.Event(),
+        "done_event": threading.Event(),
+        "thread": None,
+        "socket": sock,
+        "target_universes": target_universes,
+        "buffers": buffers,
+        "frames_raw": [],
+        "duration_ms": 0,
+        "frame_count": 0,
+        "auto_stopped": False,
+        "error": None,
+        "restore_payload": restore_payload,
+        "restore_scene_id": restore_scene_id,
+        "restored": False,
+    }
+    thread = threading.Thread(target=_animated_recording_worker, args=(state,), daemon=True)
+    state["thread"] = thread
+    thread.start()
+
+    with _recording_state_lock:
+        _ANIMATED_RECORDING_STATE = state
+    return {
+        "status": "recording",
+        "min_duration_ms": ANIMATED_RECORDING_MIN_DURATION_MS,
+        "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
+    }
+
+
+def _stop_animated_recording_session(bpm: Optional[float] = None) -> dict:
+    global _ANIMATED_RECORDING_STATE
+    with _recording_state_lock:
+        state = _ANIMATED_RECORDING_STATE
+    if not isinstance(state, dict):
+        raise HTTPException(status_code=409, detail="No animated recording session active")
+
+    if state.get("phase") == "ready":
+        frames = state.get("animated_frames") or []
+        duration_ms = int(state.get("duration_ms", 0))
+        quantize_info = state.get("bpm_quantization")
+        if bpm is not None:
+            raw_frames = state.get("raw_animated_frames") or frames
+            raw_duration_ms = int(state.get("raw_duration_ms", duration_ms))
+            frames, duration_ms, quantize_info = _apply_bpm_quantization(
+                raw_frames, raw_duration_ms, bpm
+            )
+            state["animated_frames"] = frames
+            state["duration_ms"] = duration_ms
+            state["frame_count"] = len(frames)
+            state["bpm_quantization"] = quantize_info
+
+        return {
+            "status": "recorded",
+            "duration_ms": duration_ms,
+            "frame_count": state["frame_count"],
+            "auto_stopped": bool(state.get("auto_stopped")),
+            "min_duration_ms": ANIMATED_RECORDING_MIN_DURATION_MS,
+            "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
+            "bpm_quantization": quantize_info,
+        }
+
+    stop_event = state["stop_event"]
+    done_event = state["done_event"]
+    stop_event.set()
+    done_event.wait(timeout=2.0)
+
+    thread = state.get("thread")
+    if isinstance(thread, threading.Thread) and thread.is_alive():
+        thread.join(timeout=0.5)
+
+    if state.get("error"):
+        _restore_after_animated_recording(state)
+        with _recording_state_lock:
+            _ANIMATED_RECORDING_STATE = None
+        raise HTTPException(status_code=500, detail="Animated recording failed")
+
+    duration_ms = int(state.get("duration_ms", 0))
+    raw_duration_ms = duration_ms
+    frames_raw = state.get("frames_raw") or []
+    raw_frames = _normalize_animated_frames(frames_raw, duration_ms)
+    frames, duration_ms, quantize_info = _apply_bpm_quantization(raw_frames, duration_ms, bpm)
+    state["raw_duration_ms"] = raw_duration_ms
+    state["raw_animated_frames"] = raw_frames
+    state["animated_frames"] = frames
+    state["frame_count"] = len(frames)
+    state["duration_ms"] = duration_ms
+    state["bpm_quantization"] = quantize_info
+    state["phase"] = "ready"
+    _restore_after_animated_recording(state)
+
+    if len(frames) < 2:
+        return {
+            "status": "too_short",
+            "duration_ms": duration_ms,
+            "frame_count": len(frames),
+            "auto_stopped": bool(state.get("auto_stopped")),
+            "min_duration_ms": ANIMATED_RECORDING_MIN_DURATION_MS,
+            "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
+            "warning": "No meaningful DMX changes captured",
+            "bpm_quantization": quantize_info,
+        }
+
+    if duration_ms < ANIMATED_RECORDING_MIN_DURATION_MS:
+        return {
+            "status": "too_short",
+            "duration_ms": duration_ms,
+            "frame_count": len(frames),
+            "auto_stopped": bool(state.get("auto_stopped")),
+            "min_duration_ms": ANIMATED_RECORDING_MIN_DURATION_MS,
+            "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
+            "warning": "Loop duration is below minimum",
+            "bpm_quantization": quantize_info,
+        }
+
+    return {
+        "status": "recorded",
+        "duration_ms": duration_ms,
+        "frame_count": len(frames),
+        "auto_stopped": bool(state.get("auto_stopped")),
+        "min_duration_ms": ANIMATED_RECORDING_MIN_DURATION_MS,
+        "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
+        "bpm_quantization": quantize_info,
+    }
+
+
+def _cancel_animated_recording_session() -> dict:
+    with _recording_state_lock:
+        global _ANIMATED_RECORDING_STATE
+        state = _ANIMATED_RECORDING_STATE
+        _ANIMATED_RECORDING_STATE = None
+
+    if not isinstance(state, dict):
+        return {"status": "inactive"}
+
+    if state.get("phase") == "recording":
+        stop_event = state["stop_event"]
+        done_event = state["done_event"]
+        stop_event.set()
+        done_event.wait(timeout=2.0)
+        thread = state.get("thread")
+        if isinstance(thread, threading.Thread) and thread.is_alive():
+            thread.join(timeout=0.5)
+
+    _restore_after_animated_recording(state)
+    return {"status": "cancelled"}
+
+
 @router.put("/scenes/{scene_id}", response_model=Scene)
 def api_update_scene(scene_id: str, request: SceneUpdateRequest):
     scene = get_scene(scene_id)
@@ -819,7 +1352,11 @@ def api_update_scene(scene_id: str, request: SceneUpdateRequest):
         id=scene.id,
         name=name,
         description=request.description.strip(),
+        type=scene.type,
         universes=scene.universes,
+        duration_ms=scene.duration_ms,
+        playback_mode=scene.playback_mode,
+        animated_frames=scene.animated_frames,
         created_at=scene.created_at,
         style=style,
     )
@@ -840,7 +1377,11 @@ def api_update_scene_content(scene_id: str, request: SceneContentUpdateRequest):
         id=scene.id,
         name=scene.name,
         description=scene.description,
+        type=scene.type,
         universes=request.universes,
+        duration_ms=scene.duration_ms,
+        playback_mode=scene.playback_mode,
+        animated_frames=scene.animated_frames,
         created_at=scene.created_at,
         style=scene.style,
     )
@@ -857,6 +1398,7 @@ def api_delete_scene(scene_id: str):
 
     delete_scene(scene_id)
     if ACTIVE_SCENE_ID == scene_id:
+        _stop_animated_playback()
         _set_active_scene(None)
     _broadcast_event("scenes", {"action": "deleted", "scene_id": scene_id})
     return {"status": "deleted", "scene_id": scene_id}
@@ -892,6 +1434,8 @@ def api_update_settings(request: SettingsUpdateRequest):
             raise HTTPException(status_code=400, detail=f"{key} must be in range 0..512")
 
     _clear_live_editor_state()
+    _cancel_animated_recording_session()
+    _stop_animated_playback()
     settings.node_ip = request.node_ip
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
@@ -924,6 +1468,8 @@ def api_set_control_mode(request: ControlModeUpdateRequest):
 
     if mode == "external":
         _clear_live_editor_state()
+        _cancel_animated_recording_session()
+        _stop_animated_playback()
         _set_fog_flash_active(False)
         _set_base_stream_payload(None)
         stop_stream()
@@ -942,8 +1488,11 @@ def api_play_scene(scene_id: str):
         raise HTTPException(status_code=404, detail="Scene not found")
 
     _clear_live_editor_state()
+    _stop_animated_playback()
     _set_base_stream_payload(_build_stream_payload_from_scene(scene))
     _refresh_stream_from_base_payload()
+    if scene.type == "animated":
+        _start_animated_playback(scene)
     _set_active_scene(scene_id)
     return {"status": "playing", "scene_id": scene_id}
 
@@ -978,6 +1527,8 @@ def api_rerecord_scene(
     scene = get_scene(scene_id)
     if scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
+    if scene.type != "static":
+        raise HTTPException(status_code=400, detail="Only static scenes can be rerecorded")
 
     duration = request.duration if request is not None else 1.0
     snapshot = _record_scene_snapshot(duration)
@@ -986,7 +1537,11 @@ def api_rerecord_scene(
         id=scene.id,
         name=scene.name,
         description=scene.description,
+        type=scene.type,
         universes=snapshot,
+        duration_ms=scene.duration_ms,
+        playback_mode=scene.playback_mode,
+        animated_frames=scene.animated_frames,
         created_at=scene.created_at,
         style=scene.style,
     )
@@ -999,6 +1554,8 @@ def api_rerecord_scene(
 def api_blackout():
     _assert_panel_mode()
     _clear_live_editor_state()
+    _cancel_animated_recording_session()
+    _stop_animated_playback()
     _set_fog_flash_active(False)
     _set_base_stream_payload(_build_blackout_payload())
     _refresh_stream_from_base_payload()
@@ -1009,6 +1566,8 @@ def api_blackout():
 @router.post("/stop")
 def api_stop():
     _clear_live_editor_state()
+    _cancel_animated_recording_session()
+    _stop_animated_playback()
     _set_fog_flash_active(False)
     _set_base_stream_payload(None)
     stop_stream()
