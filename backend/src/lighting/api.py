@@ -21,6 +21,7 @@ from .fixture_plan import (
     activate_fixture_plan,
     clear_fixture_plan,
     get_intensity_addresses,
+    get_fixture_plan_details,
     get_fixture_plan_summary,
     lookup_fixture_parameter,
     preview_fixture_plan,
@@ -41,6 +42,7 @@ ACTIVE_SCENE_ID: Optional[str] = None
 CONTROL_MODE: str = "panel"
 MASTER_DIMMER_PERCENT: int = 100
 _BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
+_LIVE_EDITOR_STATE: Optional[dict] = None
 _playback_state_lock = threading.Lock()
 _subscribers: set[asyncio.Queue[str]] = set()
 _subscribers_lock = threading.Lock()
@@ -247,6 +249,7 @@ def test_all_on():
     Test: Universe 0 alle Kanaele auf 255.
     """
     _assert_panel_mode()
+    _clear_live_editor_state()
     _set_base_stream_payload({0: bytes([255] * 512)})
     _refresh_stream_from_base_payload()
     return {"status": "started", "universe": 0}
@@ -257,6 +260,7 @@ def test_stop():
     """
     Test: Stream stoppen.
     """
+    _clear_live_editor_state()
     _set_base_stream_payload(None)
     stop_stream()
     _broadcast_master_dimmer_status()
@@ -278,6 +282,10 @@ class SceneUpdateRequest(BaseModel):
     name: str
     description: str = ""
     style: Optional[SceneStyle] = None
+
+
+class SceneContentUpdateRequest(BaseModel):
+    universes: Dict[int, List[int]]
 
 
 class SceneReorderRequest(BaseModel):
@@ -326,6 +334,19 @@ class MasterDimmerUpdateRequest(BaseModel):
     value_percent: int
 
 
+class SceneEditorLiveStartRequest(BaseModel):
+    scene_id: str
+    universes: Dict[int, List[int]]
+
+
+class SceneEditorLiveUpdateRequest(BaseModel):
+    universes: Dict[int, List[int]]
+
+
+class SceneEditorLiveStopRequest(BaseModel):
+    restore_previous: bool = True
+
+
 def _get_settings_payload() -> SettingsResponse:
     return SettingsResponse(
         local_ip=settings.local_ip,
@@ -369,6 +390,11 @@ def api_change_pin(request: PinChangeRequest):
 @router.get("/fixture-plan")
 def api_get_fixture_plan():
     return get_fixture_plan_summary().model_dump()
+
+
+@router.get("/fixture-plan/details")
+def api_get_fixture_plan_details():
+    return get_fixture_plan_details().model_dump()
 
 
 @router.post("/fixture-plan/preview")
@@ -438,6 +464,59 @@ def api_set_master_dimmer(request: MasterDimmerUpdateRequest):
     }
 
 
+@router.post("/scene-editor/live/start")
+def api_scene_editor_live_start(request: SceneEditorLiveStartRequest):
+    _assert_panel_mode()
+
+    scene = get_scene(request.scene_id)
+    if scene is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    _validate_scene_universes(scene, request.universes)
+    payload = _build_stream_payload_from_universes(request.universes)
+
+    with _playback_state_lock:
+        global _LIVE_EDITOR_STATE
+        if _LIVE_EDITOR_STATE is not None:
+            raise HTTPException(status_code=409, detail="Live editor is already active")
+
+        _LIVE_EDITOR_STATE = {
+            "scene_id": request.scene_id,
+            "previous_payload": _clone_payload(_BASE_STREAM_PAYLOAD or {}),
+            "previous_active_scene_id": ACTIVE_SCENE_ID,
+        }
+
+    _set_base_stream_payload(payload)
+    _refresh_stream_from_base_payload()
+    _set_active_scene("__editor_live__")
+    return {"status": "live", "scene_id": request.scene_id}
+
+
+@router.post("/scene-editor/live/update")
+def api_scene_editor_live_update(request: SceneEditorLiveUpdateRequest):
+    with _playback_state_lock:
+        state = _LIVE_EDITOR_STATE
+    if state is None:
+        raise HTTPException(status_code=409, detail="Live editor is not active")
+
+    scene_id = state.get("scene_id")
+    scene = get_scene(scene_id) if isinstance(scene_id, str) else None
+    if scene is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    _validate_scene_universes(scene, request.universes)
+    payload = _build_stream_payload_from_universes(request.universes)
+    _set_base_stream_payload(payload)
+    _refresh_stream_from_base_payload()
+    _set_active_scene("__editor_live__")
+    return {"status": "live"}
+
+
+@router.post("/scene-editor/live/stop")
+def api_scene_editor_live_stop(request: SceneEditorLiveStopRequest):
+    return _stop_live_editor_session(request.restore_previous)
+
+
 @router.get("/scenes", response_model=list[Scene])
 def api_list_scenes():
     return list_scenes()
@@ -485,6 +564,71 @@ def _build_stream_payload_from_scene(scene: Scene) -> Dict[int, bytes]:
         universe: bytes(values[:512]).ljust(512, b"\x00")
         for universe, values in scene.universes.items()
     }
+
+
+def _build_stream_payload_from_universes(
+    universes: Dict[int, List[int]]
+) -> Dict[int, bytes]:
+    return {
+        universe: bytes(values[:512]).ljust(512, b"\x00")
+        for universe, values in universes.items()
+    }
+
+
+def _validate_scene_universes(scene: Scene, universes: Dict[int, List[int]]) -> None:
+    existing_universes = set(scene.universes.keys())
+    incoming_universes = set(universes.keys())
+    if incoming_universes != existing_universes:
+        raise HTTPException(
+            status_code=400,
+            detail="Universe layout mismatch: edited content must keep the original scene universes",
+        )
+
+    # Re-validate against Scene model constraints (length 512, value range, etc.).
+    Scene(
+        id=scene.id,
+        name=scene.name,
+        description=scene.description,
+        universes=universes,
+        created_at=scene.created_at,
+        style=scene.style,
+    )
+
+
+def _stop_live_editor_session(restore_previous: bool) -> dict:
+    with _playback_state_lock:
+        global _LIVE_EDITOR_STATE
+        state = _LIVE_EDITOR_STATE
+        _LIVE_EDITOR_STATE = None
+
+    if state is None:
+        return {"status": "inactive"}
+
+    previous_payload = state.get("previous_payload")
+    previous_active_scene_id = state.get("previous_active_scene_id")
+
+    if restore_previous:
+        if isinstance(previous_payload, dict) and previous_payload:
+            _set_base_stream_payload(previous_payload)
+            _refresh_stream_from_base_payload()
+        else:
+            _set_base_stream_payload(None)
+            stop_stream()
+            _broadcast_master_dimmer_status()
+        if isinstance(previous_active_scene_id, str):
+            _set_active_scene(previous_active_scene_id)
+        else:
+            _set_active_scene(None)
+    else:
+        _set_active_scene("__editor_live__")
+
+    return {"status": "stopped"}
+
+
+def _clear_live_editor_state() -> None:
+    with _playback_state_lock:
+        global _LIVE_EDITOR_STATE
+        _LIVE_EDITOR_STATE = None
 
 
 def _build_blackout_payload() -> Dict[int, bytes]:
@@ -550,6 +694,27 @@ def api_update_scene(scene_id: str, request: SceneUpdateRequest):
     return updated
 
 
+@router.put("/scenes/{scene_id}/content", response_model=Scene)
+def api_update_scene_content(scene_id: str, request: SceneContentUpdateRequest):
+    scene = get_scene(scene_id)
+    if scene is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    _validate_scene_universes(scene, request.universes)
+
+    updated = Scene(
+        id=scene.id,
+        name=scene.name,
+        description=scene.description,
+        universes=request.universes,
+        created_at=scene.created_at,
+        style=scene.style,
+    )
+    save_scene(updated)
+    _broadcast_event("scenes", {"action": "updated", "scene_id": scene.id})
+    return updated
+
+
 @router.delete("/scenes/{scene_id}")
 def api_delete_scene(scene_id: str):
     scene = get_scene(scene_id)
@@ -580,6 +745,7 @@ def api_update_settings(request: SettingsUpdateRequest):
     if request.universe_count < 1:
         raise HTTPException(status_code=400, detail="universe_count must be >= 1")
 
+    _clear_live_editor_state()
     settings.node_ip = request.node_ip
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
@@ -607,6 +773,7 @@ def api_set_control_mode(request: ControlModeUpdateRequest):
         raise HTTPException(status_code=400, detail="Invalid control mode")
 
     if mode == "external":
+        _clear_live_editor_state()
         _set_base_stream_payload(None)
         stop_stream()
         _set_active_scene(None)
@@ -623,6 +790,7 @@ def api_play_scene(scene_id: str):
     if scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
 
+    _clear_live_editor_state()
     _set_base_stream_payload(_build_stream_payload_from_scene(scene))
     _refresh_stream_from_base_payload()
     _set_active_scene(scene_id)
@@ -679,6 +847,7 @@ def api_rerecord_scene(
 @router.post("/blackout")
 def api_blackout():
     _assert_panel_mode()
+    _clear_live_editor_state()
     _set_base_stream_payload(_build_blackout_payload())
     _refresh_stream_from_base_payload()
     _set_active_scene("__blackout__")
@@ -687,6 +856,7 @@ def api_blackout():
 
 @router.post("/stop")
 def api_stop():
+    _clear_live_editor_state()
     _set_base_stream_payload(None)
     stop_stream()
     _set_active_scene(None)

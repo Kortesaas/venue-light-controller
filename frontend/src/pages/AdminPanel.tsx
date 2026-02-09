@@ -34,6 +34,8 @@ import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
 import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import SceneDmxEditorDialog from "../components/SceneDmxEditorDialog";
 import {
   getSceneCardSx,
   getSceneIcon,
@@ -138,6 +140,7 @@ export default function AdminPanel({
   const [isApplyingPin, setIsApplyingPin] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState<Scene | null>(null);
   const [rerecordCandidate, setRerecordCandidate] = useState<Scene | null>(null);
+  const [editorScene, setEditorScene] = useState<Scene | null>(null);
   const [fixturePlanStatus, setFixturePlanStatus] = useState<FixturePlanSummary>({
     active: false,
     fixture_count: 0,
@@ -311,6 +314,11 @@ export default function AdminPanel({
     } finally {
       setIsPerformingAction(false);
     }
+  };
+
+  const handleSceneEditorSaved = async (_sceneId: string) => {
+    await loadScenes();
+    setActionMessage("Szeneninhalt gespeichert.");
   };
 
   const handleSaveRename = async (sceneId: string) => {
@@ -844,6 +852,14 @@ export default function AdminPanel({
                         </IconButton>
                         <IconButton
                           edge="end"
+                          aria-label="dmx bearbeiten"
+                          onClick={() => setEditorScene(scene)}
+                          disabled={isPerformingAction}
+                        >
+                          <TuneRoundedIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
                           aria-label="testen"
                           onClick={() => handlePlay(scene.id)}
                           disabled={isPerformingAction}
@@ -1260,6 +1276,16 @@ export default function AdminPanel({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <SceneDmxEditorDialog
+        open={editorScene !== null}
+        scene={editorScene}
+        controlMode={controlMode}
+        onClose={() => setEditorScene(null)}
+        onSaved={(sceneId) => {
+          void handleSceneEditorSaved(sceneId);
+        }}
+      />
     </Stack>
   );
 }

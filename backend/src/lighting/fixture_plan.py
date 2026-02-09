@@ -49,6 +49,16 @@ class FixturePlanSummary(BaseModel):
     example_parameters: List[FixtureParameter] = []
 
 
+class FixturePlanDetails(BaseModel):
+    active: bool
+    source_filename: Optional[str] = None
+    imported_at: Optional[str] = None
+    fixture_count: int = 0
+    parameter_count: int = 0
+    universes: List[int] = []
+    fixtures: List[FixtureDefinition] = []
+
+
 _state_lock = threading.Lock()
 _active_plan: Optional[FixturePlan] = None
 
@@ -248,6 +258,22 @@ def get_fixture_plan_summary() -> FixturePlanSummary:
     if plan is None:
         return FixturePlanSummary(active=False)
     return _build_summary(plan, active=True)
+
+
+def get_fixture_plan_details() -> FixturePlanDetails:
+    with _state_lock:
+        plan = _active_plan
+    if plan is None:
+        return FixturePlanDetails(active=False)
+    return FixturePlanDetails(
+        active=True,
+        source_filename=plan.source_filename,
+        imported_at=plan.imported_at,
+        fixture_count=plan.fixture_count,
+        parameter_count=plan.parameter_count,
+        universes=[universe + 1 for universe in plan.universes],
+        fixtures=plan.fixtures,
+    )
 
 
 def lookup_fixture_parameter(universe: int, channel: int) -> Optional[FixtureParameter]:
