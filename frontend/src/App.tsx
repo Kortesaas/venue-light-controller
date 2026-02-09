@@ -205,7 +205,7 @@ function App() {
             </Typography>
           </Box>
           <Stack direction="row" spacing={1.5} alignItems="center">
-            {mode === "operator" && !panelLocked ? (
+            {!panelLocked ? (
               <Button
                 size="small"
                 color="inherit"
@@ -246,7 +246,7 @@ function App() {
         )}
       </Container>
 
-      {mode === "operator" && panelLocked ? (
+      {panelLocked ? (
         <Box
           sx={{
             position: "fixed",
