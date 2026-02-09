@@ -177,7 +177,7 @@ function App() {
     }
   };
 
-  const keypadKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+  const keypadKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", position: "relative" }}>
@@ -334,6 +334,15 @@ function App() {
                 disabled={isUnlocking}
               >
                 Clear
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{ py: 1.75, fontSize: 24, fontWeight: 700 }}
+                onClick={() => handlePinDigit("0")}
+                disabled={isUnlocking}
+              >
+                0
               </Button>
               <Button
                 variant="contained"
