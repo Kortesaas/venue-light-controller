@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     lock_on_startup: bool = True
     operator_pin_hash: str = hash_pin("0815")
     runtime_settings_path: str = "./settings.runtime.json"
+    fixture_plan_path: str = "./fixture_plan.active.json"
 
     # Ordner für Szenen (kannst du später nutzen)
     scenes_path: str = "./scenes"

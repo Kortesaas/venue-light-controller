@@ -11,6 +11,13 @@ from pydantic import BaseModel
 
 from .artnet_core import record_snapshots, start_stream, stop_stream
 from .config import hash_pin, persist_runtime_settings, settings
+from .fixture_plan import (
+    activate_fixture_plan,
+    clear_fixture_plan,
+    get_fixture_plan_summary,
+    lookup_fixture_parameter,
+    preview_fixture_plan,
+)
 from .scenes import (
     Scene,
     SceneStyle,
@@ -202,6 +209,11 @@ class PinChangeRequest(BaseModel):
     confirm_pin: str
 
 
+class FixturePlanImportRequest(BaseModel):
+    xml: str
+    filename: Optional[str] = None
+
+
 def _get_settings_payload() -> SettingsResponse:
     return SettingsResponse(
         local_ip=settings.local_ip,
@@ -240,6 +252,55 @@ def api_change_pin(request: PinChangeRequest):
     settings.operator_pin_hash = hash_pin(new_pin)
     persist_runtime_settings()
     return {"status": "updated"}
+
+
+@router.get("/fixture-plan")
+def api_get_fixture_plan():
+    return get_fixture_plan_summary().model_dump()
+
+
+@router.post("/fixture-plan/preview")
+def api_preview_fixture_plan(request: FixturePlanImportRequest):
+    try:
+        summary = preview_fixture_plan(request.xml, source_filename=request.filename)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return summary.model_dump()
+
+
+@router.post("/fixture-plan/activate")
+def api_activate_fixture_plan(request: FixturePlanImportRequest):
+    try:
+        summary = activate_fixture_plan(request.xml, source_filename=request.filename)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    payload = summary.model_dump()
+    _broadcast_event("fixture-plan", payload)
+    return payload
+
+
+@router.delete("/fixture-plan")
+def api_clear_fixture_plan():
+    try:
+        clear_fixture_plan()
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    payload = get_fixture_plan_summary().model_dump()
+    _broadcast_event("fixture-plan", payload)
+    return {"status": "cleared"}
+
+
+@router.get("/fixture-plan/lookup")
+def api_lookup_fixture_parameter(universe: int, channel: int):
+    if universe < 1:
+        raise HTTPException(status_code=400, detail="universe must be >= 1")
+    if channel < 1 or channel > 512:
+        raise HTTPException(status_code=400, detail="channel must be in range 1..512")
+
+    entry = lookup_fixture_parameter(universe - 1, channel)
+    if entry is None:
+        return {"matched": False}
+    return {"matched": True, "parameter": entry.model_dump()}
 
 
 @router.get("/scenes", response_model=list[Scene])

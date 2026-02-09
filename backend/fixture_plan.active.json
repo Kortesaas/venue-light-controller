@@ -1,0 +1,408 @@
+{
+  "version": 1,
+  "imported_at": "2026-02-09T02:13:13.034372+00:00",
+  "source_filename": "ParameterListExport.xml",
+  "fixture_count": 2,
+  "parameter_count": 24,
+  "universes": [
+    0
+  ],
+  "fixtures": [
+    {
+      "fixture": "DS100RGD 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 1,
+          "name": "Dimmer",
+          "fixture": "DS100RGD 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 2,
+          "name": "LASERPATTERN",
+          "fixture": "DS100RGD 1",
+          "role": "other",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 3,
+          "name": "LASERPATTERNMACRORATE",
+          "fixture": "DS100RGD 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 4,
+          "name": "SCALEX",
+          "fixture": "DS100RGD 1",
+          "role": "other",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 5,
+          "name": "MACROS",
+          "fixture": "DS100RGD 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 6,
+          "name": "POSITIONZ",
+          "fixture": "DS100RGD 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 7,
+          "name": "POSITIONX",
+          "fixture": "DS100RGD 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 9,
+          "name": "POSITIONY",
+          "fixture": "DS100RGD 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 11,
+          "name": "COLORMIXER",
+          "fixture": "DS100RGD 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 12,
+          "name": "COLORMIXER2",
+          "fixture": "DS100RGD 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 13,
+          "name": "Shutter1",
+          "fixture": "DS100RGD 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 14,
+          "name": "MODE",
+          "fixture": "DS100RGD 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 15,
+          "name": "SCANRATE",
+          "fixture": "DS100RGD 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 16,
+          "name": "MACROS2",
+          "fixture": "DS100RGD 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 17,
+          "name": "INTENSITYADJUST",
+          "fixture": "DS100RGD 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 18,
+          "name": "EFFECTMACROS",
+          "fixture": "DS100RGD 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 19,
+          "name": "EFFECTMACROS2",
+          "fixture": "DS100RGD 1",
+          "role": "control",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "TWa60W1 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 35,
+          "name": "Dimmer",
+          "fixture": "TWa60W1 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 36,
+          "name": "Shutter1",
+          "fixture": "TWa60W1 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 37,
+          "name": "StrobeDuration",
+          "fixture": "TWa60W1 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 38,
+          "name": "ColorRGB_R",
+          "fixture": "TWa60W1 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 39,
+          "name": "ColorRGB_G",
+          "fixture": "TWa60W1 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 40,
+          "name": "ColorRGB_B",
+          "fixture": "TWa60W1 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 41,
+          "name": "ColorRGB_W",
+          "fixture": "TWa60W1 1",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    }
+  ],
+  "address_map": {
+    "0:1": {
+      "universe": 0,
+      "channel": 1,
+      "name": "Dimmer",
+      "fixture": "DS100RGD 1",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:2": {
+      "universe": 0,
+      "channel": 2,
+      "name": "LASERPATTERN",
+      "fixture": "DS100RGD 1",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "0:3": {
+      "universe": 0,
+      "channel": 3,
+      "name": "LASERPATTERNMACRORATE",
+      "fixture": "DS100RGD 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:4": {
+      "universe": 0,
+      "channel": 4,
+      "name": "SCALEX",
+      "fixture": "DS100RGD 1",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "0:5": {
+      "universe": 0,
+      "channel": 5,
+      "name": "MACROS",
+      "fixture": "DS100RGD 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:6": {
+      "universe": 0,
+      "channel": 6,
+      "name": "POSITIONZ",
+      "fixture": "DS100RGD 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:7": {
+      "universe": 0,
+      "channel": 7,
+      "name": "POSITIONX",
+      "fixture": "DS100RGD 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:9": {
+      "universe": 0,
+      "channel": 9,
+      "name": "POSITIONY",
+      "fixture": "DS100RGD 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:11": {
+      "universe": 0,
+      "channel": 11,
+      "name": "COLORMIXER",
+      "fixture": "DS100RGD 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:12": {
+      "universe": 0,
+      "channel": 12,
+      "name": "COLORMIXER2",
+      "fixture": "DS100RGD 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:13": {
+      "universe": 0,
+      "channel": 13,
+      "name": "Shutter1",
+      "fixture": "DS100RGD 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:14": {
+      "universe": 0,
+      "channel": 14,
+      "name": "MODE",
+      "fixture": "DS100RGD 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:15": {
+      "universe": 0,
+      "channel": 15,
+      "name": "SCANRATE",
+      "fixture": "DS100RGD 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:16": {
+      "universe": 0,
+      "channel": 16,
+      "name": "MACROS2",
+      "fixture": "DS100RGD 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:17": {
+      "universe": 0,
+      "channel": 17,
+      "name": "INTENSITYADJUST",
+      "fixture": "DS100RGD 1",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:18": {
+      "universe": 0,
+      "channel": 18,
+      "name": "EFFECTMACROS",
+      "fixture": "DS100RGD 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:19": {
+      "universe": 0,
+      "channel": 19,
+      "name": "EFFECTMACROS2",
+      "fixture": "DS100RGD 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:35": {
+      "universe": 0,
+      "channel": 35,
+      "name": "Dimmer",
+      "fixture": "TWa60W1 1",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:38": {
+      "universe": 0,
+      "channel": 38,
+      "name": "ColorRGB_R",
+      "fixture": "TWa60W1 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:39": {
+      "universe": 0,
+      "channel": 39,
+      "name": "ColorRGB_G",
+      "fixture": "TWa60W1 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:40": {
+      "universe": 0,
+      "channel": 40,
+      "name": "ColorRGB_B",
+      "fixture": "TWa60W1 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:41": {
+      "universe": 0,
+      "channel": 41,
+      "name": "ColorRGB_W",
+      "fixture": "TWa60W1 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:36": {
+      "universe": 0,
+      "channel": 36,
+      "name": "Shutter1",
+      "fixture": "TWa60W1 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:37": {
+      "universe": 0,
+      "channel": 37,
+      "name": "StrobeDuration",
+      "fixture": "TWa60W1 1",
+      "role": "beam",
+      "ma3_universe": 1
+    }
+  }
+}

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import {
   Alert,
   Box,
@@ -84,6 +84,25 @@ type SettingsState = {
   universe_count: number;
 };
 
+type FixturePlanParameterExample = {
+  universe: number;
+  channel: number;
+  name: string;
+  fixture: string;
+  role: string;
+  ma3_universe: number;
+};
+
+type FixturePlanSummary = {
+  active: boolean;
+  source_filename?: string | null;
+  imported_at?: string | null;
+  fixture_count: number;
+  parameter_count: number;
+  universes: number[];
+  example_parameters: FixturePlanParameterExample[];
+};
+
 const FPS_OPTIONS = [15, 24, 30, 40, 44, 60];
 const IPV4_REGEX =
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
@@ -119,6 +138,19 @@ export default function AdminPanel({
   const [isApplyingPin, setIsApplyingPin] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState<Scene | null>(null);
   const [rerecordCandidate, setRerecordCandidate] = useState<Scene | null>(null);
+  const [fixturePlanStatus, setFixturePlanStatus] = useState<FixturePlanSummary>({
+    active: false,
+    fixture_count: 0,
+    parameter_count: 0,
+    universes: [],
+    example_parameters: [],
+  });
+  const [fixturePlanFile, setFixturePlanFile] = useState<File | null>(null);
+  const [fixturePlanXml, setFixturePlanXml] = useState<string | null>(null);
+  const [fixturePlanPreview, setFixturePlanPreview] = useState<FixturePlanSummary | null>(null);
+  const [isPreviewingFixturePlan, setIsPreviewingFixturePlan] = useState(false);
+  const [isActivatingFixturePlan, setIsActivatingFixturePlan] = useState(false);
+  const [isRemovingFixturePlan, setIsRemovingFixturePlan] = useState(false);
 
   const loadScenes = async () => {
     setIsLoadingScenes(true);
@@ -135,6 +167,19 @@ export default function AdminPanel({
       setErrorMessage("Szenen konnten nicht geladen werden.");
     } finally {
       setIsLoadingScenes(false);
+    }
+  };
+
+  const loadFixturePlanStatus = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/fixture-plan`);
+      if (!res.ok) {
+        throw new Error("Failed to load fixture plan status");
+      }
+      const data = (await res.json()) as FixturePlanSummary;
+      setFixturePlanStatus(data);
+    } catch {
+      setErrorMessage("Fixture-Plan Status konnte nicht geladen werden.");
     }
   };
 
@@ -159,6 +204,7 @@ export default function AdminPanel({
       }
     };
     void loadSettings();
+    void loadFixturePlanStatus();
   }, []);
 
   const handlePlay = async (sceneId: string) => {
@@ -490,6 +536,126 @@ export default function AdminPanel({
     }
   };
 
+  const readApiErrorDetail = async (res: Response, fallback: string) => {
+    try {
+      const payload = (await res.json()) as { detail?: string };
+      if (payload.detail && payload.detail.trim()) {
+        return payload.detail;
+      }
+    } catch {
+      // ignore
+    }
+    return fallback;
+  };
+
+  const handleFixturePlanFileSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    setFixturePlanFile(file);
+    setFixturePlanXml(null);
+    setFixturePlanPreview(null);
+  };
+
+  const handlePreviewFixturePlan = async () => {
+    if (!fixturePlanFile) {
+      return;
+    }
+
+    setIsPreviewingFixturePlan(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+
+    try {
+      const xml = await fixturePlanFile.text();
+      const res = await fetch(`${API_BASE}/api/fixture-plan/preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          xml,
+          filename: fixturePlanFile.name,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error(await readApiErrorDetail(res, "Fixture-Plan Preview fehlgeschlagen."));
+      }
+      const data = (await res.json()) as FixturePlanSummary;
+      setFixturePlanXml(xml);
+      setFixturePlanPreview(data);
+    } catch (error) {
+      setFixturePlanPreview(null);
+      setFixturePlanXml(null);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Fixture-Plan Preview fehlgeschlagen."
+      );
+    } finally {
+      setIsPreviewingFixturePlan(false);
+    }
+  };
+
+  const handleActivateFixturePlan = async () => {
+    if (!fixturePlanXml || !fixturePlanFile) {
+      return;
+    }
+
+    setIsActivatingFixturePlan(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/fixture-plan/activate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          xml: fixturePlanXml,
+          filename: fixturePlanFile.name,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error(await readApiErrorDetail(res, "Fixture-Plan Aktivierung fehlgeschlagen."));
+      }
+      const data = (await res.json()) as FixturePlanSummary;
+      setFixturePlanStatus(data);
+      setFixturePlanPreview(null);
+      setActionMessage("Fixture-Plan aktiviert.");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Fixture-Plan Aktivierung fehlgeschlagen."
+      );
+    } finally {
+      setIsActivatingFixturePlan(false);
+    }
+  };
+
+  const handleRemoveFixturePlan = async () => {
+    setIsRemovingFixturePlan(true);
+    setErrorMessage(null);
+    setActionMessage(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/fixture-plan`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error(await readApiErrorDetail(res, "Fixture-Plan konnte nicht entfernt werden."));
+      }
+      setFixturePlanPreview(null);
+      setFixturePlanXml(null);
+      setFixturePlanStatus({
+        active: false,
+        fixture_count: 0,
+        parameter_count: 0,
+        universes: [],
+        example_parameters: [],
+      });
+      setActionMessage("Fixture-Plan entfernt.");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Fixture-Plan konnte nicht entfernt werden."
+      );
+    } finally {
+      setIsRemovingFixturePlan(false);
+    }
+  };
+
   const previewCreatedAt = new Date().toLocaleDateString();
 
   const renderScenePreview = (name: string, description: string, style: SceneStyleMeta) => (
@@ -818,6 +984,94 @@ export default function AdminPanel({
 
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+              MA3 Fixture Plan (Optional)
+            </Typography>
+
+            <Stack spacing={1.25}>
+              {fixturePlanStatus.active ? (
+                <Alert severity="success">
+                  {`Aktiv: ${fixturePlanStatus.source_filename ?? "Fixture-Plan"}`}
+                </Alert>
+              ) : (
+                <Alert severity="info">
+                  Kein Fixture-Plan aktiv. System nutzt rohe Universe/Channel Daten.
+                </Alert>
+              )}
+
+              {fixturePlanStatus.active ? (
+                <Typography variant="body2" color="text.secondary">
+                  {`Fixtures: ${fixturePlanStatus.fixture_count} • Parameter: ${fixturePlanStatus.parameter_count} • Universes: ${fixturePlanStatus.universes.join(", ") || "-"}`}
+                </Typography>
+              ) : null}
+
+              <Button variant="outlined" component="label" disabled={isPreviewingFixturePlan}>
+                XML Datei wählen
+                <input
+                  hidden
+                  type="file"
+                  accept=".xml,text/xml,application/xml"
+                  onChange={handleFixturePlanFileSelected}
+                />
+              </Button>
+              <Typography variant="caption" color="text.secondary">
+                {fixturePlanFile ? fixturePlanFile.name : "Keine Datei ausgewählt"}
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={handlePreviewFixturePlan}
+                disabled={!fixturePlanFile || isPreviewingFixturePlan}
+              >
+                {isPreviewingFixturePlan ? "Preview..." : "Preview Import"}
+              </Button>
+
+              {fixturePlanPreview ? (
+                <Box sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 1.25 }}>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Import Summary
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {`Fixtures: ${fixturePlanPreview.fixture_count} • Parameter: ${fixturePlanPreview.parameter_count}`}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {`Universes: ${fixturePlanPreview.universes.join(", ") || "-"}`}
+                  </Typography>
+
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                    Beispiel-Parameter
+                  </Typography>
+                  <Stack spacing={0.3} sx={{ mt: 0.5 }}>
+                    {fixturePlanPreview.example_parameters.slice(0, 6).map((example, index) => (
+                      <Typography key={`${example.fixture}-${example.channel}-${index}`} variant="caption">
+                        {`U${example.ma3_universe} Ch${example.channel} • ${example.fixture} • ${example.name} (${example.role})`}
+                      </Typography>
+                    ))}
+                  </Stack>
+
+                  <Button
+                    variant="contained"
+                    color="success"
+                    sx={{ mt: 1.25 }}
+                    onClick={handleActivateFixturePlan}
+                    disabled={isActivatingFixturePlan || !fixturePlanXml}
+                  >
+                    {isActivatingFixturePlan ? "Aktiviere..." : "Activate Plan"}
+                  </Button>
+                </Box>
+              ) : null}
+
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleRemoveFixturePlan}
+                disabled={!fixturePlanStatus.active || isRemovingFixturePlan}
+              >
+                {isRemovingFixturePlan ? "Entferne..." : "Remove Active Plan"}
+              </Button>
+            </Stack>
+          </Paper>
+
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={700} gutterBottom>
               System Settings
             </Typography>
             {isLoadingSettings ? (
@@ -1009,4 +1263,5 @@ export default function AdminPanel({
     </Stack>
   );
 }
+
 
