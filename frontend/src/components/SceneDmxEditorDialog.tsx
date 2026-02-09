@@ -920,6 +920,7 @@ export default function SceneDmxEditorDialog({
                                     borderColor: "divider",
                                     overflow: "hidden",
                                     touchAction: "none",
+                                    backgroundClip: "padding-box",
                                     backgroundColor: `hsl(${currentHsv.h}, 100%, 50%)`,
                                     backgroundImage:
                                       "linear-gradient(to right, #ffffff, rgba(255,255,255,0)), linear-gradient(to top, #000000, rgba(0,0,0,0))",
