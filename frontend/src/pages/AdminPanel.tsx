@@ -17,7 +17,6 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemSecondaryAction,
   ListItemText,
   MenuItem,
   Paper,
@@ -798,8 +797,16 @@ export default function AdminPanel({
             <List>
               {scenes.map((scene, index) => (
                 <Box key={scene.id}>
-                  <ListItem disablePadding>
-                    <ListItemButton>
+                  <ListItem
+                    disablePadding
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      py: 0.25,
+                    }}
+                  >
+                    <ListItemButton sx={{ flex: 1, minWidth: 0, py: 1, pr: 1 }}>
                       {(() => {
                         const createdText = scene.created_at
                           ? new Date(scene.created_at).toLocaleDateString()
@@ -816,8 +823,29 @@ export default function AdminPanel({
                         );
                       })()}
                     </ListItemButton>
-                    <ListItemSecondaryAction>
-                      <Stack direction="row" spacing={0.5}>
+                    <Box
+                      sx={{
+                        width: { xs: 166, sm: "fit-content" },
+                        ml: "auto",
+                        px: { xs: 0.25, sm: 0 },
+                        pr: { sm: 1 },
+                        flexShrink: 0,
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "repeat(4, 38px)",
+                          sm: "repeat(7, minmax(0, auto))",
+                        },
+                        justifyContent: "end",
+                        justifyItems: "center",
+                        columnGap: 0.5,
+                        rowGap: 0.5,
+                        "& .MuiIconButton-root": {
+                          width: { xs: 34, sm: 40 },
+                          height: { xs: 34, sm: 40 },
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: "contents" }}>
                         <IconButton
                           edge="end"
                           aria-label="nach oben"
@@ -882,8 +910,8 @@ export default function AdminPanel({
                         >
                           <DeleteOutlineRoundedIcon color="error" />
                         </IconButton>
-                      </Stack>
-                    </ListItemSecondaryAction>
+                      </Box>
+                    </Box>
                   </ListItem>
                   {renameSceneId === scene.id && (
                     <Box sx={{ px: 2, pb: 1.5 }}>

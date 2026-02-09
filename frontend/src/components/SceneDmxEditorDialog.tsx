@@ -512,7 +512,12 @@ export default function SceneDmxEditorDialog({
                       }
                       sx={{
                         py: 1,
-                        "& .MuiSlider-thumb": { width: 26, height: 26 },
+                        "& .MuiSlider-thumb": {
+                          width: 0,
+                          height: 0,
+                          opacity: 0,
+                          boxShadow: "none",
+                        },
                       }}
                     />
                   </Stack>
@@ -561,7 +566,12 @@ export default function SceneDmxEditorDialog({
                           }
                           sx={{
                             py: 1,
-                            "& .MuiSlider-thumb": { width: 26, height: 26 },
+                            "& .MuiSlider-thumb": {
+                              width: 0,
+                              height: 0,
+                              opacity: 0,
+                              boxShadow: "none",
+                            },
                           }}
                         />
                       </Box>
