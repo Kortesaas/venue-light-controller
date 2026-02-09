@@ -658,7 +658,7 @@ export default function SceneDmxEditorDialog({
     }
     const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
     const y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
-    const pan = (x / rect.width) * 255;
+    const pan = ((rect.width - x) / rect.width) * 255;
     const tilt = ((rect.height - y) / rect.height) * 255;
     setFixturePosition(channels, pan, tilt);
   };
@@ -1223,7 +1223,7 @@ export default function SceneDmxEditorDialog({
                                   <Box
                                     sx={{
                                       position: "absolute",
-                                      left: `${(currentPan / 255) * 100}%`,
+                                      left: `${100 - (currentPan / 255) * 100}%`,
                                       top: `${100 - (currentTilt / 255) * 100}%`,
                                       width: 18,
                                       height: 18,
