@@ -2,6 +2,7 @@ import asyncio
 import json
 import re
 import threading
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -12,6 +13,7 @@ from .artnet_core import record_snapshots, start_stream, stop_stream
 from .config import hash_pin, persist_runtime_settings, settings
 from .scenes import (
     Scene,
+    SceneStyle,
     delete_scene,
     get_scene,
     list_scenes,
@@ -150,6 +152,7 @@ class SceneRecordRequest(BaseModel):
     name: str
     description: str = ""
     duration: float = 1.0
+    style: Optional[SceneStyle] = None
 
 
 class SceneRerecordRequest(BaseModel):
@@ -159,6 +162,7 @@ class SceneRerecordRequest(BaseModel):
 class SceneUpdateRequest(BaseModel):
     name: str
     description: str = ""
+    style: Optional[SceneStyle] = None
 
 
 class SceneReorderRequest(BaseModel):
@@ -340,11 +344,17 @@ def api_update_scene(scene_id: str, request: SceneUpdateRequest):
     if _scene_name_exists(name, ignore_id=scene_id):
         raise HTTPException(status_code=409, detail="Scene name already exists")
 
+    style = scene.style
+    if "style" in request.model_fields_set:
+        style = request.style
+
     updated = Scene(
         id=scene.id,
         name=name,
         description=request.description.strip(),
         universes=scene.universes,
+        created_at=scene.created_at,
+        style=style,
     )
     save_scene(updated)
     _broadcast_event("scenes", {"action": "updated", "scene_id": scene.id})
@@ -440,6 +450,8 @@ def api_record_scene(request: SceneRecordRequest):
         name=name,
         description=request.description.strip(),
         universes=snapshot,
+        created_at=datetime.now(timezone.utc).isoformat(),
+        style=request.style,
     )
     save_scene(scene)
     _broadcast_event("scenes", {"action": "created", "scene_id": scene.id})
@@ -462,6 +474,8 @@ def api_rerecord_scene(
         name=scene.name,
         description=scene.description,
         universes=snapshot,
+        created_at=scene.created_at,
+        style=scene.style,
     )
     save_scene(updated)
     _broadcast_event("scenes", {"action": "updated", "scene_id": scene.id})

@@ -3,6 +3,8 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -30,6 +32,16 @@ import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
+import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
+import {
+  getSceneCardSx,
+  getSceneIcon,
+  normalizeSceneStyleForPayload,
+  SCENE_COLOR_OPTIONS,
+  SCENE_ICON_OPTIONS,
+  SCENE_STYLE_LABELS,
+  type SceneStyleMeta,
+} from "../sceneStyle";
 
 const API_BASE = "";
 
@@ -38,16 +50,23 @@ type Scene = {
   name: string;
   description?: string;
   universes: Record<string, number[]>;
+  created_at?: string;
+  style?: SceneStyleMeta | null;
 };
 
 type SceneFormState = {
   name: string;
   description: string;
+  style: SceneStyleMeta;
 };
 
 const initialFormState: SceneFormState = {
   name: "",
   description: "",
+  style: {
+    color: "default",
+    icon: "none",
+  },
 };
 
 type AdminPanelProps = {
@@ -80,6 +99,7 @@ export default function AdminPanel({
   const [renameSceneId, setRenameSceneId] = useState<string | null>(null);
   const [renameName, setRenameName] = useState("");
   const [renameDescription, setRenameDescription] = useState("");
+  const [renameStyle, setRenameStyle] = useState<SceneStyleMeta>(initialFormState.style);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [form, setForm] = useState<SceneFormState>(initialFormState);
@@ -176,6 +196,7 @@ export default function AdminPanel({
         setRenameSceneId(null);
         setRenameName("");
         setRenameDescription("");
+        setRenameStyle(initialFormState.style);
       }
       setActionMessage("Szene gelöscht.");
       await loadScenes();
@@ -261,6 +282,7 @@ export default function AdminPanel({
         body: JSON.stringify({
           name: renameName.trim(),
           description: renameDescription.trim(),
+          style: normalizeSceneStyleForPayload(renameStyle),
         }),
       });
       if (!res.ok) {
@@ -270,6 +292,7 @@ export default function AdminPanel({
       setRenameSceneId(null);
       setRenameName("");
       setRenameDescription("");
+      setRenameStyle(initialFormState.style);
       setActionMessage("Szene aktualisiert.");
       await loadScenes();
     } catch {
@@ -284,6 +307,29 @@ export default function AdminPanel({
     value: SceneFormState[K]
   ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleFormStyleChange = <K extends keyof SceneStyleMeta>(
+    key: K,
+    value: SceneStyleMeta[K]
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      style: {
+        ...prev.style,
+        [key]: value,
+      },
+    }));
+  };
+
+  const handleRenameStyleChange = <K extends keyof SceneStyleMeta>(
+    key: K,
+    value: SceneStyleMeta[K]
+  ) => {
+    setRenameStyle((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   const canRecord = useMemo(
@@ -306,6 +352,7 @@ export default function AdminPanel({
       const payload = {
         name: form.name.trim(),
         description: form.description.trim(),
+        style: normalizeSceneStyleForPayload(form.style),
       };
 
       const res = await fetch(`${API_BASE}/api/scenes/record`, {
@@ -442,6 +489,77 @@ export default function AdminPanel({
     }
   };
 
+  const previewCreatedAt = new Date().toLocaleDateString();
+
+  const renderScenePreview = (name: string, description: string, style: SceneStyleMeta) => (
+    <Card variant="outlined" sx={getSceneCardSx(style, false)}>
+      <CardContent sx={{ py: 1.25 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+          <Box minWidth={0}>
+            <Typography variant="subtitle1" fontWeight={700} noWrap>
+              {name.trim() || "Scene Preview"}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 0.5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+              }}
+            >
+              {description.trim() || "Optional description"}
+            </Typography>
+          </Box>
+          {style.icon && style.icon !== "none" ? (
+            <Box color="text.secondary">{getSceneIcon(style.icon)}</Box>
+          ) : null}
+        </Stack>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: "block" }}>
+          {`Created ${previewCreatedAt}`}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+
+  const renderIconGrid = (
+    value: SceneStyleMeta["icon"] | undefined,
+    onChange: (next: SceneStyleMeta["icon"]) => void
+  ) => (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+        gap: 1,
+      }}
+    >
+      {SCENE_ICON_OPTIONS.map((option) => {
+        const selected = (value ?? "none") === option;
+        return (
+          <Button
+            key={option}
+            variant={selected ? "contained" : "outlined"}
+            color={selected ? "primary" : "inherit"}
+            onClick={() => onChange(option)}
+            aria-label={SCENE_STYLE_LABELS.icon[option]}
+            sx={{
+              minHeight: 48,
+              px: 0,
+              borderColor: selected ? "primary.main" : "divider",
+            }}
+          >
+            <Box sx={{ fontSize: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {option === "none" ? <BlockRoundedIcon fontSize="inherit" /> : getSceneIcon(option)}
+            </Box>
+          </Button>
+        );
+      })}
+    </Box>
+  );
+
   return (
     <Stack spacing={2.5}>
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5}>
@@ -486,12 +604,21 @@ export default function AdminPanel({
                 <Box key={scene.id}>
                   <ListItem disablePadding>
                     <ListItemButton>
+                      {(() => {
+                        const createdText = scene.created_at
+                          ? new Date(scene.created_at).toLocaleDateString()
+                          : null;
+                        const descriptionText = scene.description?.trim() ? scene.description : "-";
+                        const secondary = createdText
+                          ? `${descriptionText} • Created ${createdText}`
+                          : descriptionText;
+                        return (
                       <ListItemText
                         primary={scene.name}
-                        secondary={
-                          scene.description?.trim() ? scene.description : "-"
-                        }
+                        secondary={secondary}
                       />
+                        );
+                      })()}
                     </ListItemButton>
                     <ListItemSecondaryAction>
                       <Stack direction="row" spacing={0.5}>
@@ -518,6 +645,10 @@ export default function AdminPanel({
                             setRenameSceneId(scene.id);
                             setRenameName(scene.name);
                             setRenameDescription(scene.description ?? "");
+                            setRenameStyle({
+                              color: scene.style?.color ?? "default",
+                              icon: scene.style?.icon ?? "none",
+                            });
                           }}
                           disabled={isPerformingAction}
                         >
@@ -567,12 +698,40 @@ export default function AdminPanel({
                           value={renameDescription}
                           onChange={(event) => setRenameDescription(event.target.value)}
                         />
+                        <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                          <TextField
+                            select
+                            size="small"
+                            fullWidth
+                            label="Color"
+                            value={renameStyle.color ?? "default"}
+                            onChange={(event) =>
+                              handleRenameStyleChange(
+                                "color",
+                                event.target.value as SceneStyleMeta["color"]
+                              )
+                            }
+                          >
+                            {SCENE_COLOR_OPTIONS.map((option) => (
+                              <MenuItem key={option} value={option}>
+                                {SCENE_STYLE_LABELS.color[option]}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary">
+                          Icon
+                        </Typography>
+                        {renderIconGrid(renameStyle.icon, (next) =>
+                          handleRenameStyleChange("icon", next)
+                        )}
+                        {renderScenePreview(renameName, renameDescription, renameStyle)}
                         <Button
                           variant="contained"
                           onClick={() => void handleSaveRename(scene.id)}
                           disabled={isPerformingAction || renameName.trim().length === 0}
                         >
-                          Rename
+                          Update Scene
                         </Button>
                       </Stack>
                     </Box>
@@ -604,6 +763,31 @@ export default function AdminPanel({
                 size="small"
                 fullWidth
               />
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                <TextField
+                  select
+                  size="small"
+                  fullWidth
+                  label="Color"
+                  value={form.style.color ?? "default"}
+                  onChange={(event) =>
+                    handleFormStyleChange("color", event.target.value as SceneStyleMeta["color"])
+                  }
+                >
+                  {SCENE_COLOR_OPTIONS.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {SCENE_STYLE_LABELS.color[option]}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
+              <Typography variant="caption" color="text.secondary">
+                Icon
+              </Typography>
+              {renderIconGrid(form.style.icon, (next) =>
+                handleFormStyleChange("icon", next)
+              )}
+              {renderScenePreview(form.name, form.description, form.style)}
               <Button variant="contained" onClick={handleRecord} disabled={!canRecord}>
                 {isRecording ? "Aufnahme läuft..." : "Szene aufnehmen"}
               </Button>

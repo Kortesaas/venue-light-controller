@@ -1,7 +1,8 @@
-﻿import json
+import json
 import logging
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -15,17 +16,67 @@ DMX_MAX = 255
 ORDER_FILE = "_order.json"
 
 
+class SceneStyle(BaseModel):
+    color: Optional[
+        Literal[
+            "default",
+            "cyan",
+            "blue",
+            "teal",
+            "green",
+            "violet",
+            "amber",
+            "rose",
+            "red",
+        ]
+    ] = None
+    variant: Optional[Literal["default", "solid", "soft", "outline"]] = None
+    icon: Optional[
+        Literal[
+            "none",
+            "beam",
+            "wash",
+            "strobe",
+            "movement",
+            "color",
+            "fx",
+            "speaker",
+            "party",
+            "chill",
+            "dinner",
+            "ceremony",
+            "show",
+            "technical",
+        ]
+    ] = None
+    emphasis: Optional[Literal["normal", "primary", "warning"]] = None
+
+
 class Scene(BaseModel):
     id: str
     name: str
     description: str = ""
     universes: Dict[int, List[int]]
+    created_at: Optional[str] = None
+    style: Optional[SceneStyle] = None
 
     @field_validator("universes")
     @classmethod
     def _validate_universes(cls, universes: Dict[int, List[int]]) -> Dict[int, List[int]]:
         _validate_universes(universes)
         return universes
+
+    @field_validator("created_at")
+    @classmethod
+    def _validate_created_at(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        normalized = value.replace("Z", "+00:00")
+        try:
+            datetime.fromisoformat(normalized)
+        except ValueError as exc:
+            raise ValueError("created_at must be an ISO-8601 timestamp") from exc
+        return value
 
 
 def _scenes_dir() -> Path:

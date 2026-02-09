@@ -15,10 +15,16 @@ import {
   DialogTitle,
   Paper,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
+import {
+  getSceneCardSx,
+  getSceneIcon,
+  type SceneStyleMeta,
+} from "../sceneStyle";
 
 const API_BASE = "";
 
@@ -33,6 +39,8 @@ type Scene = {
   name: string;
   description?: string;
   universes: Record<string, number[]>;
+  created_at?: string;
+  style?: SceneStyleMeta | null;
 };
 
 type OperatorDashboardProps = {
@@ -164,6 +172,17 @@ export default function OperatorDashboard({
     return scenes.find((scene) => scene.id === activeSceneId)?.name ?? activeSceneId;
   }, [activeSceneId, scenes]);
 
+  const formatCreatedAt = (value?: string) => {
+    if (!value) {
+      return null;
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    return date.toLocaleString();
+  };
+
   return (
     <Stack spacing={2.5}>
       <Paper variant="outlined" sx={{ p: 2 }}>
@@ -205,15 +224,15 @@ export default function OperatorDashboard({
           {scenes.map((scene) => {
             const isActive = scene.id === activeSceneId;
             const isPending = pendingSceneId === scene.id;
+            const createdAtText = formatCreatedAt(scene.created_at);
+            const createdAtShort = scene.created_at
+              ? new Date(scene.created_at).toLocaleDateString()
+              : null;
             return (
               <Card
                 key={scene.id}
                 variant="outlined"
-                sx={{
-                  borderColor: isActive ? "primary.main" : "divider",
-                  borderWidth: isActive ? 2 : 1,
-                  height: "100%",
-                }}
+                sx={getSceneCardSx(scene.style ?? undefined, isActive)}
               >
                 <CardActionArea
                   onClick={() => handlePlayScene(scene.id)}
@@ -224,7 +243,7 @@ export default function OperatorDashboard({
                     <Stack
                       direction="row"
                       justifyContent="space-between"
-                      alignItems="flex-start"
+                      alignItems="center"
                       spacing={1}
                     >
                       <Box minWidth={0}>
@@ -248,8 +267,36 @@ export default function OperatorDashboard({
                           </Typography>
                         ) : null}
                       </Box>
-                      {isPending && <CircularProgress size={18} />}
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        {scene.style?.icon && scene.style.icon !== "none" ? (
+                          <Box
+                            color="text.secondary"
+                            sx={{
+                              fontSize: 30,
+                              width: 32,
+                              height: 32,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {getSceneIcon(scene.style.icon)}
+                          </Box>
+                        ) : null}
+                        {isPending && <CircularProgress size={18} />}
+                      </Stack>
                     </Stack>
+                    {createdAtText && createdAtShort ? (
+                      <Tooltip title={`Created: ${createdAtText}`}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block", mt: 0.75 }}
+                        >
+                          {`Created ${createdAtShort}`}
+                        </Typography>
+                      </Tooltip>
+                    ) : null}
                   </CardContent>
                 </CardActionArea>
               </Card>
