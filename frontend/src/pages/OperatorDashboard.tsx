@@ -13,15 +13,21 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Fab,
+  IconButton,
   Paper,
   Slider,
   Snackbar,
   Stack,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { getSceneCardSx, getSceneIcon, type SceneStyleMeta } from "../sceneStyle";
 
 const API_BASE = "";
@@ -58,6 +64,8 @@ export default function OperatorDashboard({
   controlMode,
   panelLocked,
 }: OperatorDashboardProps) {
+  const theme = useTheme();
+  const isPhone = useMediaQuery(theme.breakpoints.down("sm"));
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,8 +74,7 @@ export default function OperatorDashboard({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showBlackoutConfirm, setShowBlackoutConfirm] = useState(false);
   const [masterDimmerPercent, setMasterDimmerPercent] = useState(100);
-  const [masterDimmerMode, setMasterDimmerMode] =
-    useState<"parameter-aware" | "raw">("raw");
+  const [isMasterDimmerExpandedMobile, setIsMasterDimmerExpandedMobile] = useState(false);
   const masterDimmerTargetRef = useRef(100);
   const masterDimmerTimerRef = useRef<number | null>(null);
 
@@ -93,12 +100,6 @@ export default function OperatorDashboard({
         setMasterDimmerPercent(statusData.master_dimmer_percent);
         masterDimmerTargetRef.current = statusData.master_dimmer_percent;
       }
-      if (
-        statusData.master_dimmer_mode === "parameter-aware" ||
-        statusData.master_dimmer_mode === "raw"
-      ) {
-        setMasterDimmerMode(statusData.master_dimmer_mode);
-      }
     } catch {
       setErrorMessage("Status oder Szenen konnten nicht geladen werden.");
     } finally {
@@ -109,6 +110,29 @@ export default function OperatorDashboard({
   useEffect(() => {
     void loadData();
   }, [sceneVersion]);
+
+  useEffect(() => {
+    const source = new EventSource(`${API_BASE}/api/events`);
+    const handleStatusEvent = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data) as {
+          master_dimmer_percent?: number;
+          master_dimmer_mode?: "parameter-aware" | "raw";
+        };
+        if (typeof data.master_dimmer_percent === "number") {
+          setMasterDimmerPercent(data.master_dimmer_percent);
+          masterDimmerTargetRef.current = data.master_dimmer_percent;
+        }
+      } catch {
+        // Ignore malformed SSE payloads.
+      }
+    };
+    source.addEventListener("status", handleStatusEvent);
+    return () => {
+      source.removeEventListener("status", handleStatusEvent);
+      source.close();
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -134,7 +158,6 @@ export default function OperatorDashboard({
       };
       setMasterDimmerPercent(data.value_percent);
       masterDimmerTargetRef.current = data.value_percent;
-      setMasterDimmerMode(data.mode);
     } catch {
       setErrorMessage("Master Dimmer konnte nicht gesetzt werden.");
     }
@@ -255,8 +278,10 @@ export default function OperatorDashboard({
     return date.toLocaleString();
   };
 
+  const showMasterDimmerDock = !isPhone || isMasterDimmerExpandedMobile;
+
   return (
-    <Stack spacing={2.5}>
+    <Stack spacing={2.5} sx={{ pr: { sm: 12 } }}>
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}
@@ -269,44 +294,6 @@ export default function OperatorDashboard({
             <Chip size="small" label={`SCENES: ${scenes.length}`} />
             <Chip size="small" color="primary" label={`AKTIV: ${activeSceneName}`} />
           </Stack>
-        </Stack>
-      </Paper>
-
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Stack spacing={1.2}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="subtitle1" fontWeight={700}>
-              Master Dimmer
-            </Typography>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="h6" fontWeight={800}>
-                {`${masterDimmerPercent}%`}
-              </Typography>
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={handleMasterDimmerFull}
-                disabled={panelLocked || masterDimmerPercent === 100}
-              >
-                Full
-              </Button>
-            </Stack>
-          </Stack>
-          <Slider
-            value={masterDimmerPercent}
-            min={0}
-            max={100}
-            step={1}
-            onChange={handleMasterDimmerChange}
-            valueLabelDisplay="auto"
-            disabled={panelLocked}
-            sx={{ py: 1.4 }}
-          />
-          <Typography variant="caption" color="text.secondary">
-            {masterDimmerMode === "parameter-aware"
-              ? "Mode: Parameter-aware (only intensity channels)"
-              : "Mode: Raw fallback (all DMX channels)"}
-          </Typography>
         </Stack>
       </Paper>
 
@@ -327,6 +314,123 @@ export default function OperatorDashboard({
       {controlMode !== "panel" && (
         <Alert severity="warning">Panel gesperrt - MA aktiv</Alert>
       )}
+
+      {isPhone && !showMasterDimmerDock ? (
+        <Fab
+          color="primary"
+          onClick={() => setIsMasterDimmerExpandedMobile(true)}
+          sx={{
+            position: "fixed",
+            right: 14,
+            bottom: 162,
+            zIndex: (theme) => theme.zIndex.appBar + 2,
+          }}
+          aria-label="Master Dimmer öffnen"
+        >
+          <TuneRoundedIcon />
+        </Fab>
+      ) : null}
+
+      {showMasterDimmerDock ? (
+        <Box
+          sx={{
+            position: "fixed",
+            right: { xs: 10, sm: 16 },
+            bottom: { xs: 168, sm: 126 },
+            zIndex: (theme) => theme.zIndex.appBar + 1,
+            pointerEvents: "auto",
+          }}
+        >
+          <Paper
+            variant="outlined"
+            sx={{
+              width: { xs: 92, sm: 96 },
+              p: 1.1,
+              borderRadius: 1,
+              bgcolor: "background.paper",
+            }}
+          >
+            <Stack spacing={0.9} alignItems="center">
+              <Stack
+                direction="row"
+                spacing={0.5}
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ width: "100%" }}
+              >
+                <Typography
+                  variant="caption"
+                  fontWeight={700}
+                  sx={{ flex: 1, textAlign: "center", lineHeight: 1.15, pl: isPhone ? 1 : 0 }}
+                >
+                  Master Dimmer
+                </Typography>
+                {isPhone ? (
+                  <IconButton
+                    size="small"
+                    onClick={() => setIsMasterDimmerExpandedMobile(false)}
+                    aria-label="Master Dimmer minimieren"
+                    sx={{ p: 0.25 }}
+                  >
+                    <KeyboardArrowDownRoundedIcon fontSize="small" />
+                  </IconButton>
+                ) : null}
+              </Stack>
+              <Typography
+                variant="subtitle2"
+                fontWeight={800}
+                sx={{ mt: 0.2, mb: 1, position: "relative", zIndex: 2 }}
+              >
+                {`${masterDimmerPercent}%`}
+              </Typography>
+              <Slider
+                orientation="vertical"
+                value={masterDimmerPercent}
+                min={0}
+                max={100}
+                step={1}
+                onChange={handleMasterDimmerChange}
+                valueLabelDisplay="auto"
+                disabled={panelLocked}
+                sx={{
+                  height: { xs: 210, sm: 228 },
+                  mt: 0.4,
+                  mb: 1.5,
+                  py: 0,
+                  "& .MuiSlider-rail": {
+                    width: 24,
+                    opacity: 0.28,
+                    borderRadius: 1,
+                    top: 0,
+                    bottom: 0,
+                  },
+                  "& .MuiSlider-track": {
+                    width: 24,
+                    border: 0,
+                    borderRadius: 1,
+                  },
+                  "& .MuiSlider-thumb": {
+                    width: 16,
+                    height: 16,
+                    opacity: 0,
+                    boxShadow: "none",
+                    pointerEvents: "none",
+                  },
+                }}
+              />
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={handleMasterDimmerFull}
+                disabled={panelLocked || masterDimmerPercent === 100}
+                sx={{ minWidth: 0, width: "100%" }}
+              >
+                Full
+              </Button>
+            </Stack>
+          </Paper>
+        </Box>
+      ) : null}
 
       {isLoading ? (
         <Box display="flex" justifyContent="center" py={6}>
