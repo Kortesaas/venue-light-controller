@@ -76,6 +76,8 @@ type FixtureRow = {
 type ColorComponentKey = "r" | "g" | "b" | "w" | "amber" | "uv";
 
 type FixtureColorChannels = Partial<Record<ColorComponentKey, FixtureParameterRow>>;
+type PositionComponentKey = "pan" | "tilt";
+type FixturePositionChannels = Partial<Record<PositionComponentKey, FixtureParameterRow>>;
 
 function cloneUniverses(universes: Record<string, number[]>): Record<string, number[]> {
   const next: Record<string, number[]> = {};
@@ -199,6 +201,39 @@ function getFixtureColorChannels(parameters: FixtureParameterRow[]): FixtureColo
   return channels;
 }
 
+function detectPositionComponent(parameterName: string): PositionComponentKey | null {
+  const name = parameterName.toUpperCase();
+  if (
+    name.includes("FINE") ||
+    name.includes("SPEED") ||
+    name.includes("RATE") ||
+    name.includes("MACRO") ||
+    name.includes("PROGRAM") ||
+    name.includes("CONTROL")
+  ) {
+    return null;
+  }
+  if (name.includes("PAN") || name.includes("POSITIONX") || name.includes("POSX")) {
+    return "pan";
+  }
+  if (name.includes("TILT") || name.includes("POSITIONY") || name.includes("POSY")) {
+    return "tilt";
+  }
+  return null;
+}
+
+function getFixturePositionChannels(parameters: FixtureParameterRow[]): FixturePositionChannels {
+  const channels: FixturePositionChannels = {};
+  for (const parameter of parameters) {
+    const component = detectPositionComponent(parameter.parameter.name);
+    if (!component || channels[component]) {
+      continue;
+    }
+    channels[component] = parameter;
+  }
+  return channels;
+}
+
 async function stopLiveSessionRequest(restorePrevious: boolean): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE}/api/scene-editor/live/stop`, {
@@ -231,6 +266,7 @@ export default function SceneDmxEditorDialog({
   const [isLoadingPlan, setIsLoadingPlan] = useState(false);
   const [fixturePlan, setFixturePlan] = useState<FixturePlanDetails | null>(null);
   const [expandedColorFixture, setExpandedColorFixture] = useState<string | null>(null);
+  const [expandedPositionFixture, setExpandedPositionFixture] = useState<string | null>(null);
   const [fixtureHueMap, setFixtureHueMap] = useState<Record<string, number>>({});
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -341,6 +377,7 @@ export default function SceneDmxEditorDialog({
     setIsLiveSession(false);
     isLiveSessionRef.current = false;
     setExpandedColorFixture(null);
+    setExpandedPositionFixture(null);
     setFixtureHueMap({});
     setShowDiscardConfirm(false);
     setErrorMessage(null);
@@ -583,6 +620,47 @@ export default function SceneDmxEditorDialog({
     const saturation = (x / rect.width) * 100;
     const value = 100 - (y / rect.height) * 100;
     setFixtureHsvColor(fixtureKey, channels, hue, saturation, value);
+  };
+
+  const setFixturePosition = (
+    channels: FixturePositionChannels,
+    panValue: number,
+    tiltValue: number
+  ) => {
+    const updates: Array<{ universeKey: string; channelIndex: number; value: number }> = [];
+    if (channels.pan) {
+      updates.push({
+        universeKey: channels.pan.universeKey,
+        channelIndex: channels.pan.channelIndex,
+        value: panValue,
+      });
+    }
+    if (channels.tilt) {
+      updates.push({
+        universeKey: channels.tilt.universeKey,
+        channelIndex: channels.tilt.channelIndex,
+        value: tiltValue,
+      });
+    }
+    applyChannelUpdates(updates);
+  };
+
+  const updateFixturePositionPad = (
+    event: ReactPointerEvent<HTMLDivElement>,
+    channels: FixturePositionChannels
+  ) => {
+    if (!channels.pan || !channels.tilt) {
+      return;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+    const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+    const y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+    const pan = (x / rect.width) * 255;
+    const tilt = ((rect.height - y) / rect.height) * 255;
+    setFixturePosition(channels, pan, tilt);
   };
 
   const handleEditModeChange = async (_event: React.MouseEvent<HTMLElement>, next: EditMode | null) => {
@@ -848,14 +926,19 @@ export default function SceneDmxEditorDialog({
               >
                 {fixtureRows.map((fixture) => {
                   const channels = getFixtureColorChannels(fixture.parameters);
+                  const positionChannels = getFixturePositionChannels(fixture.parameters);
                   const hasRgb = Boolean(channels.r && channels.g && channels.b);
+                  const hasPanTilt = Boolean(positionChannels.pan && positionChannels.tilt);
                   const fixtureColorKey = `${selectedUniverse}:${fixture.fixture}`;
                   const isColorOpen = expandedColorFixture === fixtureColorKey;
+                  const isPositionOpen = expandedPositionFixture === fixtureColorKey;
                   const currentHsv = getFixtureHsv(fixtureColorKey, channels);
                   const currentHex = hasRgb
                     ? rgbToHex(channels.r?.value ?? 0, channels.g?.value ?? 0, channels.b?.value ?? 0)
                     : "#000000";
                   const presetHues = [0, 25, 45, 90, 145, 190, 230, 275, 320];
+                  const currentPan = positionChannels.pan?.value ?? 0;
+                  const currentTilt = positionChannels.tilt?.value ?? 0;
 
                   return (
                     <Paper key={fixture.fixture} variant="outlined" sx={{ p: 1.25 }}>
@@ -864,19 +947,34 @@ export default function SceneDmxEditorDialog({
                           <Typography variant="subtitle2" fontWeight={700}>
                             {fixture.fixture}
                           </Typography>
-                          {hasRgb ? (
-                            <Button
-                              size="small"
-                              variant={isColorOpen ? "contained" : "outlined"}
-                              onClick={() =>
-                                setExpandedColorFixture((prev) =>
-                                  prev === fixtureColorKey ? null : fixtureColorKey
-                                )
-                              }
-                            >
-                              {isColorOpen ? "Hide Color" : "Open Color"}
-                            </Button>
-                          ) : null}
+                          <Stack direction="row" spacing={0.6}>
+                            {hasPanTilt ? (
+                              <Button
+                                size="small"
+                                variant={isPositionOpen ? "contained" : "outlined"}
+                                onClick={() =>
+                                  setExpandedPositionFixture((prev) =>
+                                    prev === fixtureColorKey ? null : fixtureColorKey
+                                  )
+                                }
+                              >
+                                {isPositionOpen ? "Hide Position" : "Open Position"}
+                              </Button>
+                            ) : null}
+                            {hasRgb ? (
+                              <Button
+                                size="small"
+                                variant={isColorOpen ? "contained" : "outlined"}
+                                onClick={() =>
+                                  setExpandedColorFixture((prev) =>
+                                    prev === fixtureColorKey ? null : fixtureColorKey
+                                  )
+                                }
+                              >
+                                {isColorOpen ? "Hide Color" : "Open Color"}
+                              </Button>
+                            ) : null}
+                          </Stack>
                         </Stack>
 
                         {hasRgb ? (
@@ -1068,6 +1166,113 @@ export default function SceneDmxEditorDialog({
                                       />
                                     </Box>
                                   ))}
+                              </Stack>
+                            </Paper>
+                          </Collapse>
+                        ) : null}
+
+                        {hasPanTilt ? (
+                          <Collapse in={isPositionOpen}>
+                            <Paper
+                              variant="outlined"
+                              sx={{
+                                px: 1,
+                                py: 1,
+                                bgcolor: "rgba(255,255,255,0.04)",
+                                borderColor: "rgba(255,255,255,0.16)",
+                              }}
+                            >
+                              <Stack spacing={1.2}>
+                                <Stack direction="row" alignItems="center" spacing={1.1}>
+                                  <Typography variant="body2" fontWeight={700}>
+                                    Fixture Position
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary" sx={{ ml: "auto" }}>
+                                    {`Pan ${currentPan} • Tilt ${currentTilt}`}
+                                  </Typography>
+                                </Stack>
+
+                                <Box
+                                  sx={{
+                                    position: "relative",
+                                    width: "100%",
+                                    height: 170,
+                                    borderRadius: 1.1,
+                                    border: "1px solid",
+                                    borderColor: "divider",
+                                    overflow: "hidden",
+                                    touchAction: "none",
+                                    backgroundClip: "padding-box",
+                                    backgroundColor: "rgba(255,255,255,0.02)",
+                                    backgroundImage:
+                                      "linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(to top, rgba(255,255,255,0.08) 1px, transparent 1px)",
+                                    backgroundSize: "24px 24px",
+                                  }}
+                                  onPointerDown={(event) => {
+                                    event.preventDefault();
+                                    event.currentTarget.setPointerCapture(event.pointerId);
+                                    updateFixturePositionPad(event, positionChannels);
+                                  }}
+                                  onPointerMove={(event) => {
+                                    if (event.buttons === 0 && event.pointerType !== "touch") {
+                                      return;
+                                    }
+                                    updateFixturePositionPad(event, positionChannels);
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      left: `${(currentPan / 255) * 100}%`,
+                                      top: `${100 - (currentTilt / 255) * 100}%`,
+                                      width: 18,
+                                      height: 18,
+                                      borderRadius: "50%",
+                                      border: "2px solid #fff",
+                                      bgcolor: "rgba(255,255,255,0.2)",
+                                      boxShadow: "0 0 0 1px rgba(0,0,0,0.45)",
+                                      transform: "translate(-50%, -50%)",
+                                      pointerEvents: "none",
+                                    }}
+                                  />
+                                  <Box
+                                    sx={{
+                                      position: "absolute",
+                                      left: "50%",
+                                      top: "50%",
+                                      width: 8,
+                                      height: 8,
+                                      borderRadius: "50%",
+                                      bgcolor: "rgba(255,255,255,0.35)",
+                                      transform: "translate(-50%, -50%)",
+                                      pointerEvents: "none",
+                                    }}
+                                  />
+                                </Box>
+
+                                <Stack direction="row" spacing={0.8}>
+                                  <Button
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => setFixturePosition(positionChannels, 128, 128)}
+                                  >
+                                    Center
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => setFixturePosition(positionChannels, currentPan, 255)}
+                                  >
+                                    Tilt Up
+                                  </Button>
+                                  <Button
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => setFixturePosition(positionChannels, currentPan, 0)}
+                                  >
+                                    Tilt Down
+                                  </Button>
+                                </Stack>
                               </Stack>
                             </Paper>
                           </Collapse>

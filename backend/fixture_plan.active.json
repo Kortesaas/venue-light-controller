@@ -1,13 +1,107 @@
 {
   "version": 1,
-  "imported_at": "2026-02-09T02:23:17.105339+00:00",
+  "imported_at": "2026-02-09T06:02:18.069268+00:00",
   "source_filename": "ParameterListExport.xml",
-  "fixture_count": 2,
-  "parameter_count": 24,
+  "fixture_count": 4,
+  "parameter_count": 36,
   "universes": [
-    0
+    0,
+    1
   ],
   "fixtures": [
+    {
+      "fixture": "ASC20013 1",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 377,
+          "name": "Pan",
+          "fixture": "ASC20013 1",
+          "role": "position",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 379,
+          "name": "Tilt",
+          "fixture": "ASC20013 1",
+          "role": "position",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 381,
+          "name": "Dimmer",
+          "fixture": "ASC20013 1",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 382,
+          "name": "Shutter1",
+          "fixture": "ASC20013 1",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 383,
+          "name": "Color1",
+          "fixture": "ASC20013 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 384,
+          "name": "Gobo1",
+          "fixture": "ASC20013 1",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 385,
+          "name": "Gobo1Pos",
+          "fixture": "ASC20013 1",
+          "role": "position",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 386,
+          "name": "GOBO1OFFSET",
+          "fixture": "ASC20013 1",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 387,
+          "name": "EFFECTWHEEL",
+          "fixture": "ASC20013 1",
+          "role": "other",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 388,
+          "name": "Focus1",
+          "fixture": "ASC20013 1",
+          "role": "position",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 389,
+          "name": "FixtureGlobalReset",
+          "fixture": "ASC20013 1",
+          "role": "control",
+          "ma3_universe": 2
+        }
+      ]
+    },
     {
       "fixture": "DS100RGD 1",
       "parameters": [
@@ -146,6 +240,19 @@
           "fixture": "DS100RGD 1",
           "role": "control",
           "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "FOG",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 511,
+          "name": "Fog1",
+          "fixture": "FOG",
+          "role": "other",
+          "ma3_universe": 2
         }
       ]
     },
@@ -403,6 +510,102 @@
       "fixture": "TWa60W1 1",
       "role": "beam",
       "ma3_universe": 1
+    },
+    "1:381": {
+      "universe": 1,
+      "channel": 381,
+      "name": "Dimmer",
+      "fixture": "ASC20013 1",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:377": {
+      "universe": 1,
+      "channel": 377,
+      "name": "Pan",
+      "fixture": "ASC20013 1",
+      "role": "position",
+      "ma3_universe": 2
+    },
+    "1:379": {
+      "universe": 1,
+      "channel": 379,
+      "name": "Tilt",
+      "fixture": "ASC20013 1",
+      "role": "position",
+      "ma3_universe": 2
+    },
+    "1:382": {
+      "universe": 1,
+      "channel": 382,
+      "name": "Shutter1",
+      "fixture": "ASC20013 1",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:383": {
+      "universe": 1,
+      "channel": 383,
+      "name": "Color1",
+      "fixture": "ASC20013 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:384": {
+      "universe": 1,
+      "channel": 384,
+      "name": "Gobo1",
+      "fixture": "ASC20013 1",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:385": {
+      "universe": 1,
+      "channel": 385,
+      "name": "Gobo1Pos",
+      "fixture": "ASC20013 1",
+      "role": "position",
+      "ma3_universe": 2
+    },
+    "1:386": {
+      "universe": 1,
+      "channel": 386,
+      "name": "GOBO1OFFSET",
+      "fixture": "ASC20013 1",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:387": {
+      "universe": 1,
+      "channel": 387,
+      "name": "EFFECTWHEEL",
+      "fixture": "ASC20013 1",
+      "role": "other",
+      "ma3_universe": 2
+    },
+    "1:388": {
+      "universe": 1,
+      "channel": 388,
+      "name": "Focus1",
+      "fixture": "ASC20013 1",
+      "role": "position",
+      "ma3_universe": 2
+    },
+    "1:389": {
+      "universe": 1,
+      "channel": 389,
+      "name": "FixtureGlobalReset",
+      "fixture": "ASC20013 1",
+      "role": "control",
+      "ma3_universe": 2
+    },
+    "1:511": {
+      "universe": 1,
+      "channel": 511,
+      "name": "Fog1",
+      "fixture": "FOG",
+      "role": "other",
+      "ma3_universe": 2
     }
   }
 }
