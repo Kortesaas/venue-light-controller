@@ -257,7 +257,7 @@ def _stop_animated_playback() -> None:
 
 
 def _start_animated_playback(scene: Scene) -> None:
-    if scene.type != "animated" or not scene.animated_frames:
+    if scene.type != "dynamic" or not scene.animated_frames:
         return
 
     _stop_animated_playback()
@@ -859,22 +859,26 @@ def api_scene_editor_live_stop(request: SceneEditorLiveStopRequest):
     return _stop_live_editor_session(request.restore_previous)
 
 
+@router.post("/scenes/dynamic/start")
 @router.post("/scenes/animated/start")
 def api_start_animated_scene_recording():
     return _start_animated_recording_session()
 
 
+@router.post("/scenes/dynamic/stop")
 @router.post("/scenes/animated/stop")
 def api_stop_animated_scene_recording(request: Optional[AnimatedSceneStopRequest] = None):
     bpm = request.bpm if request is not None else None
     return _stop_animated_recording_session(bpm=bpm)
 
 
+@router.post("/scenes/dynamic/cancel")
 @router.post("/scenes/animated/cancel")
 def api_cancel_animated_scene_recording():
     return _cancel_animated_recording_session()
 
 
+@router.post("/scenes/dynamic/save", response_model=Scene)
 @router.post("/scenes/animated/save", response_model=Scene)
 def api_save_animated_scene(request: AnimatedSceneSaveRequest):
     global _ANIMATED_RECORDING_STATE
@@ -889,22 +893,22 @@ def api_save_animated_scene(request: AnimatedSceneSaveRequest):
         if not isinstance(state, dict) or state.get("phase") != "ready":
             raise HTTPException(
                 status_code=409,
-                detail="No recorded animated loop available. Start and stop an animated recording first.",
+                detail="No recorded dynamic loop available. Start and stop a dynamic recording first.",
             )
 
     duration_ms = int(state.get("duration_ms", 0))
     frames = state.get("animated_frames")
     if not isinstance(frames, list) or len(frames) < 2:
-        raise HTTPException(status_code=400, detail="Animated recording is too short")
+        raise HTTPException(status_code=400, detail="Dynamic recording is too short")
     if duration_ms < ANIMATED_RECORDING_MIN_DURATION_MS:
-        raise HTTPException(status_code=400, detail="Animated recording is below minimum duration")
+        raise HTTPException(status_code=400, detail="Dynamic recording is below minimum duration")
 
     first_frame = frames[0]
     scene = Scene(
         id=_build_unique_scene_id(name),
         name=name,
         description=request.description.strip(),
-        type="animated",
+        type="dynamic",
         universes=first_frame.universes,
         duration_ms=duration_ms,
         playback_mode=request.mode,
@@ -963,7 +967,7 @@ def _build_unique_scene_id(scene_name: str) -> str:
 
 
 def _build_stream_payload_from_scene(scene: Scene) -> Dict[int, bytes]:
-    if scene.type == "animated" and scene.animated_frames:
+    if scene.type == "dynamic" and scene.animated_frames:
         return {
             universe: bytes(values[:512]).ljust(512, b"\x00")
             for universe, values in scene.animated_frames[0].universes.items()
@@ -1157,7 +1161,7 @@ def _start_animated_recording_session() -> dict:
         global _ANIMATED_RECORDING_STATE
         existing = _ANIMATED_RECORDING_STATE
         if isinstance(existing, dict) and existing.get("phase") == "recording":
-            raise HTTPException(status_code=409, detail="Animated recording already in progress")
+            raise HTTPException(status_code=409, detail="Dynamic recording already in progress")
 
     with _playback_state_lock:
         restore_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
@@ -1219,7 +1223,7 @@ def _stop_animated_recording_session(bpm: Optional[float] = None) -> dict:
     with _recording_state_lock:
         state = _ANIMATED_RECORDING_STATE
     if not isinstance(state, dict):
-        raise HTTPException(status_code=409, detail="No animated recording session active")
+        raise HTTPException(status_code=409, detail="No dynamic recording session active")
 
     if state.get("phase") == "ready":
         frames = state.get("animated_frames") or []
@@ -1259,7 +1263,7 @@ def _stop_animated_recording_session(bpm: Optional[float] = None) -> dict:
         _restore_after_animated_recording(state)
         with _recording_state_lock:
             _ANIMATED_RECORDING_STATE = None
-        raise HTTPException(status_code=500, detail="Animated recording failed")
+        raise HTTPException(status_code=500, detail="Dynamic recording failed")
 
     duration_ms = int(state.get("duration_ms", 0))
     raw_duration_ms = duration_ms
@@ -1491,7 +1495,7 @@ def api_play_scene(scene_id: str):
     _stop_animated_playback()
     _set_base_stream_payload(_build_stream_payload_from_scene(scene))
     _refresh_stream_from_base_payload()
-    if scene.type == "animated":
+    if scene.type == "dynamic":
         _start_animated_playback(scene)
     _set_active_scene(scene_id)
     return {"status": "playing", "scene_id": scene_id}

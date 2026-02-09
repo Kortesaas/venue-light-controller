@@ -77,7 +77,7 @@ class Scene(BaseModel):
     id: str
     name: str
     description: str = ""
-    type: Literal["static", "animated"] = "static"
+    type: Literal["static", "dynamic"] = "static"
     universes: Dict[int, List[int]] = Field(default_factory=dict)
     duration_ms: Optional[int] = None
     playback_mode: Optional[Literal["loop", "once"]] = None
@@ -90,6 +90,13 @@ class Scene(BaseModel):
     def _validate_universes(cls, universes: Dict[int, List[int]]) -> Dict[int, List[int]]:
         _validate_universes(universes)
         return universes
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def _normalize_type(cls, value: object) -> object:
+        if isinstance(value, str) and value.strip().lower() == "animated":
+            return "dynamic"
+        return value
 
     @field_validator("created_at")
     @classmethod
@@ -115,21 +122,21 @@ class Scene(BaseModel):
             return self
 
         if self.duration_ms is None or self.duration_ms < 1:
-            raise ValueError("Animated scenes require duration_ms >= 1")
+            raise ValueError("Dynamic scenes require duration_ms >= 1")
         if self.playback_mode is None:
             self.playback_mode = "loop"
         if self.animated_frames is None or len(self.animated_frames) == 0:
-            raise ValueError("Animated scenes require animated_frames")
+            raise ValueError("Dynamic scenes require animated_frames")
 
         frame_universe_sets = {
             tuple(sorted(frame.universes.keys())) for frame in self.animated_frames
         }
         if len(frame_universe_sets) > 1:
-            raise ValueError("All animated frames must use the same universe layout")
+            raise ValueError("All dynamic frames must use the same universe layout")
         if not self.universes and self.animated_frames:
             self.universes = dict(self.animated_frames[0].universes)
         if set(self.universes.keys()) != set(self.animated_frames[0].universes.keys()):
-            raise ValueError("Animated scene universes must match animated frame universes")
+            raise ValueError("Dynamic scene universes must match dynamic frame universes")
         return self
 
 
@@ -306,7 +313,11 @@ def _decompress_animated_frames(payload: dict) -> List[dict]:
 
 def _inflate_scene_payload(raw: dict) -> dict:
     data = dict(raw)
-    if data.get("type") != "animated":
+    scene_type = data.get("type")
+    if isinstance(scene_type, str) and scene_type.strip().lower() == "animated":
+        data["type"] = "dynamic"
+        scene_type = "dynamic"
+    if scene_type != "dynamic":
         return data
 
     compact = data.get("animated_frames_compact")
@@ -318,7 +329,7 @@ def _inflate_scene_payload(raw: dict) -> dict:
 
 def _deflate_scene_payload(scene: Scene) -> dict:
     payload = scene.model_dump()
-    if scene.type != "animated" or not scene.animated_frames:
+    if scene.type != "dynamic" or not scene.animated_frames:
         return payload
 
     payload["animated_frames_compact"] = _compress_animated_frames(

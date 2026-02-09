@@ -48,7 +48,7 @@ type Scene = {
   id: string;
   name: string;
   description?: string;
-  type?: "static" | "animated";
+  type?: "static" | "dynamic" | "animated";
   universes: Record<string, number[]>;
   created_at?: string;
   style?: SceneStyleMeta | null;
@@ -477,6 +477,7 @@ export default function OperatorDashboard({
   };
 
   const showMasterDimmerDock = !isPhone || isMasterDimmerExpandedMobile;
+  const isDynamicScene = (scene: Scene) => scene.type === "dynamic" || scene.type === "animated";
 
   return (
     <Stack spacing={2.5} sx={{ pr: { sm: 12 } }}>
@@ -762,8 +763,13 @@ export default function OperatorDashboard({
                         <Typography
                           variant="caption"
                           sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                             px: 0.55,
-                            py: 0.15,
+                            py: 0.25,
+                            minHeight: 20,
+                            lineHeight: 1,
                             borderRadius: 0.6,
                             border: "1px solid",
                             borderColor: "divider",
@@ -772,7 +778,7 @@ export default function OperatorDashboard({
                             letterSpacing: 0.2,
                           }}
                         >
-                          {scene.type === "animated" ? "ANIM" : "STATIC"}
+                          {isDynamicScene(scene) ? "DYNAMIC" : "STATIC"}
                         </Typography>
                         {scene.style?.icon && scene.style.icon !== "none" ? (
                           <Box

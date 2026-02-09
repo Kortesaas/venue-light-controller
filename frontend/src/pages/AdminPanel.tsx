@@ -51,7 +51,7 @@ type Scene = {
   id: string;
   name: string;
   description?: string;
-  type?: "static" | "animated";
+  type?: "static" | "dynamic" | "animated";
   duration_ms?: number | null;
   playback_mode?: "loop" | "once" | null;
   universes: Record<string, number[]>;
@@ -190,6 +190,7 @@ export default function AdminPanel({
   const [isPreviewingFixturePlan, setIsPreviewingFixturePlan] = useState(false);
   const [isActivatingFixturePlan, setIsActivatingFixturePlan] = useState(false);
   const [isRemovingFixturePlan, setIsRemovingFixturePlan] = useState(false);
+  const isDynamicScene = (scene: Scene) => scene.type === "dynamic" || scene.type === "animated";
 
   const loadScenes = async () => {
     setIsLoadingScenes(true);
@@ -491,13 +492,13 @@ export default function AdminPanel({
     setErrorMessage(null);
     setActionMessage(null);
     try {
-      const res = await fetch(`${API_BASE}/api/scenes/animated/start`, { method: "POST" });
+      const res = await fetch(`${API_BASE}/api/scenes/dynamic/start`, { method: "POST" });
       if (!res.ok) {
-        throw new Error("Animated recording could not be started.");
+        throw new Error("Dynamic recording could not be started.");
       }
       setAnimatedRecordState("recording");
     } catch {
-      setErrorMessage("Animated recording could not be started.");
+      setErrorMessage("Dynamic recording could not be started.");
     } finally {
       setIsAnimatedBusy(false);
     }
@@ -512,13 +513,13 @@ export default function AdminPanel({
         hasAnimatedBpmInput && isAnimatedBpmValid
           ? { bpm: parsedAnimatedBpm }
           : {};
-      const res = await fetch(`${API_BASE}/api/scenes/animated/stop`, {
+      const res = await fetch(`${API_BASE}/api/scenes/dynamic/stop`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bpmPayload),
       });
       if (!res.ok) {
-        throw new Error("Animated recording could not be stopped.");
+        throw new Error("Dynamic recording could not be stopped.");
       }
       const data = (await res.json()) as AnimatedRecordSummary;
       setAnimatedSummary(data);
@@ -529,7 +530,7 @@ export default function AdminPanel({
         );
       }
     } catch {
-      setErrorMessage("Animated recording could not be stopped.");
+      setErrorMessage("Dynamic recording could not be stopped.");
     } finally {
       setIsAnimatedBusy(false);
     }
@@ -538,7 +539,7 @@ export default function AdminPanel({
   const handleAnimatedCancel = async (closeDialog: boolean) => {
     setIsAnimatedBusy(true);
     try {
-      await fetch(`${API_BASE}/api/scenes/animated/cancel`, { method: "POST" });
+      await fetch(`${API_BASE}/api/scenes/dynamic/cancel`, { method: "POST" });
     } catch {
       // Keep cancel resilient.
     } finally {
@@ -561,7 +562,7 @@ export default function AdminPanel({
     setErrorMessage(null);
     setActionMessage(null);
     try {
-      const res = await fetch(`${API_BASE}/api/scenes/animated/save`, {
+      const res = await fetch(`${API_BASE}/api/scenes/dynamic/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -572,16 +573,16 @@ export default function AdminPanel({
         }),
       });
       if (!res.ok) {
-        throw new Error("Animated scene could not be saved.");
+        throw new Error("Dynamic scene could not be saved.");
       }
       setIsAnimatedRecordOpen(false);
       setAnimatedSummary(null);
       setAnimatedRecordState("waiting");
       setForm(initialFormState);
       await loadScenes();
-      setActionMessage("Animated scene saved.");
+      setActionMessage("Dynamic scene saved.");
     } catch {
-      setErrorMessage("Animated scene could not be saved.");
+      setErrorMessage("Dynamic scene could not be saved.");
     } finally {
       setIsAnimatedBusy(false);
     }
@@ -984,7 +985,7 @@ export default function AdminPanel({
                           ? new Date(scene.created_at).toLocaleDateString()
                           : null;
                         const descriptionText = scene.description?.trim() ? scene.description : "-";
-                        const typeLabel = scene.type === "animated" ? "Animated" : "Static";
+                        const typeLabel = isDynamicScene(scene) ? "Dynamic" : "Static";
                         const secondaryBase = createdText
                           ? `${descriptionText} • Created ${createdText}`
                           : descriptionText;
@@ -1056,7 +1057,7 @@ export default function AdminPanel({
                           edge="end"
                           aria-label="dmx bearbeiten"
                           onClick={() => setEditorScene(scene)}
-                          disabled={isPerformingAction || scene.type === "animated"}
+                          disabled={isPerformingAction || isDynamicScene(scene)}
                         >
                           <TuneRoundedIcon />
                         </IconButton>
@@ -1072,7 +1073,7 @@ export default function AdminPanel({
                           edge="end"
                           aria-label="inhalt aktualisieren"
                           onClick={() => setRerecordCandidate(scene)}
-                          disabled={isPerformingAction || scene.type === "animated"}
+                          disabled={isPerformingAction || isDynamicScene(scene)}
                         >
                           <AutorenewRoundedIcon />
                         </IconButton>
