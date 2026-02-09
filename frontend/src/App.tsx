@@ -178,6 +178,19 @@ function App() {
   };
 
   const keypadKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const digitButtonSx = {
+    py: 1.75,
+    fontSize: 24,
+    fontWeight: 700,
+    borderWidth: 1,
+    borderColor: "divider",
+    bgcolor: "background.paper",
+    color: "text.primary",
+    "&:hover": {
+      borderColor: "primary.main",
+      bgcolor: "rgba(255,255,255,0.12)",
+    },
+  } as const;
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", position: "relative" }}>
@@ -252,8 +265,8 @@ function App() {
             position: "fixed",
             inset: 0,
             zIndex: (theme) => theme.zIndex.modal + 2,
-            bgcolor: "rgba(8, 10, 14, 0.88)",
-            backdropFilter: "blur(2px)",
+            bgcolor: "rgba(7, 11, 20, 0.58)",
+            backdropFilter: "blur(8px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -265,10 +278,11 @@ function App() {
               width: "100%",
               maxWidth: 460,
               borderRadius: 3,
-              border: "1px solid rgba(255,255,255,0.14)",
-              bgcolor: "rgba(20, 25, 32, 0.96)",
+              border: "1px solid rgba(255,255,255,0.16)",
+              bgcolor: "rgba(13, 21, 36, 0.18)",
+              backdropFilter: "blur(12px)",
               p: { xs: 2, sm: 3 },
-              boxShadow: 8,
+              boxShadow: "0 16px 44px rgba(0,0,0,0.36)",
             }}
           >
             <Typography variant="h4" fontWeight={800} textAlign="center">
@@ -317,9 +331,9 @@ function App() {
               {keypadKeys.map((key) => (
                 <Button
                   key={key}
-                  variant="contained"
-                  color="primary"
-                  sx={{ py: 1.75, fontSize: 24, fontWeight: 700 }}
+                  variant="outlined"
+                  color="inherit"
+                  sx={digitButtonSx}
                   onClick={() => handlePinDigit(key)}
                   disabled={isUnlocking}
                 >
@@ -336,9 +350,9 @@ function App() {
                 Clear
               </Button>
               <Button
-                variant="contained"
-                color="primary"
-                sx={{ py: 1.75, fontSize: 24, fontWeight: 700 }}
+                variant="outlined"
+                color="inherit"
+                sx={digitButtonSx}
                 onClick={() => handlePinDigit("0")}
                 disabled={isUnlocking}
               >
