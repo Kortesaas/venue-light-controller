@@ -92,6 +92,11 @@ export default function OperatorDashboard({
   const masterDimmerLocalHoldUntilRef = useRef(0);
   const hazeTargetRef = useRef(0);
   const hazeTimerRef = useRef<number | null>(null);
+  const hazeRequestSeqRef = useRef(0);
+  const hazeLocalHoldUntilRef = useRef(0);
+  const fogDesiredRef = useRef(false);
+  const fogRequestSeqRef = useRef(0);
+  const fogLocalHoldUntilRef = useRef(0);
 
   const holdMasterDimmerRemoteSync = (durationMs: number) => {
     const nextUntil = Date.now() + durationMs;
@@ -103,6 +108,26 @@ export default function OperatorDashboard({
   const shouldIgnoreRemoteMasterDimmer = (incomingValue: number) =>
     Date.now() < masterDimmerLocalHoldUntilRef.current &&
     incomingValue !== masterDimmerTargetRef.current;
+
+  const holdHazeRemoteSync = (durationMs: number) => {
+    const nextUntil = Date.now() + durationMs;
+    if (nextUntil > hazeLocalHoldUntilRef.current) {
+      hazeLocalHoldUntilRef.current = nextUntil;
+    }
+  };
+
+  const shouldIgnoreRemoteHaze = (incomingValue: number) =>
+    Date.now() < hazeLocalHoldUntilRef.current && incomingValue !== hazeTargetRef.current;
+
+  const holdFogRemoteSync = (durationMs: number) => {
+    const nextUntil = Date.now() + durationMs;
+    if (nextUntil > fogLocalHoldUntilRef.current) {
+      fogLocalHoldUntilRef.current = nextUntil;
+    }
+  };
+
+  const shouldIgnoreRemoteFog = (incomingValue: boolean) =>
+    Date.now() < fogLocalHoldUntilRef.current && incomingValue !== fogDesiredRef.current;
 
   const loadData = async () => {
     setIsLoading(true);
@@ -127,11 +152,16 @@ export default function OperatorDashboard({
         masterDimmerTargetRef.current = statusData.master_dimmer_percent;
       }
       if (typeof statusData.haze_percent === "number") {
-        setHazePercent(statusData.haze_percent);
-        hazeTargetRef.current = statusData.haze_percent;
+        if (!shouldIgnoreRemoteHaze(statusData.haze_percent)) {
+          setHazePercent(statusData.haze_percent);
+          hazeTargetRef.current = statusData.haze_percent;
+        }
       }
       if (typeof statusData.fog_flash_active === "boolean") {
-        setFogFlashActive(statusData.fog_flash_active);
+        if (!shouldIgnoreRemoteFog(statusData.fog_flash_active)) {
+          setFogFlashActive(statusData.fog_flash_active);
+          fogDesiredRef.current = statusData.fog_flash_active;
+        }
       }
       setIsHazeConfigured(Boolean(statusData.haze_configured));
       setIsFogConfigured(Boolean(statusData.fog_flash_configured));
@@ -165,11 +195,16 @@ export default function OperatorDashboard({
           }
         }
         if (typeof data.haze_percent === "number") {
-          setHazePercent(data.haze_percent);
-          hazeTargetRef.current = data.haze_percent;
+          if (!shouldIgnoreRemoteHaze(data.haze_percent)) {
+            setHazePercent(data.haze_percent);
+            hazeTargetRef.current = data.haze_percent;
+          }
         }
         if (typeof data.fog_flash_active === "boolean") {
-          setFogFlashActive(data.fog_flash_active);
+          if (!shouldIgnoreRemoteFog(data.fog_flash_active)) {
+            setFogFlashActive(data.fog_flash_active);
+            fogDesiredRef.current = data.fog_flash_active;
+          }
         }
         if (typeof data.haze_configured === "boolean") {
           setIsHazeConfigured(data.haze_configured);
@@ -264,6 +299,8 @@ export default function OperatorDashboard({
   };
 
   const pushHaze = async (valuePercent: number) => {
+    const requestSeq = hazeRequestSeqRef.current + 1;
+    hazeRequestSeqRef.current = requestSeq;
     try {
       const res = await fetch(`${API_BASE}/api/atmosphere/haze`, {
         method: "POST",
@@ -276,6 +313,9 @@ export default function OperatorDashboard({
       const data = (await res.json()) as {
         haze_percent: number;
       };
+      if (requestSeq !== hazeRequestSeqRef.current) {
+        return;
+      }
       setHazePercent(data.haze_percent);
       hazeTargetRef.current = data.haze_percent;
     } catch {
@@ -297,13 +337,27 @@ export default function OperatorDashboard({
   const handleHazeChange = (_event: Event, value: number | number[]) => {
     const next = Array.isArray(value) ? value[0] : value;
     setHazePercent(next);
+    holdHazeRemoteSync(600);
     queueHazeUpdate(next);
+  };
+
+  const handleHazeCommit = () => {
+    holdHazeRemoteSync(600);
+    if (hazeTimerRef.current !== null) {
+      window.clearTimeout(hazeTimerRef.current);
+      hazeTimerRef.current = null;
+      void pushHaze(hazeTargetRef.current);
+    }
   };
 
   const setFogFlash = async (active: boolean) => {
     if (!isFogConfigured || panelLocked || controlMode !== "panel") {
       return;
     }
+    const requestSeq = fogRequestSeqRef.current + 1;
+    fogRequestSeqRef.current = requestSeq;
+    fogDesiredRef.current = active;
+    holdFogRemoteSync(400);
     setFogFlashActive(active);
     try {
       const res = await fetch(`${API_BASE}/api/atmosphere/fog-flash`, {
@@ -313,6 +367,16 @@ export default function OperatorDashboard({
       });
       if (!res.ok) {
         throw new Error("fog update failed");
+      }
+      const data = (await res.json()) as {
+        fog_flash_active?: boolean;
+      };
+      if (requestSeq !== fogRequestSeqRef.current) {
+        return;
+      }
+      if (typeof data.fog_flash_active === "boolean") {
+        setFogFlashActive(data.fog_flash_active);
+        fogDesiredRef.current = data.fog_flash_active;
       }
     } catch {
       setErrorMessage("Fog Flash konnte nicht gesetzt werden.");
@@ -533,10 +597,11 @@ export default function OperatorDashboard({
                   value={hazePercent}
                   min={0}
                   max={100}
-                  step={1}
-                  onChange={handleHazeChange}
-                  valueLabelDisplay="off"
-                  disabled={panelLocked || controlMode !== "panel" || !isHazeConfigured}
+                step={1}
+                onChange={handleHazeChange}
+                onChangeCommitted={handleHazeCommit}
+                valueLabelDisplay="off"
+                disabled={panelLocked || controlMode !== "panel" || !isHazeConfigured}
                   sx={{
                     py: 0.15,
                     "& .MuiSlider-thumb": {
