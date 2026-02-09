@@ -779,12 +779,23 @@ export default function OperatorDashboard({
               variant="outlined"
               sx={{
                 maxWidth: { xs: "calc(100vw - 132px)", sm: "min(72vw, 760px)" },
+                mb: "35px",
                 p: 1,
                 borderRadius: 1,
                 bgcolor: "background.paper",
               }}
             >
-              <Stack direction="row" spacing={0.9} sx={{ overflowX: "auto", pb: 0.2 }}>
+              <Box
+                sx={{
+                  display: { xs: "grid", sm: "flex" },
+                  gridTemplateColumns: { xs: "repeat(3, minmax(0, 1fr))" },
+                  gap: 0.9,
+                  overflowX: { sm: "auto" },
+                  overflowY: { xs: "auto" },
+                  maxHeight: { xs: "52vh", sm: "none" },
+                  pb: 0.2,
+                }}
+              >
                 {groupDimmers.length === 0 ? (
                   <Box sx={{ px: 1.5, py: 2 }}>
                     <Typography variant="caption" color="text.secondary">
@@ -797,7 +808,7 @@ export default function OperatorDashboard({
                       key={group.key}
                       variant="outlined"
                       sx={{
-                        width: 94,
+                        width: { xs: "100%", sm: 94 },
                         p: 0.75,
                         borderRadius: 1,
                         flex: "0 0 auto",
@@ -886,20 +897,21 @@ export default function OperatorDashboard({
                     </Paper>
                   ))
                 )}
-              </Stack>
+              </Box>
             </Paper>
           ) : null}
 
-          <Paper
-            variant="outlined"
-            sx={{
-              width: { xs: 92, sm: 96 },
-              p: 1,
-              borderRadius: 1,
-              bgcolor: "background.paper",
-            }}
-          >
-            <Stack spacing={0.9} alignItems="center">
+          <Stack spacing={0.6} alignItems="stretch">
+            <Paper
+              variant="outlined"
+              sx={{
+                width: { xs: 92, sm: 96 },
+                p: 1,
+                borderRadius: 1,
+                bgcolor: "background.paper",
+              }}
+            >
+              <Stack spacing={0.9} alignItems="center">
               <Button
                 size="small"
                 variant={fogFlashActive ? "contained" : "outlined"}
@@ -959,21 +971,6 @@ export default function OperatorDashboard({
                 justifyContent="space-between"
                 sx={{ width: "100%" }}
               >
-                <IconButton
-                  size="small"
-                  onClick={handleToggleGroupMixer}
-                  aria-label="Group Dimmer Mixer umschalten"
-                  sx={{
-                    p: 0.25,
-                    color: isGroupDimmerAvailable ? "text.primary" : "text.disabled",
-                  }}
-                >
-                  {isGroupMixerExpanded ? (
-                    <KeyboardArrowRightRoundedIcon fontSize="small" />
-                  ) : (
-                    <KeyboardArrowLeftRoundedIcon fontSize="small" />
-                  )}
-                </IconButton>
                 <Typography
                   variant="caption"
                   fontWeight={700}
@@ -1046,8 +1043,40 @@ export default function OperatorDashboard({
               >
                 Full
               </Button>
-            </Stack>
-          </Paper>
+              </Stack>
+            </Paper>
+            <Paper
+              variant="outlined"
+              sx={{
+                width: { xs: 92, sm: 96 },
+                height: 30,
+                borderRadius: 1,
+                bgcolor: "background.paper",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <IconButton
+                size="small"
+                onClick={handleToggleGroupMixer}
+                aria-label="Group Dimmer Mixer umschalten"
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  p: 0,
+                  borderRadius: 1,
+                  color: isGroupDimmerAvailable ? "text.primary" : "text.disabled",
+                }}
+              >
+                {isGroupMixerExpanded ? (
+                  <KeyboardArrowRightRoundedIcon fontSize="small" />
+                ) : (
+                  <KeyboardArrowLeftRoundedIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Paper>
+          </Stack>
         </Box>
       ) : null}
 
