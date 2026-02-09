@@ -87,6 +87,7 @@ class _ArtNetController:
             universe: bytes(dmx[:DMX_CHANNELS]).ljust(DMX_CHANNELS, b"\x00")
             for universe, dmx in universe_to_dmx.items()
         }
+        self._data_lock = threading.Lock()
 
         self._stop = threading.Event()
         self._stopped = False
@@ -103,16 +104,26 @@ class _ArtNetController:
         self._poll_thread = threading.Thread(target=self._poll_loop, daemon=True)
 
     def start(self) -> None:
+        with self._data_lock:
+            universe_keys = sorted(self.universe_to_dmx.keys())
         _log.info(
             "Starting ArtNet stream (local_ip=%s, node_ip=%s, fps=%.2f, poll=%.2fs, universes=%s)",
             self.local_ip,
             self.node_ip,
             self.fps,
             self.poll_interval,
-            sorted(self.universe_to_dmx.keys()),
+            universe_keys,
         )
         self._dmx_thread.start()
         self._poll_thread.start()
+
+    def set_universe_to_dmx(self, universe_to_dmx: Dict[int, bytes]) -> None:
+        sanitized = {
+            universe: bytes(dmx[:DMX_CHANNELS]).ljust(DMX_CHANNELS, b"\x00")
+            for universe, dmx in universe_to_dmx.items()
+        }
+        with self._data_lock:
+            self.universe_to_dmx = sanitized
 
     def stop(self) -> None:
         if self._stopped:
@@ -146,7 +157,10 @@ class _ArtNetController:
                 time.sleep(next_frame - now)
 
             frame_start = time.monotonic()
-            for universe, dmx in self.universe_to_dmx.items():
+            with self._data_lock:
+                current_items = list(self.universe_to_dmx.items())
+
+            for universe, dmx in current_items:
                 packet = _build_artdmx(universe, dmx, sequence)
                 sequence = (sequence + 1) % 256
                 try:
@@ -262,3 +276,20 @@ def stop_stream() -> None:
             return
         _controller.stop()
         _controller = None
+
+
+def update_stream(universe_to_dmx: dict[int, bytes]) -> None:
+    """
+    Aktualisiert den laufenden Stream mit neuen DMX-Werten, ohne Threads/Sockets neu zu starten.
+    Falls kein Stream laeuft, wird nichts geaendert.
+    """
+    with _controller_lock:
+        if _controller is None:
+            _log.warning("update_stream called while no stream is running")
+            return
+        _controller.set_universe_to_dmx(universe_to_dmx)
+
+
+def is_stream_running() -> bool:
+    with _controller_lock:
+        return _controller is not None

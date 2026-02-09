@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -14,6 +14,7 @@ import {
   DialogContentText,
   DialogTitle,
   Paper,
+  Slider,
   Snackbar,
   Stack,
   Tooltip,
@@ -21,11 +22,7 @@ import {
 } from "@mui/material";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
-import {
-  getSceneCardSx,
-  getSceneIcon,
-  type SceneStyleMeta,
-} from "../sceneStyle";
+import { getSceneCardSx, getSceneIcon, type SceneStyleMeta } from "../sceneStyle";
 
 const API_BASE = "";
 
@@ -33,6 +30,8 @@ type StatusResponse = {
   status: string;
   local_ip: string;
   node_ip: string;
+  master_dimmer_percent?: number;
+  master_dimmer_mode?: "parameter-aware" | "raw";
 };
 
 type Scene = {
@@ -66,6 +65,11 @@ export default function OperatorDashboard({
   const [pendingSceneId, setPendingSceneId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showBlackoutConfirm, setShowBlackoutConfirm] = useState(false);
+  const [masterDimmerPercent, setMasterDimmerPercent] = useState(100);
+  const [masterDimmerMode, setMasterDimmerMode] =
+    useState<"parameter-aware" | "raw">("raw");
+  const masterDimmerTargetRef = useRef(100);
+  const masterDimmerTimerRef = useRef<number | null>(null);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -85,6 +89,16 @@ export default function OperatorDashboard({
       const scenesData = (await scenesRes.json()) as Scene[];
       setStatus(statusData);
       setScenes(scenesData);
+      if (typeof statusData.master_dimmer_percent === "number") {
+        setMasterDimmerPercent(statusData.master_dimmer_percent);
+        masterDimmerTargetRef.current = statusData.master_dimmer_percent;
+      }
+      if (
+        statusData.master_dimmer_mode === "parameter-aware" ||
+        statusData.master_dimmer_mode === "raw"
+      ) {
+        setMasterDimmerMode(statusData.master_dimmer_mode);
+      }
     } catch {
       setErrorMessage("Status oder Szenen konnten nicht geladen werden.");
     } finally {
@@ -95,6 +109,63 @@ export default function OperatorDashboard({
   useEffect(() => {
     void loadData();
   }, [sceneVersion]);
+
+  useEffect(() => {
+    return () => {
+      if (masterDimmerTimerRef.current !== null) {
+        window.clearTimeout(masterDimmerTimerRef.current);
+      }
+    };
+  }, []);
+
+  const pushMasterDimmer = async (valuePercent: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/master-dimmer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value_percent: valuePercent }),
+      });
+      if (!res.ok) {
+        throw new Error("Master dimmer update failed");
+      }
+      const data = (await res.json()) as {
+        value_percent: number;
+        mode: "parameter-aware" | "raw";
+      };
+      setMasterDimmerPercent(data.value_percent);
+      masterDimmerTargetRef.current = data.value_percent;
+      setMasterDimmerMode(data.mode);
+    } catch {
+      setErrorMessage("Master Dimmer konnte nicht gesetzt werden.");
+    }
+  };
+
+  const queueMasterDimmerUpdate = (valuePercent: number) => {
+    masterDimmerTargetRef.current = valuePercent;
+    if (masterDimmerTimerRef.current !== null) {
+      return;
+    }
+    masterDimmerTimerRef.current = window.setTimeout(() => {
+      masterDimmerTimerRef.current = null;
+      void pushMasterDimmer(masterDimmerTargetRef.current);
+    }, 80);
+  };
+
+  const handleMasterDimmerChange = (_event: Event, value: number | number[]) => {
+    const next = Array.isArray(value) ? value[0] : value;
+    setMasterDimmerPercent(next);
+    queueMasterDimmerUpdate(next);
+  };
+
+  const handleMasterDimmerFull = () => {
+    setMasterDimmerPercent(100);
+    masterDimmerTargetRef.current = 100;
+    if (masterDimmerTimerRef.current !== null) {
+      window.clearTimeout(masterDimmerTimerRef.current);
+      masterDimmerTimerRef.current = null;
+    }
+    void pushMasterDimmer(100);
+  };
 
   const handlePlayScene = async (sceneId: string) => {
     if (controlMode !== "panel" || panelLocked) {
@@ -198,6 +269,44 @@ export default function OperatorDashboard({
             <Chip size="small" label={`SCENES: ${scenes.length}`} />
             <Chip size="small" color="primary" label={`AKTIV: ${activeSceneName}`} />
           </Stack>
+        </Stack>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack spacing={1.2}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="subtitle1" fontWeight={700}>
+              Master Dimmer
+            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Typography variant="h6" fontWeight={800}>
+                {`${masterDimmerPercent}%`}
+              </Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={handleMasterDimmerFull}
+                disabled={panelLocked || masterDimmerPercent === 100}
+              >
+                Full
+              </Button>
+            </Stack>
+          </Stack>
+          <Slider
+            value={masterDimmerPercent}
+            min={0}
+            max={100}
+            step={1}
+            onChange={handleMasterDimmerChange}
+            valueLabelDisplay="auto"
+            disabled={panelLocked}
+            sx={{ py: 1.4 }}
+          />
+          <Typography variant="caption" color="text.secondary">
+            {masterDimmerMode === "parameter-aware"
+              ? "Mode: Parameter-aware (only intensity channels)"
+              : "Mode: Raw fallback (all DMX channels)"}
+          </Typography>
         </Stack>
       </Paper>
 
@@ -371,4 +480,3 @@ export default function OperatorDashboard({
     </Stack>
   );
 }
-

@@ -9,11 +9,18 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from .artnet_core import record_snapshots, start_stream, stop_stream
+from .artnet_core import (
+    is_stream_running,
+    record_snapshots,
+    start_stream,
+    stop_stream,
+    update_stream,
+)
 from .config import hash_pin, persist_runtime_settings, settings
 from .fixture_plan import (
     activate_fixture_plan,
     clear_fixture_plan,
+    get_intensity_addresses,
     get_fixture_plan_summary,
     lookup_fixture_parameter,
     preview_fixture_plan,
@@ -32,6 +39,9 @@ router = APIRouter()
 
 ACTIVE_SCENE_ID: Optional[str] = None
 CONTROL_MODE: str = "panel"
+MASTER_DIMMER_PERCENT: int = 100
+_BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
+_playback_state_lock = threading.Lock()
 _subscribers: set[asyncio.Queue[str]] = set()
 _subscribers_lock = threading.Lock()
 _event_loop: Optional[asyncio.AbstractEventLoop] = None
@@ -65,6 +75,97 @@ def _set_control_mode(mode: str) -> None:
     _broadcast_event("status", {"control_mode": CONTROL_MODE})
 
 
+def _set_master_dimmer_percent(value: int) -> None:
+    global MASTER_DIMMER_PERCENT
+    MASTER_DIMMER_PERCENT = max(0, min(100, int(value)))
+
+
+def _clone_payload(payload: Dict[int, bytes]) -> Dict[int, bytes]:
+    return {universe: bytes(dmx) for universe, dmx in payload.items()}
+
+
+def _get_master_dimmer_mode() -> str:
+    intensity_addresses = get_intensity_addresses()
+    return "parameter-aware" if intensity_addresses is not None else "raw"
+
+
+def _apply_master_dimmer(
+    payload: Dict[int, bytes], dimmer_percent: int
+) -> tuple[Dict[int, bytes], str]:
+    clamped_percent = max(0, min(100, int(dimmer_percent)))
+    intensity_addresses = get_intensity_addresses()
+
+    if clamped_percent == 100:
+        mode = "parameter-aware" if intensity_addresses is not None else "raw"
+        return _clone_payload(payload), mode
+
+    if intensity_addresses is None:
+        # Raw fallback: scale all channels uniformly.
+        scaled_payload: Dict[int, bytes] = {}
+        for universe, dmx in payload.items():
+            values = bytearray(bytes(dmx[:512]).ljust(512, b"\x00"))
+            for index, value in enumerate(values):
+                values[index] = max(0, min(255, round((value * clamped_percent) / 100)))
+            scaled_payload[universe] = bytes(values)
+        return scaled_payload, "raw"
+
+    # Parameter-aware mode: scale only channels classified as intensity.
+    intensity_by_universe: Dict[int, List[int]] = {}
+    for universe, channel in intensity_addresses:
+        if 1 <= channel <= 512:
+            intensity_by_universe.setdefault(universe, []).append(channel - 1)
+
+    scaled_payload = _clone_payload(payload)
+    for universe, indices in intensity_by_universe.items():
+        dmx = scaled_payload.get(universe)
+        if dmx is None:
+            continue
+        values = bytearray(bytes(dmx[:512]).ljust(512, b"\x00"))
+        for index in indices:
+            values[index] = max(
+                0, min(255, round((values[index] * clamped_percent) / 100))
+            )
+        scaled_payload[universe] = bytes(values)
+
+    return scaled_payload, "parameter-aware"
+
+
+def _broadcast_master_dimmer_status(mode: Optional[str] = None) -> None:
+    _broadcast_event(
+        "status",
+        {
+            "master_dimmer_percent": MASTER_DIMMER_PERCENT,
+            "master_dimmer_mode": mode or _get_master_dimmer_mode(),
+        },
+    )
+
+
+def _refresh_stream_from_base_payload() -> None:
+    with _playback_state_lock:
+        base_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
+        dimmer_percent = MASTER_DIMMER_PERCENT
+
+    if not base_payload:
+        _broadcast_master_dimmer_status()
+        return
+
+    scaled_payload, mode = _apply_master_dimmer(base_payload, dimmer_percent)
+    if is_stream_running():
+        update_stream(scaled_payload)
+    else:
+        start_stream(scaled_payload)
+    _broadcast_master_dimmer_status(mode)
+
+
+def _set_base_stream_payload(payload: Optional[Dict[int, bytes]]) -> None:
+    with _playback_state_lock:
+        global _BASE_STREAM_PAYLOAD
+        if payload is None:
+            _BASE_STREAM_PAYLOAD = None
+        else:
+            _BASE_STREAM_PAYLOAD = _clone_payload(payload)
+
+
 def _assert_panel_mode() -> None:
     if CONTROL_MODE != "panel":
         raise HTTPException(
@@ -93,6 +194,8 @@ def get_status():
         "node_ip": settings.node_ip,
         "active_scene_id": ACTIVE_SCENE_ID,
         "control_mode": CONTROL_MODE,
+        "master_dimmer_percent": MASTER_DIMMER_PERCENT,
+        "master_dimmer_mode": _get_master_dimmer_mode(),
     }
 
 
@@ -112,6 +215,8 @@ async def api_events():
                 {
                     "active_scene_id": ACTIVE_SCENE_ID,
                     "control_mode": CONTROL_MODE,
+                    "master_dimmer_percent": MASTER_DIMMER_PERCENT,
+                    "master_dimmer_mode": _get_master_dimmer_mode(),
                 },
             )
             while True:
@@ -142,7 +247,8 @@ def test_all_on():
     Test: Universe 0 alle Kanaele auf 255.
     """
     _assert_panel_mode()
-    start_stream({0: bytes([255] * 512)})
+    _set_base_stream_payload({0: bytes([255] * 512)})
+    _refresh_stream_from_base_payload()
     return {"status": "started", "universe": 0}
 
 
@@ -151,7 +257,9 @@ def test_stop():
     """
     Test: Stream stoppen.
     """
+    _set_base_stream_payload(None)
     stop_stream()
+    _broadcast_master_dimmer_status()
     return {"status": "stopped"}
 
 
@@ -212,6 +320,10 @@ class PinChangeRequest(BaseModel):
 class FixturePlanImportRequest(BaseModel):
     xml: str
     filename: Optional[str] = None
+
+
+class MasterDimmerUpdateRequest(BaseModel):
+    value_percent: int
 
 
 def _get_settings_payload() -> SettingsResponse:
@@ -275,6 +387,7 @@ def api_activate_fixture_plan(request: FixturePlanImportRequest):
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     payload = summary.model_dump()
+    _refresh_stream_from_base_payload()
     _broadcast_event("fixture-plan", payload)
     return payload
 
@@ -286,6 +399,7 @@ def api_clear_fixture_plan():
     except ValueError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     payload = get_fixture_plan_summary().model_dump()
+    _refresh_stream_from_base_payload()
     _broadcast_event("fixture-plan", payload)
     return {"status": "cleared"}
 
@@ -301,6 +415,27 @@ def api_lookup_fixture_parameter(universe: int, channel: int):
     if entry is None:
         return {"matched": False}
     return {"matched": True, "parameter": entry.model_dump()}
+
+
+@router.get("/master-dimmer")
+def api_get_master_dimmer():
+    return {
+        "value_percent": MASTER_DIMMER_PERCENT,
+        "mode": _get_master_dimmer_mode(),
+    }
+
+
+@router.post("/master-dimmer")
+def api_set_master_dimmer(request: MasterDimmerUpdateRequest):
+    if request.value_percent < 0 or request.value_percent > 100:
+        raise HTTPException(status_code=400, detail="value_percent must be in range 0..100")
+
+    _set_master_dimmer_percent(request.value_percent)
+    _refresh_stream_from_base_payload()
+    return {
+        "value_percent": MASTER_DIMMER_PERCENT,
+        "mode": _get_master_dimmer_mode(),
+    }
 
 
 @router.get("/scenes", response_model=list[Scene])
@@ -363,18 +498,9 @@ def _build_blackout_payload() -> Dict[int, bytes]:
 def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
     # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
     target_universes = list(range(settings.universe_count))
-    active_before = ACTIVE_SCENE_ID
-    restore_payload: Optional[Dict[int, bytes]] = None
-    restore_scene_id: Optional[str] = None
-
-    if active_before == "__blackout__":
-        restore_payload = _build_blackout_payload()
-        restore_scene_id = "__blackout__"
-    elif active_before:
-        active_scene = get_scene(active_before)
-        if active_scene is not None:
-            restore_payload = _build_stream_payload_from_scene(active_scene)
-            restore_scene_id = active_before
+    with _playback_state_lock:
+        restore_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
+    restore_scene_id = ACTIVE_SCENE_ID
 
     # Ensure port 6454 is free for snapshot recording.
     stop_stream()
@@ -386,10 +512,12 @@ def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
             detail="Art-Net port 6454 is already in use",
         ) from exc
     finally:
-        if restore_payload is not None and CONTROL_MODE == "panel":
-            start_stream(restore_payload)
+        if restore_payload and CONTROL_MODE == "panel":
+            _set_base_stream_payload(restore_payload)
+            _refresh_stream_from_base_payload()
             _set_active_scene(restore_scene_id)
         else:
+            _set_base_stream_payload(None)
             _set_active_scene(None)
 
 
@@ -459,8 +587,10 @@ def api_update_settings(request: SettingsUpdateRequest):
     persist_runtime_settings()
 
     # Force reconnect/re-init with updated runtime settings on next play.
+    _set_base_stream_payload(None)
     stop_stream()
     _set_active_scene(None)
+    _broadcast_master_dimmer_status()
     _broadcast_event("settings", _get_settings_payload().model_dump())
     return _get_settings_payload()
 
@@ -477,8 +607,10 @@ def api_set_control_mode(request: ControlModeUpdateRequest):
         raise HTTPException(status_code=400, detail="Invalid control mode")
 
     if mode == "external":
+        _set_base_stream_payload(None)
         stop_stream()
         _set_active_scene(None)
+        _broadcast_master_dimmer_status()
 
     _set_control_mode(mode)
     return ControlModeResponse(control_mode=CONTROL_MODE)
@@ -491,7 +623,8 @@ def api_play_scene(scene_id: str):
     if scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
 
-    start_stream(_build_stream_payload_from_scene(scene))
+    _set_base_stream_payload(_build_stream_payload_from_scene(scene))
+    _refresh_stream_from_base_payload()
     _set_active_scene(scene_id)
     return {"status": "playing", "scene_id": scene_id}
 
@@ -546,13 +679,16 @@ def api_rerecord_scene(
 @router.post("/blackout")
 def api_blackout():
     _assert_panel_mode()
-    start_stream(_build_blackout_payload())
+    _set_base_stream_payload(_build_blackout_payload())
+    _refresh_stream_from_base_payload()
     _set_active_scene("__blackout__")
     return {"status": "blackout"}
 
 
 @router.post("/stop")
 def api_stop():
+    _set_base_stream_payload(None)
     stop_stream()
     _set_active_scene(None)
+    _broadcast_master_dimmer_status()
     return {"status": "stopped"}

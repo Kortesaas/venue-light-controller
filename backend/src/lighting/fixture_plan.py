@@ -259,6 +259,23 @@ def lookup_fixture_parameter(universe: int, channel: int) -> Optional[FixturePar
     return plan.address_map.get(key)
 
 
+def get_intensity_addresses() -> Optional[set[tuple[int, int]]]:
+    """
+    Gibt alle als Intensitaet erkannten Adressen als (universe, channel) zurueck.
+    `None` bedeutet: kein aktiver Plan (raw mode).
+    """
+    with _state_lock:
+        plan = _active_plan
+    if plan is None:
+        return None
+
+    addresses: set[tuple[int, int]] = set()
+    for parameter in plan.address_map.values():
+        if parameter.role == "intensity":
+            addresses.add((parameter.universe, parameter.channel))
+    return addresses
+
+
 def _load_fixture_plan_on_startup() -> None:
     path = _plan_path()
     if not path.exists():

@@ -99,6 +99,9 @@ function App() {
     const handleScenesEvent = () => {
       setSceneVersion((prev) => prev + 1);
     };
+    const handleFixturePlanEvent = () => {
+      setSceneVersion((prev) => prev + 1);
+    };
     const handleSettingsEvent = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data) as {
@@ -110,10 +113,12 @@ function App() {
       }
     };
     source.addEventListener("scenes", handleScenesEvent);
+    source.addEventListener("fixture-plan", handleFixturePlanEvent);
     source.addEventListener("settings", handleSettingsEvent);
     return () => {
       source.removeEventListener("status", handleStatusEvent);
       source.removeEventListener("scenes", handleScenesEvent);
+      source.removeEventListener("fixture-plan", handleFixturePlanEvent);
       source.removeEventListener("settings", handleSettingsEvent);
       source.close();
     };
