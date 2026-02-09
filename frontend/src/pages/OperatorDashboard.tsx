@@ -38,6 +38,10 @@ type StatusResponse = {
   node_ip: string;
   master_dimmer_percent?: number;
   master_dimmer_mode?: "parameter-aware" | "raw";
+  haze_percent?: number;
+  fog_flash_active?: boolean;
+  haze_configured?: boolean;
+  fog_flash_configured?: boolean;
 };
 
 type Scene = {
@@ -76,9 +80,15 @@ export default function OperatorDashboard({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showBlackoutConfirm, setShowBlackoutConfirm] = useState(false);
   const [masterDimmerPercent, setMasterDimmerPercent] = useState(100);
+  const [hazePercent, setHazePercent] = useState(0);
+  const [fogFlashActive, setFogFlashActive] = useState(false);
+  const [isHazeConfigured, setIsHazeConfigured] = useState(false);
+  const [isFogConfigured, setIsFogConfigured] = useState(false);
   const [isMasterDimmerExpandedMobile, setIsMasterDimmerExpandedMobile] = useState(false);
   const masterDimmerTargetRef = useRef(100);
   const masterDimmerTimerRef = useRef<number | null>(null);
+  const hazeTargetRef = useRef(0);
+  const hazeTimerRef = useRef<number | null>(null);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -102,6 +112,15 @@ export default function OperatorDashboard({
         setMasterDimmerPercent(statusData.master_dimmer_percent);
         masterDimmerTargetRef.current = statusData.master_dimmer_percent;
       }
+      if (typeof statusData.haze_percent === "number") {
+        setHazePercent(statusData.haze_percent);
+        hazeTargetRef.current = statusData.haze_percent;
+      }
+      if (typeof statusData.fog_flash_active === "boolean") {
+        setFogFlashActive(statusData.fog_flash_active);
+      }
+      setIsHazeConfigured(Boolean(statusData.haze_configured));
+      setIsFogConfigured(Boolean(statusData.fog_flash_configured));
     } catch {
       setErrorMessage("Status oder Szenen konnten nicht geladen werden.");
     } finally {
@@ -120,10 +139,27 @@ export default function OperatorDashboard({
         const data = JSON.parse(event.data) as {
           master_dimmer_percent?: number;
           master_dimmer_mode?: "parameter-aware" | "raw";
+          haze_percent?: number;
+          fog_flash_active?: boolean;
+          haze_configured?: boolean;
+          fog_flash_configured?: boolean;
         };
         if (typeof data.master_dimmer_percent === "number") {
           setMasterDimmerPercent(data.master_dimmer_percent);
           masterDimmerTargetRef.current = data.master_dimmer_percent;
+        }
+        if (typeof data.haze_percent === "number") {
+          setHazePercent(data.haze_percent);
+          hazeTargetRef.current = data.haze_percent;
+        }
+        if (typeof data.fog_flash_active === "boolean") {
+          setFogFlashActive(data.fog_flash_active);
+        }
+        if (typeof data.haze_configured === "boolean") {
+          setIsHazeConfigured(data.haze_configured);
+        }
+        if (typeof data.fog_flash_configured === "boolean") {
+          setIsFogConfigured(data.fog_flash_configured);
         }
       } catch {
         // Ignore malformed SSE payloads.
@@ -140,6 +176,9 @@ export default function OperatorDashboard({
     return () => {
       if (masterDimmerTimerRef.current !== null) {
         window.clearTimeout(masterDimmerTimerRef.current);
+      }
+      if (hazeTimerRef.current !== null) {
+        window.clearTimeout(hazeTimerRef.current);
       }
     };
   }, []);
@@ -190,6 +229,62 @@ export default function OperatorDashboard({
       masterDimmerTimerRef.current = null;
     }
     void pushMasterDimmer(100);
+  };
+
+  const pushHaze = async (valuePercent: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/atmosphere/haze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value_percent: valuePercent }),
+      });
+      if (!res.ok) {
+        throw new Error("haze update failed");
+      }
+      const data = (await res.json()) as {
+        haze_percent: number;
+      };
+      setHazePercent(data.haze_percent);
+      hazeTargetRef.current = data.haze_percent;
+    } catch {
+      setErrorMessage("Haze konnte nicht gesetzt werden.");
+    }
+  };
+
+  const queueHazeUpdate = (valuePercent: number) => {
+    hazeTargetRef.current = valuePercent;
+    if (hazeTimerRef.current !== null) {
+      return;
+    }
+    hazeTimerRef.current = window.setTimeout(() => {
+      hazeTimerRef.current = null;
+      void pushHaze(hazeTargetRef.current);
+    }, 80);
+  };
+
+  const handleHazeChange = (_event: Event, value: number | number[]) => {
+    const next = Array.isArray(value) ? value[0] : value;
+    setHazePercent(next);
+    queueHazeUpdate(next);
+  };
+
+  const setFogFlash = async (active: boolean) => {
+    if (!isFogConfigured || panelLocked || controlMode !== "panel") {
+      return;
+    }
+    setFogFlashActive(active);
+    try {
+      const res = await fetch(`${API_BASE}/api/atmosphere/fog-flash`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active }),
+      });
+      if (!res.ok) {
+        throw new Error("fog update failed");
+      }
+    } catch {
+      setErrorMessage("Fog Flash konnte nicht gesetzt werden.");
+    }
   };
 
   const handlePlayScene = async (sceneId: string) => {
@@ -365,12 +460,63 @@ export default function OperatorDashboard({
             variant="outlined"
             sx={{
               width: { xs: 92, sm: 96 },
-              p: 1.1,
+              p: 1,
               borderRadius: 1,
               bgcolor: "background.paper",
             }}
           >
             <Stack spacing={0.9} alignItems="center">
+              <Button
+                size="small"
+                variant={fogFlashActive ? "contained" : "outlined"}
+                color={fogFlashActive ? "warning" : "inherit"}
+                disabled={panelLocked || controlMode !== "panel" || !isFogConfigured}
+                onPointerDown={() => void setFogFlash(true)}
+                onPointerUp={() => void setFogFlash(false)}
+                onPointerCancel={() => void setFogFlash(false)}
+                onPointerLeave={() => void setFogFlash(false)}
+                sx={{
+                  minWidth: 0,
+                  width: "100%",
+                  minHeight: 38,
+                  py: 0.2,
+                  fontWeight: 800,
+                  lineHeight: 1,
+                  fontSize: 10.5,
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {"FOG\nFLASH"}
+              </Button>
+              <Stack spacing={0.2} sx={{ width: "100%" }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="caption" fontWeight={700} sx={{ fontSize: 10 }}>
+                    Haze
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+                    {`${hazePercent}%`}
+                  </Typography>
+                </Stack>
+                <Slider
+                  value={hazePercent}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onChange={handleHazeChange}
+                  valueLabelDisplay="off"
+                  disabled={panelLocked || controlMode !== "panel" || !isHazeConfigured}
+                  sx={{
+                    py: 0.15,
+                    "& .MuiSlider-thumb": {
+                      width: 0,
+                      height: 0,
+                      opacity: 0,
+                      boxShadow: "none",
+                    },
+                  }}
+                />
+              </Stack>
+              <Box sx={{ width: "100%", borderTop: "1px solid", borderColor: "divider", my: 0.15 }} />
               <Stack
                 direction="row"
                 spacing={0.5}

@@ -41,6 +41,8 @@ router = APIRouter()
 ACTIVE_SCENE_ID: Optional[str] = None
 CONTROL_MODE: str = "panel"
 MASTER_DIMMER_PERCENT: int = 100
+HAZE_PERCENT: int = 0
+FOG_FLASH_ACTIVE: bool = False
 _BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
 _LIVE_EDITOR_STATE: Optional[dict] = None
 _playback_state_lock = threading.Lock()
@@ -68,13 +70,7 @@ def _broadcast_event(event: str, data: dict) -> None:
 def _set_active_scene(scene_id: Optional[str]) -> None:
     global ACTIVE_SCENE_ID
     ACTIVE_SCENE_ID = scene_id
-    _broadcast_event(
-        "status",
-        {
-            "active_scene_id": ACTIVE_SCENE_ID,
-            "live_edit_scene_name": _get_live_editor_scene_name(),
-        },
-    )
+    _broadcast_event("status", _build_status_payload())
 
 
 def _set_control_mode(mode: str) -> None:
@@ -86,6 +82,42 @@ def _set_control_mode(mode: str) -> None:
 def _set_master_dimmer_percent(value: int) -> None:
     global MASTER_DIMMER_PERCENT
     MASTER_DIMMER_PERCENT = max(0, min(100, int(value)))
+
+
+def _set_haze_percent(value: int) -> None:
+    global HAZE_PERCENT
+    HAZE_PERCENT = max(0, min(100, int(value)))
+
+
+def _set_fog_flash_active(value: bool) -> None:
+    global FOG_FLASH_ACTIVE
+    FOG_FLASH_ACTIVE = bool(value)
+
+
+def _has_fog_channel_configured() -> bool:
+    return settings.fog_flash_channel > 0 and settings.fog_flash_universe > 0
+
+
+def _has_haze_channel_configured() -> bool:
+    return settings.haze_channel > 0 and settings.haze_universe > 0
+
+
+def _build_status_payload() -> dict:
+    return {
+        "active_scene_id": ACTIVE_SCENE_ID,
+        "live_edit_scene_name": _get_live_editor_scene_name(),
+        "control_mode": CONTROL_MODE,
+        "master_dimmer_percent": MASTER_DIMMER_PERCENT,
+        "master_dimmer_mode": _get_master_dimmer_mode(),
+        "haze_percent": HAZE_PERCENT,
+        "fog_flash_active": FOG_FLASH_ACTIVE,
+        "fog_flash_universe": settings.fog_flash_universe,
+        "fog_flash_channel": settings.fog_flash_channel,
+        "haze_universe": settings.haze_universe,
+        "haze_channel": settings.haze_channel,
+        "fog_flash_configured": _has_fog_channel_configured(),
+        "haze_configured": _has_haze_channel_configured(),
+    }
 
 
 def _get_live_editor_scene_id() -> Optional[str]:
@@ -157,14 +189,39 @@ def _apply_master_dimmer(
     return scaled_payload, "parameter-aware"
 
 
+def _apply_atmosphere_controls(payload: Dict[int, bytes]) -> Dict[int, bytes]:
+    output = _clone_payload(payload)
+
+    def ensure_universe(universe: int) -> bytearray:
+        existing = output.get(universe)
+        if existing is None:
+            return bytearray(b"\x00" * 512)
+        return bytearray(bytes(existing[:512]).ljust(512, b"\x00"))
+
+    if _has_haze_channel_configured():
+        haze_universe = settings.haze_universe - 1
+        haze_index = settings.haze_channel - 1
+        if 0 <= haze_index < 512:
+            values = ensure_universe(haze_universe)
+            values[haze_index] = max(0, min(255, round((HAZE_PERCENT * 255) / 100)))
+            output[haze_universe] = bytes(values)
+
+    if _has_fog_channel_configured():
+        fog_universe = settings.fog_flash_universe - 1
+        fog_index = settings.fog_flash_channel - 1
+        if 0 <= fog_index < 512:
+            values = ensure_universe(fog_universe)
+            values[fog_index] = 255 if FOG_FLASH_ACTIVE else 0
+            output[fog_universe] = bytes(values)
+
+    return output
+
+
 def _broadcast_master_dimmer_status(mode: Optional[str] = None) -> None:
-    _broadcast_event(
-        "status",
-        {
-            "master_dimmer_percent": MASTER_DIMMER_PERCENT,
-            "master_dimmer_mode": mode or _get_master_dimmer_mode(),
-        },
-    )
+    payload = _build_status_payload()
+    if mode is not None:
+        payload["master_dimmer_mode"] = mode
+    _broadcast_event("status", payload)
 
 
 def _refresh_stream_from_base_payload() -> None:
@@ -172,15 +229,16 @@ def _refresh_stream_from_base_payload() -> None:
         base_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
         dimmer_percent = MASTER_DIMMER_PERCENT
 
-    if not base_payload:
-        _broadcast_master_dimmer_status()
-        return
-
     scaled_payload, mode = _apply_master_dimmer(base_payload, dimmer_percent)
-    if is_stream_running():
-        update_stream(scaled_payload)
+    effective_payload = _apply_atmosphere_controls(scaled_payload)
+
+    if effective_payload:
+        if is_stream_running():
+            update_stream(effective_payload)
+        else:
+            start_stream(effective_payload)
     else:
-        start_stream(scaled_payload)
+        stop_stream()
     _broadcast_master_dimmer_status(mode)
 
 
@@ -219,11 +277,7 @@ def get_status():
         "status": "ok",
         "local_ip": settings.local_ip,
         "node_ip": settings.node_ip,
-        "active_scene_id": ACTIVE_SCENE_ID,
-        "live_edit_scene_name": _get_live_editor_scene_name(),
-        "control_mode": CONTROL_MODE,
-        "master_dimmer_percent": MASTER_DIMMER_PERCENT,
-        "master_dimmer_mode": _get_master_dimmer_mode(),
+        **_build_status_payload(),
     }
 
 
@@ -240,13 +294,7 @@ async def api_events():
         try:
             yield _format_sse(
                 "status",
-                {
-                    "active_scene_id": ACTIVE_SCENE_ID,
-                    "live_edit_scene_name": _get_live_editor_scene_name(),
-                    "control_mode": CONTROL_MODE,
-                    "master_dimmer_percent": MASTER_DIMMER_PERCENT,
-                    "master_dimmer_mode": _get_master_dimmer_mode(),
-                },
+                _build_status_payload(),
             )
             while True:
                 try:
@@ -325,6 +373,10 @@ class SettingsResponse(BaseModel):
     dmx_fps: float
     poll_interval: float
     universe_count: int
+    fog_flash_universe: int
+    fog_flash_channel: int
+    haze_universe: int
+    haze_channel: int
 
 
 class SettingsUpdateRequest(BaseModel):
@@ -332,6 +384,10 @@ class SettingsUpdateRequest(BaseModel):
     dmx_fps: float
     poll_interval: float
     universe_count: int
+    fog_flash_universe: int
+    fog_flash_channel: int
+    haze_universe: int
+    haze_channel: int
 
 
 class ControlModeResponse(BaseModel):
@@ -361,6 +417,14 @@ class MasterDimmerUpdateRequest(BaseModel):
     value_percent: int
 
 
+class HazeUpdateRequest(BaseModel):
+    value_percent: int
+
+
+class FogFlashUpdateRequest(BaseModel):
+    active: bool
+
+
 class SceneEditorLiveStartRequest(BaseModel):
     scene_id: str
     universes: Dict[int, List[int]]
@@ -381,6 +445,10 @@ def _get_settings_payload() -> SettingsResponse:
         dmx_fps=settings.dmx_fps,
         poll_interval=settings.poll_interval,
         universe_count=settings.universe_count,
+        fog_flash_universe=settings.fog_flash_universe,
+        fog_flash_channel=settings.fog_flash_channel,
+        haze_universe=settings.haze_universe,
+        haze_channel=settings.haze_channel,
     )
 
 
@@ -488,6 +556,45 @@ def api_set_master_dimmer(request: MasterDimmerUpdateRequest):
     return {
         "value_percent": MASTER_DIMMER_PERCENT,
         "mode": _get_master_dimmer_mode(),
+    }
+
+
+@router.get("/atmosphere")
+def api_get_atmosphere():
+    return {
+        "haze_percent": HAZE_PERCENT,
+        "fog_flash_active": FOG_FLASH_ACTIVE,
+        "fog_flash_configured": _has_fog_channel_configured(),
+        "haze_configured": _has_haze_channel_configured(),
+        "fog_flash_universe": settings.fog_flash_universe,
+        "fog_flash_channel": settings.fog_flash_channel,
+        "haze_universe": settings.haze_universe,
+        "haze_channel": settings.haze_channel,
+    }
+
+
+@router.post("/atmosphere/haze")
+def api_set_haze(request: HazeUpdateRequest):
+    _assert_panel_mode()
+    if request.value_percent < 0 or request.value_percent > 100:
+        raise HTTPException(status_code=400, detail="value_percent must be in range 0..100")
+
+    _set_haze_percent(request.value_percent)
+    _refresh_stream_from_base_payload()
+    return {
+        "haze_percent": HAZE_PERCENT,
+        "haze_configured": _has_haze_channel_configured(),
+    }
+
+
+@router.post("/atmosphere/fog-flash")
+def api_set_fog_flash(request: FogFlashUpdateRequest):
+    _assert_panel_mode()
+    _set_fog_flash_active(request.active)
+    _refresh_stream_from_base_payload()
+    return {
+        "fog_flash_active": FOG_FLASH_ACTIVE,
+        "fog_flash_configured": _has_fog_channel_configured(),
     }
 
 
@@ -771,12 +878,28 @@ def api_get_settings():
 def api_update_settings(request: SettingsUpdateRequest):
     if request.universe_count < 1:
         raise HTTPException(status_code=400, detail="universe_count must be >= 1")
+    for key, value in (
+        ("fog_flash_universe", request.fog_flash_universe),
+        ("haze_universe", request.haze_universe),
+    ):
+        if value < 1:
+            raise HTTPException(status_code=400, detail=f"{key} must be >= 1")
+    for key, value in (
+        ("fog_flash_channel", request.fog_flash_channel),
+        ("haze_channel", request.haze_channel),
+    ):
+        if value < 0 or value > 512:
+            raise HTTPException(status_code=400, detail=f"{key} must be in range 0..512")
 
     _clear_live_editor_state()
     settings.node_ip = request.node_ip
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
     settings.universe_count = request.universe_count
+    settings.fog_flash_universe = request.fog_flash_universe
+    settings.fog_flash_channel = request.fog_flash_channel
+    settings.haze_universe = request.haze_universe
+    settings.haze_channel = request.haze_channel
     persist_runtime_settings()
 
     # Force reconnect/re-init with updated runtime settings on next play.
@@ -801,6 +924,7 @@ def api_set_control_mode(request: ControlModeUpdateRequest):
 
     if mode == "external":
         _clear_live_editor_state()
+        _set_fog_flash_active(False)
         _set_base_stream_payload(None)
         stop_stream()
         _set_active_scene(None)
@@ -875,6 +999,7 @@ def api_rerecord_scene(
 def api_blackout():
     _assert_panel_mode()
     _clear_live_editor_state()
+    _set_fog_flash_active(False)
     _set_base_stream_payload(_build_blackout_payload())
     _refresh_stream_from_base_payload()
     _set_active_scene("__blackout__")
@@ -884,6 +1009,7 @@ def api_blackout():
 @router.post("/stop")
 def api_stop():
     _clear_live_editor_state()
+    _set_fog_flash_active(False)
     _set_base_stream_payload(None)
     stop_stream()
     _set_active_scene(None)

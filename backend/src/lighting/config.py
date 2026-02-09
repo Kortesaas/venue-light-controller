@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     operator_pin_hash: str = hash_pin("0815")
     runtime_settings_path: str = "./settings.runtime.json"
     fixture_plan_path: str = "./fixture_plan.active.json"
+    fog_flash_universe: int = 1
+    fog_flash_channel: int = 0
+    haze_universe: int = 1
+    haze_channel: int = 0
 
     # Ordner für Szenen (kannst du später nutzen)
     scenes_path: str = "./scenes"
@@ -61,6 +65,10 @@ def load_runtime_settings() -> None:
         "universe_count",
         "lock_on_startup",
         "operator_pin_hash",
+        "fog_flash_universe",
+        "fog_flash_channel",
+        "haze_universe",
+        "haze_channel",
     ):
         if key in data:
             setattr(settings, key, data[key])
@@ -75,6 +83,10 @@ def persist_runtime_settings() -> None:
         "universe_count": settings.universe_count,
         "lock_on_startup": settings.lock_on_startup,
         "operator_pin_hash": settings.operator_pin_hash,
+        "fog_flash_universe": settings.fog_flash_universe,
+        "fog_flash_channel": settings.fog_flash_channel,
+        "haze_universe": settings.haze_universe,
+        "haze_channel": settings.haze_channel,
     }
     try:
         path.parent.mkdir(parents=True, exist_ok=True)

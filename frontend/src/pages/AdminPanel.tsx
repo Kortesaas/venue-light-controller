@@ -83,6 +83,10 @@ type SettingsState = {
   dmx_fps: number;
   poll_interval: number;
   universe_count: number;
+  fog_flash_universe: number;
+  fog_flash_channel: number;
+  haze_universe: number;
+  haze_channel: number;
 };
 
 type FixturePlanParameterExample = {
@@ -130,6 +134,10 @@ export default function AdminPanel({
     dmx_fps: 30,
     poll_interval: 5,
     universe_count: 1,
+    fog_flash_universe: 1,
+    fog_flash_channel: 0,
+    haze_universe: 1,
+    haze_channel: 0,
   });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isApplyingSettings, setIsApplyingSettings] = useState(false);
@@ -457,6 +465,16 @@ export default function AdminPanel({
     FPS_OPTIONS.includes(Number(settingsForm.dmx_fps)) &&
     Number.isInteger(Number(settingsForm.universe_count)) &&
     Number(settingsForm.universe_count) > 0 &&
+    Number.isInteger(Number(settingsForm.fog_flash_universe)) &&
+    Number(settingsForm.fog_flash_universe) > 0 &&
+    Number.isInteger(Number(settingsForm.haze_universe)) &&
+    Number(settingsForm.haze_universe) > 0 &&
+    Number.isInteger(Number(settingsForm.fog_flash_channel)) &&
+    Number(settingsForm.fog_flash_channel) >= 0 &&
+    Number(settingsForm.fog_flash_channel) <= 512 &&
+    Number.isInteger(Number(settingsForm.haze_channel)) &&
+    Number(settingsForm.haze_channel) >= 0 &&
+    Number(settingsForm.haze_channel) <= 512 &&
     settingsForm.poll_interval > 0 &&
     !isApplyingSettings;
 
@@ -487,6 +505,10 @@ export default function AdminPanel({
           dmx_fps: Number(settingsForm.dmx_fps),
           poll_interval: Number(settingsForm.poll_interval),
           universe_count: Number(settingsForm.universe_count),
+          fog_flash_universe: Number(settingsForm.fog_flash_universe),
+          fog_flash_channel: Number(settingsForm.fog_flash_channel),
+          haze_universe: Number(settingsForm.haze_universe),
+          haze_channel: Number(settingsForm.haze_channel),
         }),
       });
       if (!res.ok) {
@@ -1187,6 +1209,62 @@ export default function AdminPanel({
                   size="small"
                   fullWidth
                   helperText={universeExampleText}
+                />
+                <TextField
+                  label="Fog Flash Universe"
+                  type="number"
+                  value={settingsForm.fog_flash_universe}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      fog_flash_universe: Number(event.target.value),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="1-based universe"
+                />
+                <TextField
+                  label="Fog Flash Channel"
+                  type="number"
+                  value={settingsForm.fog_flash_channel}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      fog_flash_channel: Number(event.target.value),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="0 disables fog flash, else 1..512"
+                />
+                <TextField
+                  label="Haze Universe"
+                  type="number"
+                  value={settingsForm.haze_universe}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      haze_universe: Number(event.target.value),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="1-based universe"
+                />
+                <TextField
+                  label="Haze Channel"
+                  type="number"
+                  value={settingsForm.haze_channel}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      haze_channel: Number(event.target.value),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="0 disables haze, else 1..512"
                 />
                 <Button
                   variant="contained"
