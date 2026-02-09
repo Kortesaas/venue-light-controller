@@ -2,7 +2,7 @@
   "node_ip": "2.0.0.10",
   "dmx_fps": 30.0,
   "poll_interval": 5.0,
-  "universe_count": 1,
+  "universe_count": 2,
   "lock_on_startup": true,
   "operator_pin_hash": "c57a5df4f97ed6914116e5fd1348406064834f22503d890eb571af442ac4b4c3"
 }

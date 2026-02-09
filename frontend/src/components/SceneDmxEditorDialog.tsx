@@ -10,6 +10,7 @@ import {
   DialogContentText,
   DialogTitle,
   Paper,
+  Snackbar,
   Slider,
   Stack,
   ToggleButton,
@@ -1117,10 +1118,32 @@ export default function SceneDmxEditorDialog({
             </Stack>
           )}
 
-          {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
-          {actionMessage ? <Alert severity="success">{actionMessage}</Alert> : null}
         </Stack>
       </Box>
+
+      <Snackbar
+        open={Boolean(errorMessage || actionMessage)}
+        autoHideDuration={2200}
+        onClose={() => {
+          setErrorMessage(null);
+          setActionMessage(null);
+        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.tooltip + 100,
+          bottom: { xs: 86, sm: 92 },
+        }}
+      >
+        <Alert
+          severity={errorMessage ? "error" : "success"}
+          onClose={() => {
+            setErrorMessage(null);
+            setActionMessage(null);
+          }}
+        >
+          {errorMessage ?? actionMessage ?? ""}
+        </Alert>
+      </Snackbar>
 
       <Paper
         variant="outlined"
