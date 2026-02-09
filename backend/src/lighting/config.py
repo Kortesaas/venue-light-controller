@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     fog_flash_channel: int = 0
     haze_universe: int = 1
     haze_channel: int = 0
+    show_scene_created_at_on_operator: bool = True
 
     # Ordner für Szenen (kannst du später nutzen)
     scenes_path: str = "./scenes"
@@ -69,6 +70,7 @@ def load_runtime_settings() -> None:
         "fog_flash_channel",
         "haze_universe",
         "haze_channel",
+        "show_scene_created_at_on_operator",
     ):
         if key in data:
             setattr(settings, key, data[key])
@@ -87,6 +89,7 @@ def persist_runtime_settings() -> None:
         "fog_flash_channel": settings.fog_flash_channel,
         "haze_universe": settings.haze_universe,
         "haze_channel": settings.haze_channel,
+        "show_scene_created_at_on_operator": settings.show_scene_created_at_on_operator,
     }
     try:
         path.parent.mkdir(parents=True, exist_ok=True)

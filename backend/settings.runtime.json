@@ -8,5 +8,6 @@
   "fog_flash_universe": 2,
   "fog_flash_channel": 511,
   "haze_universe": 2,
-  "haze_channel": 510
+  "haze_channel": 510,
+  "show_scene_created_at_on_operator": false
 }

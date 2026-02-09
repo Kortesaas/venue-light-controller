@@ -108,6 +108,7 @@ type SettingsState = {
   fog_flash_channel: number;
   haze_universe: number;
   haze_channel: number;
+  show_scene_created_at_on_operator: boolean;
 };
 
 type FixturePlanParameterExample = {
@@ -167,6 +168,7 @@ export default function AdminPanel({
     fog_flash_channel: 0,
     haze_universe: 1,
     haze_channel: 0,
+    show_scene_created_at_on_operator: true,
   });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isApplyingSettings, setIsApplyingSettings] = useState(false);
@@ -660,6 +662,7 @@ export default function AdminPanel({
           fog_flash_channel: Number(settingsForm.fog_flash_channel),
           haze_universe: Number(settingsForm.haze_universe),
           haze_channel: Number(settingsForm.haze_channel),
+          show_scene_created_at_on_operator: settingsForm.show_scene_created_at_on_operator,
         }),
       });
       if (!res.ok) {
@@ -1428,6 +1431,20 @@ export default function AdminPanel({
                   size="small"
                   fullWidth
                   helperText="0 disables haze, else 1..512"
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={settingsForm.show_scene_created_at_on_operator}
+                      onChange={(_event, checked) =>
+                        setSettingsForm((prev) => ({
+                          ...prev,
+                          show_scene_created_at_on_operator: checked,
+                        }))
+                      }
+                    />
+                  }
+                  label="Show scene creation date on Operator view"
                 />
                 <Button
                   variant="contained"

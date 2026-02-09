@@ -128,6 +128,7 @@ def _build_status_payload() -> dict:
         "haze_channel": settings.haze_channel,
         "fog_flash_configured": _has_fog_channel_configured(),
         "haze_configured": _has_haze_channel_configured(),
+        "show_scene_created_at_on_operator": settings.show_scene_created_at_on_operator,
     }
 
 
@@ -584,6 +585,7 @@ class SettingsResponse(BaseModel):
     fog_flash_channel: int
     haze_universe: int
     haze_channel: int
+    show_scene_created_at_on_operator: bool
 
 
 class SettingsUpdateRequest(BaseModel):
@@ -595,6 +597,7 @@ class SettingsUpdateRequest(BaseModel):
     fog_flash_channel: int
     haze_universe: int
     haze_channel: int
+    show_scene_created_at_on_operator: bool
 
 
 class ControlModeResponse(BaseModel):
@@ -656,6 +659,7 @@ def _get_settings_payload() -> SettingsResponse:
         fog_flash_channel=settings.fog_flash_channel,
         haze_universe=settings.haze_universe,
         haze_channel=settings.haze_channel,
+        show_scene_created_at_on_operator=settings.show_scene_created_at_on_operator,
     )
 
 
@@ -1448,6 +1452,7 @@ def api_update_settings(request: SettingsUpdateRequest):
     settings.fog_flash_channel = request.fog_flash_channel
     settings.haze_universe = request.haze_universe
     settings.haze_channel = request.haze_channel
+    settings.show_scene_created_at_on_operator = request.show_scene_created_at_on_operator
     persist_runtime_settings()
 
     # Force reconnect/re-init with updated runtime settings on next play.

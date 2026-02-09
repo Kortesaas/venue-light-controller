@@ -42,6 +42,7 @@ type StatusResponse = {
   fog_flash_active?: boolean;
   haze_configured?: boolean;
   fog_flash_configured?: boolean;
+  show_scene_created_at_on_operator?: boolean;
 };
 
 type Scene = {
@@ -86,6 +87,7 @@ export default function OperatorDashboard({
   const [isHazeConfigured, setIsHazeConfigured] = useState(false);
   const [isFogConfigured, setIsFogConfigured] = useState(false);
   const [isMasterDimmerExpandedMobile, setIsMasterDimmerExpandedMobile] = useState(false);
+  const [showSceneCreatedAt, setShowSceneCreatedAt] = useState(true);
   const masterDimmerTargetRef = useRef(100);
   const masterDimmerTimerRef = useRef<number | null>(null);
   const masterDimmerRequestSeqRef = useRef(0);
@@ -165,6 +167,9 @@ export default function OperatorDashboard({
       }
       setIsHazeConfigured(Boolean(statusData.haze_configured));
       setIsFogConfigured(Boolean(statusData.fog_flash_configured));
+      if (typeof statusData.show_scene_created_at_on_operator === "boolean") {
+        setShowSceneCreatedAt(statusData.show_scene_created_at_on_operator);
+      }
     } catch {
       setErrorMessage("Status oder Szenen konnten nicht geladen werden.");
     } finally {
@@ -187,6 +192,7 @@ export default function OperatorDashboard({
           fog_flash_active?: boolean;
           haze_configured?: boolean;
           fog_flash_configured?: boolean;
+          show_scene_created_at_on_operator?: boolean;
         };
         if (typeof data.master_dimmer_percent === "number") {
           if (!shouldIgnoreRemoteMasterDimmer(data.master_dimmer_percent)) {
@@ -211,6 +217,9 @@ export default function OperatorDashboard({
         }
         if (typeof data.fog_flash_configured === "boolean") {
           setIsFogConfigured(data.fog_flash_configured);
+        }
+        if (typeof data.show_scene_created_at_on_operator === "boolean") {
+          setShowSceneCreatedAt(data.show_scene_created_at_on_operator);
         }
       } catch {
         // Ignore malformed SSE payloads.
@@ -798,7 +807,7 @@ export default function OperatorDashboard({
                         {isPending && <CircularProgress size={18} />}
                       </Stack>
                     </Stack>
-                    {createdAtText && createdAtShort ? (
+                    {showSceneCreatedAt && createdAtText && createdAtShort ? (
                       <Tooltip title={`Created: ${createdAtText}`}>
                         <Typography
                           variant="caption"
