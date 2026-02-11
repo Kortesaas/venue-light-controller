@@ -7,6 +7,9 @@ import {
   Box,
   Button,
   Container,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Snackbar,
   Stack,
   Toolbar,
@@ -15,6 +18,9 @@ import {
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import QrCode2RoundedIcon from "@mui/icons-material/QrCode2Rounded";
+import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
+import { QRCodeSVG } from "qrcode.react";
 import AdminPanel from "./pages/AdminPanel";
 import OperatorDashboard from "./pages/OperatorDashboard";
 
@@ -54,6 +60,7 @@ function App() {
     severity: "success" | "error" | "info";
     message: string;
   } | null>(null);
+  const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
 
   useEffect(() => {
     const loadStatus = async () => {
@@ -115,8 +122,17 @@ function App() {
       try {
         const data = JSON.parse(event.data) as {
           node_ip: string;
+          local_ip?: string;
         };
-        setStatus((prev) => (prev ? { ...prev, node_ip: data.node_ip } : prev));
+        setStatus((prev) =>
+          prev
+            ? {
+                ...prev,
+                node_ip: data.node_ip,
+                local_ip: data.local_ip ?? prev.local_ip,
+              }
+            : prev
+        );
       } catch {
         // Ignore malformed SSE payloads.
       }
@@ -191,6 +207,17 @@ function App() {
     }
   };
 
+  const connectUrl = `http://${status?.local_ip ?? window.location.hostname}:8000`;
+
+  const handleCopyConnectUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(connectUrl);
+      setSnackbar({ severity: "success", message: "Link copied." });
+    } catch {
+      setSnackbar({ severity: "error", message: "Could not copy link." });
+    }
+  };
+
   const keypadKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
   const digitButtonSx = {
     py: 1.75,
@@ -232,6 +259,15 @@ function App() {
             </Typography>
           </Box>
           <Stack direction="row" spacing={1.5} alignItems="center">
+            <Button
+              size="small"
+              color="inherit"
+              variant="outlined"
+              startIcon={<QrCode2RoundedIcon />}
+              onClick={() => setIsQrDialogOpen(true)}
+            >
+              Connect
+            </Button>
             {!panelLocked ? (
               <Button
                 size="small"
@@ -428,6 +464,65 @@ function App() {
           {snackbar?.message ?? ""}
         </Alert>
       </Snackbar>
+
+      <Dialog open={isQrDialogOpen} onClose={() => setIsQrDialogOpen(false)}>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h6" fontWeight={800}>
+            Open On Another Device
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Scan this QR code to open the panel directly.
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ pb: 2.5 }}>
+          <Box
+            sx={{
+              borderRadius: 2,
+              border: "1px solid rgba(255,255,255,0.12)",
+              bgcolor: "rgba(255,255,255,0.04)",
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 1.5,
+                bgcolor: "#fff",
+              }}
+            >
+              <QRCodeSVG value={connectUrl} size={220} level="M" includeMargin />
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                fontFamily: "monospace",
+                wordBreak: "break-all",
+                textAlign: "center",
+              }}
+            >
+              {connectUrl}
+            </Typography>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<ContentCopyRoundedIcon />}
+              onClick={() => void handleCopyConnectUrl()}
+            >
+              Copy Link
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
