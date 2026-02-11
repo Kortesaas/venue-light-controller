@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import re
 import socket
 import struct
@@ -43,6 +44,7 @@ from .scenes import (
 )
 
 router = APIRouter()
+_log = logging.getLogger(__name__)
 
 ACTIVE_SCENE_ID: Optional[str] = None
 CONTROL_MODE: str = "panel"
@@ -63,6 +65,15 @@ _event_loop: Optional[asyncio.AbstractEventLoop] = None
 
 ANIMATED_RECORDING_MIN_DURATION_MS = 1500
 ANIMATED_RECORDING_MAX_DURATION_MS = 60000
+
+
+def _raise_conflict(detail: str, **context: object) -> None:
+    if context:
+        context_text = ", ".join(f"{key}={value!r}" for key, value in sorted(context.items()))
+        _log.warning("409 Conflict: %s | %s", detail, context_text)
+    else:
+        _log.warning("409 Conflict: %s", detail)
+    raise HTTPException(status_code=409, detail=detail)
 
 
 def _format_sse(event: str, data: dict) -> str:
@@ -174,9 +185,9 @@ def _build_group_dimmer_status() -> dict:
 def _find_group_dimmer_or_raise(group_key: str) -> dict:
     layout = _get_group_dimmer_layout()
     if layout is None:
-        raise HTTPException(
-            status_code=409,
-            detail="Group dimmer mixer requires an active fixture plan",
+        _raise_conflict(
+            "Group dimmer mixer requires an active MA3 fixture plan. Import and activate a fixture plan first.",
+            group_key=group_key,
         )
     for group in layout:
         if group["key"] == group_key:
@@ -561,9 +572,9 @@ def _set_base_stream_payload(payload: Optional[Dict[int, bytes]]) -> None:
 
 def _assert_panel_mode() -> None:
     if CONTROL_MODE != "panel":
-        raise HTTPException(
-            status_code=409,
-            detail="Panel control is disabled while external control mode is active",
+        _raise_conflict(
+            "Panel control is disabled because external control mode is active. Switch control mode to 'panel' to continue.",
+            control_mode=CONTROL_MODE,
         )
 
 
@@ -990,7 +1001,10 @@ def api_scene_editor_live_start(request: SceneEditorLiveStartRequest):
     with _playback_state_lock:
         global _LIVE_EDITOR_STATE
         if _LIVE_EDITOR_STATE is not None:
-            raise HTTPException(status_code=409, detail="Live editor is already active")
+            _raise_conflict(
+                "Live editor is already active. Stop the current live edit session before starting another one.",
+                requested_scene_id=request.scene_id,
+            )
 
         _LIVE_EDITOR_STATE = {
             "scene_id": request.scene_id,
@@ -1009,7 +1023,9 @@ def api_scene_editor_live_update(request: SceneEditorLiveUpdateRequest):
     with _playback_state_lock:
         state = _LIVE_EDITOR_STATE
     if state is None:
-        raise HTTPException(status_code=409, detail="Live editor is not active")
+        _raise_conflict(
+            "Live editor is not active. Start live edit mode before sending live updates.",
+        )
 
     scene_id = state.get("scene_id")
     scene = get_scene(scene_id) if isinstance(scene_id, str) else None
@@ -1056,14 +1072,17 @@ def api_save_animated_scene(request: AnimatedSceneSaveRequest):
     if not name:
         raise HTTPException(status_code=400, detail="Scene name cannot be empty")
     if _scene_name_exists(name):
-        raise HTTPException(status_code=409, detail="Scene name already exists")
+        _raise_conflict(
+            "Scene name already exists. Choose a different scene name.",
+            scene_name=name,
+        )
 
     with _recording_state_lock:
         state = _ANIMATED_RECORDING_STATE
         if not isinstance(state, dict) or state.get("phase") != "ready":
-            raise HTTPException(
-                status_code=409,
-                detail="No recorded dynamic loop available. Start and stop a dynamic recording first.",
+            _raise_conflict(
+                "No recorded dynamic loop is ready. Start and stop a dynamic recording first.",
+                recording_phase=state.get("phase") if isinstance(state, dict) else "none",
             )
 
     duration_ms = int(state.get("duration_ms", 0))
@@ -1239,10 +1258,11 @@ def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
     try:
         return record_snapshots(target_universes, duration)
     except OSError as exc:
-        raise HTTPException(
-            status_code=409,
-            detail="Art-Net port 6454 is already in use",
-        ) from exc
+        _raise_conflict(
+            "Art-Net UDP port 6454 is already in use. Stop the other Art-Net source or listener and retry.",
+            port=ARTNET_PORT,
+            error=str(exc),
+        )
     finally:
         if restore_payload and CONTROL_MODE == "panel":
             _set_base_stream_payload(restore_payload)
@@ -1331,7 +1351,12 @@ def _start_animated_recording_session() -> dict:
         global _ANIMATED_RECORDING_STATE
         existing = _ANIMATED_RECORDING_STATE
         if isinstance(existing, dict) and existing.get("phase") == "recording":
-            raise HTTPException(status_code=409, detail="Dynamic recording already in progress")
+            return {
+                "status": "recording",
+                "min_duration_ms": ANIMATED_RECORDING_MIN_DURATION_MS,
+                "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
+                "already_recording": True,
+            }
 
     with _playback_state_lock:
         restore_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
@@ -1351,10 +1376,11 @@ def _start_animated_recording_session() -> dict:
             _set_base_stream_payload(restore_payload)
             _refresh_stream_from_base_payload()
             _set_active_scene(restore_scene_id)
-        raise HTTPException(
-            status_code=409,
-            detail="Art-Net port 6454 is already in use",
-        ) from exc
+        _raise_conflict(
+            "Art-Net UDP port 6454 is already in use. Stop the other Art-Net source or listener and retry.",
+            port=ARTNET_PORT,
+            error=str(exc),
+        )
 
     state = {
         "phase": "recording",
@@ -1393,7 +1419,9 @@ def _stop_animated_recording_session(bpm: Optional[float] = None) -> dict:
     with _recording_state_lock:
         state = _ANIMATED_RECORDING_STATE
     if not isinstance(state, dict):
-        raise HTTPException(status_code=409, detail="No dynamic recording session active")
+        _raise_conflict(
+            "No dynamic recording session is active. Start a dynamic recording first.",
+        )
 
     if state.get("phase") == "ready":
         frames = state.get("animated_frames") or []
@@ -1516,7 +1544,10 @@ def api_update_scene(scene_id: str, request: SceneUpdateRequest):
     if not name:
         raise HTTPException(status_code=400, detail="Scene name cannot be empty")
     if _scene_name_exists(name, ignore_id=scene_id):
-        raise HTTPException(status_code=409, detail="Scene name already exists")
+        _raise_conflict(
+            "Scene name already exists. Choose a different scene name.",
+            scene_name=name,
+        )
 
     style = scene.style
     if "style" in request.model_fields_set:
@@ -1678,7 +1709,10 @@ def api_record_scene(request: SceneRecordRequest):
     if not name:
         raise HTTPException(status_code=400, detail="Scene name cannot be empty")
     if _scene_name_exists(name):
-        raise HTTPException(status_code=409, detail="Scene name already exists")
+        _raise_conflict(
+            "Scene name already exists. Choose a different scene name.",
+            scene_name=name,
+        )
 
     snapshot = _record_scene_snapshot(request.duration)
 

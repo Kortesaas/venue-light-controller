@@ -496,6 +496,10 @@ export default function AdminPanel({
     try {
       const res = await fetch(`${API_BASE}/api/scenes/dynamic/start`, { method: "POST" });
       if (!res.ok) {
+        if (res.status === 409) {
+          setAnimatedRecordState("recording");
+          return;
+        }
         throw new Error("Dynamic recording could not be started.");
       }
       setAnimatedRecordState("recording");

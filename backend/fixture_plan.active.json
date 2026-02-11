@@ -1,317 +1,2504 @@
 {
   "version": 1,
-  "imported_at": "2026-02-09T06:02:18.069268+00:00",
-  "source_filename": "ParameterListExport.xml",
-  "fixture_count": 4,
-  "parameter_count": 36,
+  "imported_at": "2026-02-09T12:52:43.078554+00:00",
+  "source_filename": "ParameterListExport (3) (1).xml",
+  "fixture_count": 43,
+  "parameter_count": 285,
   "universes": [
     0,
     1
   ],
   "fixtures": [
     {
-      "fixture": "ASC20013 1",
+      "fixture": "Blind 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 2,
+          "name": "Dimmer",
+          "fixture": "Blind 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Disco LED",
       "parameters": [
         {
           "universe": 1,
-          "channel": 377,
-          "name": "Pan",
-          "fixture": "ASC20013 1",
-          "role": "position",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 379,
-          "name": "Tilt",
-          "fixture": "ASC20013 1",
-          "role": "position",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 381,
-          "name": "Dimmer",
-          "fixture": "ASC20013 1",
-          "role": "intensity",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 382,
-          "name": "Shutter1",
-          "fixture": "ASC20013 1",
-          "role": "beam",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 383,
-          "name": "Color1",
-          "fixture": "ASC20013 1",
+          "channel": 19,
+          "name": "ColorRGB_R",
+          "fixture": "Disco LED",
           "role": "color",
           "ma3_universe": 2
         },
         {
           "universe": 1,
-          "channel": 384,
-          "name": "Gobo1",
-          "fixture": "ASC20013 1",
+          "channel": 20,
+          "name": "ColorRGB_G",
+          "fixture": "Disco LED",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 21,
+          "name": "ColorRGB_B",
+          "fixture": "Disco LED",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 22,
+          "name": "ColorRGB_W",
+          "fixture": "Disco LED",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 23,
+          "name": "COLORMIXER",
+          "fixture": "Disco LED",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 24,
+          "name": "Shutter1",
+          "fixture": "Disco LED",
           "role": "beam",
           "ma3_universe": 2
         },
         {
           "universe": 1,
-          "channel": 385,
-          "name": "Gobo1Pos",
-          "fixture": "ASC20013 1",
-          "role": "position",
+          "channel": 25,
+          "name": "COLORMIXER2",
+          "fixture": "Disco LED",
+          "role": "color",
           "ma3_universe": 2
         },
         {
           "universe": 1,
-          "channel": 386,
-          "name": "GOBO1OFFSET",
-          "fixture": "ASC20013 1",
-          "role": "beam",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 387,
-          "name": "EFFECTWHEEL",
-          "fixture": "ASC20013 1",
-          "role": "other",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 388,
-          "name": "Focus1",
-          "fixture": "ASC20013 1",
-          "role": "position",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 389,
-          "name": "FixtureGlobalReset",
-          "fixture": "ASC20013 1",
-          "role": "control",
+          "channel": 26,
+          "name": "Dimmer",
+          "fixture": "Disco LED",
+          "role": "intensity",
           "ma3_universe": 2
         }
       ]
     },
     {
-      "fixture": "DS100RGD 1",
+      "fixture": "Disco Motor",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 505,
+          "name": "MIRRORBALL",
+          "fixture": "Disco Motor",
+          "role": "other",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Flood 1",
       "parameters": [
         {
           "universe": 0,
-          "channel": 1,
+          "channel": 25,
           "name": "Dimmer",
-          "fixture": "DS100RGD 1",
+          "fixture": "Flood 1",
           "role": "intensity",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 2,
-          "name": "LASERPATTERN",
-          "fixture": "DS100RGD 1",
-          "role": "other",
+          "channel": 26,
+          "name": "Shutter1",
+          "fixture": "Flood 1",
+          "role": "beam",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 3,
-          "name": "LASERPATTERNMACRORATE",
-          "fixture": "DS100RGD 1",
-          "role": "control",
+          "channel": 27,
+          "name": "StrobeDuration",
+          "fixture": "Flood 1",
+          "role": "beam",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 4,
-          "name": "SCALEX",
-          "fixture": "DS100RGD 1",
-          "role": "other",
+          "channel": 28,
+          "name": "ColorRGB_R",
+          "fixture": "Flood 1",
+          "role": "color",
           "ma3_universe": 1
         },
+        {
+          "universe": 0,
+          "channel": 29,
+          "name": "ColorRGB_G",
+          "fixture": "Flood 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 30,
+          "name": "ColorRGB_B",
+          "fixture": "Flood 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 31,
+          "name": "ColorRGB_W",
+          "fixture": "Flood 1",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Flood 2",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 32,
+          "name": "Dimmer",
+          "fixture": "Flood 2",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 33,
+          "name": "Shutter1",
+          "fixture": "Flood 2",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 34,
+          "name": "StrobeDuration",
+          "fixture": "Flood 2",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 35,
+          "name": "ColorRGB_R",
+          "fixture": "Flood 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 36,
+          "name": "ColorRGB_G",
+          "fixture": "Flood 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 37,
+          "name": "ColorRGB_B",
+          "fixture": "Flood 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 38,
+          "name": "ColorRGB_W",
+          "fixture": "Flood 2",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Flood 3",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 39,
+          "name": "Dimmer",
+          "fixture": "Flood 3",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 40,
+          "name": "Shutter1",
+          "fixture": "Flood 3",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 41,
+          "name": "StrobeDuration",
+          "fixture": "Flood 3",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 42,
+          "name": "ColorRGB_R",
+          "fixture": "Flood 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 43,
+          "name": "ColorRGB_G",
+          "fixture": "Flood 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 44,
+          "name": "ColorRGB_B",
+          "fixture": "Flood 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 45,
+          "name": "ColorRGB_W",
+          "fixture": "Flood 3",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Flood 4",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 46,
+          "name": "Dimmer",
+          "fixture": "Flood 4",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 47,
+          "name": "Shutter1",
+          "fixture": "Flood 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 48,
+          "name": "StrobeDuration",
+          "fixture": "Flood 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 49,
+          "name": "ColorRGB_R",
+          "fixture": "Flood 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 50,
+          "name": "ColorRGB_G",
+          "fixture": "Flood 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 51,
+          "name": "ColorRGB_B",
+          "fixture": "Flood 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 52,
+          "name": "ColorRGB_W",
+          "fixture": "Flood 4",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Fog 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 511,
+          "name": "Fog1",
+          "fixture": "Fog 1",
+          "role": "other",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Front 1",
+      "parameters": [
         {
           "universe": 0,
           "channel": 5,
-          "name": "MACROS",
-          "fixture": "DS100RGD 1",
-          "role": "control",
+          "name": "ColorRGB_CW",
+          "fixture": "Front 1",
+          "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 6,
-          "name": "POSITIONZ",
-          "fixture": "DS100RGD 1",
-          "role": "position",
+          "name": "ColorRGB_WW",
+          "fixture": "Front 1",
+          "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 7,
-          "name": "POSITIONX",
-          "fixture": "DS100RGD 1",
-          "role": "position",
+          "name": "Shutter1",
+          "fixture": "Front 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 8,
+          "name": "MACROS",
+          "fixture": "Front 1",
+          "role": "control",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 9,
-          "name": "POSITIONY",
-          "fixture": "DS100RGD 1",
-          "role": "position",
+          "name": "Dimmer",
+          "fixture": "Front 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Front 2",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 10,
+          "name": "ColorRGB_CW",
+          "fixture": "Front 2",
+          "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 11,
-          "name": "COLORMIXER",
-          "fixture": "DS100RGD 1",
+          "name": "ColorRGB_WW",
+          "fixture": "Front 2",
           "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 12,
-          "name": "COLORMIXER2",
-          "fixture": "DS100RGD 1",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 13,
           "name": "Shutter1",
-          "fixture": "DS100RGD 1",
+          "fixture": "Front 2",
           "role": "beam",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 14,
-          "name": "MODE",
-          "fixture": "DS100RGD 1",
+          "channel": 13,
+          "name": "MACROS",
+          "fixture": "Front 2",
           "role": "control",
           "ma3_universe": 1
         },
         {
           "universe": 0,
+          "channel": 14,
+          "name": "Dimmer",
+          "fixture": "Front 2",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Front 3",
+      "parameters": [
+        {
+          "universe": 0,
           "channel": 15,
-          "name": "SCANRATE",
-          "fixture": "DS100RGD 1",
-          "role": "control",
+          "name": "ColorRGB_CW",
+          "fixture": "Front 3",
+          "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 16,
-          "name": "MACROS2",
-          "fixture": "DS100RGD 1",
-          "role": "control",
+          "name": "ColorRGB_WW",
+          "fixture": "Front 3",
+          "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 17,
-          "name": "INTENSITYADJUST",
-          "fixture": "DS100RGD 1",
-          "role": "intensity",
+          "name": "Shutter1",
+          "fixture": "Front 3",
+          "role": "beam",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 18,
-          "name": "EFFECTMACROS",
-          "fixture": "DS100RGD 1",
+          "name": "MACROS",
+          "fixture": "Front 3",
           "role": "control",
           "ma3_universe": 1
         },
         {
           "universe": 0,
           "channel": 19,
-          "name": "EFFECTMACROS2",
-          "fixture": "DS100RGD 1",
+          "name": "Dimmer",
+          "fixture": "Front 3",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Front 4",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 20,
+          "name": "ColorRGB_CW",
+          "fixture": "Front 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 21,
+          "name": "ColorRGB_WW",
+          "fixture": "Front 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 22,
+          "name": "Shutter1",
+          "fixture": "Front 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 23,
+          "name": "MACROS",
+          "fixture": "Front 4",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 24,
+          "name": "Dimmer",
+          "fixture": "Front 4",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Haze 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 510,
+          "name": "Haze1",
+          "fixture": "Haze 1",
+          "role": "other",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "MH 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 55,
+          "name": "Pan",
+          "fixture": "MH 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 57,
+          "name": "Tilt",
+          "fixture": "MH 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 59,
+          "name": "Dimmer",
+          "fixture": "MH 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 60,
+          "name": "Shutter1",
+          "fixture": "MH 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 61,
+          "name": "Color1",
+          "fixture": "MH 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 62,
+          "name": "Gobo1",
+          "fixture": "MH 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 63,
+          "name": "Gobo1Pos",
+          "fixture": "MH 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 64,
+          "name": "GOBO1OFFSET",
+          "fixture": "MH 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 65,
+          "name": "EFFECTWHEEL",
+          "fixture": "MH 1",
+          "role": "other",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 66,
+          "name": "Focus1",
+          "fixture": "MH 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 67,
+          "name": "FixtureGlobalReset",
+          "fixture": "MH 1",
           "role": "control",
           "ma3_universe": 1
         }
       ]
     },
     {
-      "fixture": "FOG",
-      "parameters": [
-        {
-          "universe": 1,
-          "channel": 511,
-          "name": "Fog1",
-          "fixture": "FOG",
-          "role": "other",
-          "ma3_universe": 2
-        }
-      ]
-    },
-    {
-      "fixture": "TWa60W1 1",
+      "fixture": "MH 2",
       "parameters": [
         {
           "universe": 0,
-          "channel": 35,
+          "channel": 68,
+          "name": "Pan",
+          "fixture": "MH 2",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 70,
+          "name": "Tilt",
+          "fixture": "MH 2",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 72,
           "name": "Dimmer",
-          "fixture": "TWa60W1 1",
+          "fixture": "MH 2",
           "role": "intensity",
           "ma3_universe": 1
         },
         {
           "universe": 0,
+          "channel": 73,
+          "name": "Shutter1",
+          "fixture": "MH 2",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 74,
+          "name": "Color1",
+          "fixture": "MH 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 75,
+          "name": "Gobo1",
+          "fixture": "MH 2",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 76,
+          "name": "Gobo1Pos",
+          "fixture": "MH 2",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 77,
+          "name": "GOBO1OFFSET",
+          "fixture": "MH 2",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 78,
+          "name": "EFFECTWHEEL",
+          "fixture": "MH 2",
+          "role": "other",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 79,
+          "name": "Focus1",
+          "fixture": "MH 2",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 80,
+          "name": "FixtureGlobalReset",
+          "fixture": "MH 2",
+          "role": "control",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "MH 3",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 81,
+          "name": "Pan",
+          "fixture": "MH 3",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 83,
+          "name": "Tilt",
+          "fixture": "MH 3",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 85,
+          "name": "Dimmer",
+          "fixture": "MH 3",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 86,
+          "name": "Shutter1",
+          "fixture": "MH 3",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 87,
+          "name": "Color1",
+          "fixture": "MH 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 88,
+          "name": "Gobo1",
+          "fixture": "MH 3",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 89,
+          "name": "Gobo1Pos",
+          "fixture": "MH 3",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 90,
+          "name": "GOBO1OFFSET",
+          "fixture": "MH 3",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 91,
+          "name": "EFFECTWHEEL",
+          "fixture": "MH 3",
+          "role": "other",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 92,
+          "name": "Focus1",
+          "fixture": "MH 3",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 93,
+          "name": "FixtureGlobalReset",
+          "fixture": "MH 3",
+          "role": "control",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "MH 4",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 94,
+          "name": "Pan",
+          "fixture": "MH 4",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 96,
+          "name": "Tilt",
+          "fixture": "MH 4",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 98,
+          "name": "Dimmer",
+          "fixture": "MH 4",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 99,
+          "name": "Shutter1",
+          "fixture": "MH 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 100,
+          "name": "Color1",
+          "fixture": "MH 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 101,
+          "name": "Gobo1",
+          "fixture": "MH 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 102,
+          "name": "Gobo1Pos",
+          "fixture": "MH 4",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 103,
+          "name": "GOBO1OFFSET",
+          "fixture": "MH 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 104,
+          "name": "EFFECTWHEEL",
+          "fixture": "MH 4",
+          "role": "other",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 105,
+          "name": "Focus1",
+          "fixture": "MH 4",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 106,
+          "name": "FixtureGlobalReset",
+          "fixture": "MH 4",
+          "role": "control",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Par 1",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 1,
+          "name": "Dimmer",
+          "fixture": "Par 1",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 2,
+          "name": "Shutter1",
+          "fixture": "Par 1",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 3,
+          "name": "ColorRGB_R",
+          "fixture": "Par 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 4,
+          "name": "ColorRGB_G",
+          "fixture": "Par 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 5,
+          "name": "ColorRGB_B",
+          "fixture": "Par 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 6,
+          "name": "ColorRGB_W",
+          "fixture": "Par 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 7,
+          "name": "ColorRGB_RY",
+          "fixture": "Par 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 8,
+          "name": "ColorRGB_UV",
+          "fixture": "Par 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 9,
+          "name": "COLORMIXER",
+          "fixture": "Par 1",
+          "role": "color",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Par 2",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 10,
+          "name": "Dimmer",
+          "fixture": "Par 2",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 11,
+          "name": "Shutter1",
+          "fixture": "Par 2",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 12,
+          "name": "ColorRGB_R",
+          "fixture": "Par 2",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 13,
+          "name": "ColorRGB_G",
+          "fixture": "Par 2",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 14,
+          "name": "ColorRGB_B",
+          "fixture": "Par 2",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 15,
+          "name": "ColorRGB_W",
+          "fixture": "Par 2",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 16,
+          "name": "ColorRGB_RY",
+          "fixture": "Par 2",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 17,
+          "name": "ColorRGB_UV",
+          "fixture": "Par 2",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 18,
+          "name": "COLORMIXER",
+          "fixture": "Par 2",
+          "role": "color",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 160,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 161,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 162,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 163,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 164,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 165,
+          "name": "Dimmer",
+          "fixture": "Spot 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 166,
+          "name": "Shutter1",
+          "fixture": "Spot 1",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 10",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 223,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 10",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 224,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 10",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 225,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 10",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 226,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 10",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 227,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 10",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 228,
+          "name": "Dimmer",
+          "fixture": "Spot 10",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 229,
+          "name": "Shutter1",
+          "fixture": "Spot 10",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 11",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 230,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 11",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 231,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 11",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 232,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 11",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 233,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 11",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 234,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 11",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 235,
+          "name": "Dimmer",
+          "fixture": "Spot 11",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 236,
+          "name": "Shutter1",
+          "fixture": "Spot 11",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 12",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 237,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 12",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 238,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 12",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 239,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 12",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 240,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 12",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 241,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 12",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 242,
+          "name": "Dimmer",
+          "fixture": "Spot 12",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 243,
+          "name": "Shutter1",
+          "fixture": "Spot 12",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 13",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 244,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 13",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 245,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 13",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 246,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 13",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 247,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 13",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 248,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 13",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 249,
+          "name": "Dimmer",
+          "fixture": "Spot 13",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 250,
+          "name": "Shutter1",
+          "fixture": "Spot 13",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 14",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 251,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 14",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 252,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 14",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 253,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 14",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 254,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 14",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 255,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 14",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 256,
+          "name": "Dimmer",
+          "fixture": "Spot 14",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 257,
+          "name": "Shutter1",
+          "fixture": "Spot 14",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 15",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 258,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 15",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 259,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 15",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 260,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 15",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 261,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 15",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 262,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 15",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 263,
+          "name": "Dimmer",
+          "fixture": "Spot 15",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 264,
+          "name": "Shutter1",
+          "fixture": "Spot 15",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 2",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 167,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 168,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 169,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 170,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 171,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 172,
+          "name": "Dimmer",
+          "fixture": "Spot 2",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 173,
+          "name": "Shutter1",
+          "fixture": "Spot 2",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 3",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 174,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 175,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 176,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 177,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 178,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 179,
+          "name": "Dimmer",
+          "fixture": "Spot 3",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 180,
+          "name": "Shutter1",
+          "fixture": "Spot 3",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 4",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 181,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 182,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 183,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 184,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 185,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 186,
+          "name": "Dimmer",
+          "fixture": "Spot 4",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 187,
+          "name": "Shutter1",
+          "fixture": "Spot 4",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 5",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 188,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 5",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 189,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 5",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 190,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 5",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 191,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 5",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 192,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 5",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 193,
+          "name": "Dimmer",
+          "fixture": "Spot 5",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 194,
+          "name": "Shutter1",
+          "fixture": "Spot 5",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 6",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 195,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 6",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 196,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 6",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 197,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 6",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 198,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 6",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 199,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 6",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 200,
+          "name": "Dimmer",
+          "fixture": "Spot 6",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 201,
+          "name": "Shutter1",
+          "fixture": "Spot 6",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 7",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 202,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 7",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 203,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 7",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 204,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 7",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 205,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 7",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 206,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 7",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 207,
+          "name": "Dimmer",
+          "fixture": "Spot 7",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 208,
+          "name": "Shutter1",
+          "fixture": "Spot 7",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 8",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 209,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 8",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 210,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 8",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 211,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 8",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 212,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 8",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 213,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 8",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 214,
+          "name": "Dimmer",
+          "fixture": "Spot 8",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 215,
+          "name": "Shutter1",
+          "fixture": "Spot 8",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Spot 9",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 216,
+          "name": "ColorRGB_R",
+          "fixture": "Spot 9",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 217,
+          "name": "ColorRGB_G",
+          "fixture": "Spot 9",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 218,
+          "name": "ColorRGB_B",
+          "fixture": "Spot 9",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 219,
+          "name": "ColorRGB_W",
+          "fixture": "Spot 9",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 220,
+          "name": "ColorRGB_RY",
+          "fixture": "Spot 9",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 221,
+          "name": "Dimmer",
+          "fixture": "Spot 9",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 222,
+          "name": "Shutter1",
+          "fixture": "Spot 9",
+          "role": "beam",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Strobe",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 300,
+          "name": "Shutter1",
+          "fixture": "Strobe",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 301,
+          "name": "Dimmer",
+          "fixture": "Strobe",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Theater 1",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 27,
+          "name": "Dimmer",
+          "fixture": "Theater 1",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 28,
+          "name": "Shutter1",
+          "fixture": "Theater 1",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 29,
+          "name": "ColorRGB_WW",
+          "fixture": "Theater 1",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 30,
+          "name": "ColorRGB_CW",
+          "fixture": "Theater 1",
+          "role": "color",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Theater 2",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 31,
+          "name": "Dimmer",
+          "fixture": "Theater 2",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 32,
+          "name": "Shutter1",
+          "fixture": "Theater 2",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 33,
+          "name": "ColorRGB_WW",
+          "fixture": "Theater 2",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 34,
+          "name": "ColorRGB_CW",
+          "fixture": "Theater 2",
+          "role": "color",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Theater 3",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 35,
+          "name": "Dimmer",
+          "fixture": "Theater 3",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
           "channel": 36,
           "name": "Shutter1",
-          "fixture": "TWa60W1 1",
+          "fixture": "Theater 3",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 2
         },
         {
-          "universe": 0,
+          "universe": 1,
           "channel": 37,
-          "name": "StrobeDuration",
-          "fixture": "TWa60W1 1",
+          "name": "ColorRGB_WW",
+          "fixture": "Theater 3",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 38,
+          "name": "ColorRGB_CW",
+          "fixture": "Theater 3",
+          "role": "color",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Theater 4",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 39,
+          "name": "Dimmer",
+          "fixture": "Theater 4",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 40,
+          "name": "Shutter1",
+          "fixture": "Theater 4",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 41,
+          "name": "ColorRGB_WW",
+          "fixture": "Theater 4",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 42,
+          "name": "ColorRGB_CW",
+          "fixture": "Theater 4",
+          "role": "color",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Wash 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 110,
+          "name": "Shutter1",
+          "fixture": "Wash 1",
           "role": "beam",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 38,
+          "channel": 111,
+          "name": "Dimmer",
+          "fixture": "Wash 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 112,
+          "name": "Pan",
+          "fixture": "Wash 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 114,
+          "name": "Tilt",
+          "fixture": "Wash 1",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 116,
+          "name": "FixtureGlobalReset",
+          "fixture": "Wash 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 117,
+          "name": "COLORMIXER",
+          "fixture": "Wash 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 118,
           "name": "ColorRGB_R",
-          "fixture": "TWa60W1 1",
+          "fixture": "Wash 1",
           "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 39,
+          "channel": 119,
           "name": "ColorRGB_G",
-          "fixture": "TWa60W1 1",
+          "fixture": "Wash 1",
           "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 40,
+          "channel": 120,
           "name": "ColorRGB_B",
-          "fixture": "TWa60W1 1",
+          "fixture": "Wash 1",
           "role": "color",
           "ma3_universe": 1
         },
         {
           "universe": 0,
-          "channel": 41,
+          "channel": 121,
           "name": "ColorRGB_W",
-          "fixture": "TWa60W1 1",
+          "fixture": "Wash 1",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Wash 2",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 122,
+          "name": "Shutter1",
+          "fixture": "Wash 2",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 123,
+          "name": "Dimmer",
+          "fixture": "Wash 2",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 124,
+          "name": "Pan",
+          "fixture": "Wash 2",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 126,
+          "name": "Tilt",
+          "fixture": "Wash 2",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 128,
+          "name": "FixtureGlobalReset",
+          "fixture": "Wash 2",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 129,
+          "name": "COLORMIXER",
+          "fixture": "Wash 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 130,
+          "name": "ColorRGB_R",
+          "fixture": "Wash 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 131,
+          "name": "ColorRGB_G",
+          "fixture": "Wash 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 132,
+          "name": "ColorRGB_B",
+          "fixture": "Wash 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 133,
+          "name": "ColorRGB_W",
+          "fixture": "Wash 2",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Wash 3",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 134,
+          "name": "Shutter1",
+          "fixture": "Wash 3",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 135,
+          "name": "Dimmer",
+          "fixture": "Wash 3",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 136,
+          "name": "Pan",
+          "fixture": "Wash 3",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 138,
+          "name": "Tilt",
+          "fixture": "Wash 3",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 140,
+          "name": "FixtureGlobalReset",
+          "fixture": "Wash 3",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 141,
+          "name": "COLORMIXER",
+          "fixture": "Wash 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 142,
+          "name": "ColorRGB_R",
+          "fixture": "Wash 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 143,
+          "name": "ColorRGB_G",
+          "fixture": "Wash 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 144,
+          "name": "ColorRGB_B",
+          "fixture": "Wash 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 145,
+          "name": "ColorRGB_W",
+          "fixture": "Wash 3",
+          "role": "color",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Wash 4",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 146,
+          "name": "Shutter1",
+          "fixture": "Wash 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 147,
+          "name": "Dimmer",
+          "fixture": "Wash 4",
+          "role": "intensity",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 148,
+          "name": "Pan",
+          "fixture": "Wash 4",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 150,
+          "name": "Tilt",
+          "fixture": "Wash 4",
+          "role": "position",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 152,
+          "name": "FixtureGlobalReset",
+          "fixture": "Wash 4",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 153,
+          "name": "COLORMIXER",
+          "fixture": "Wash 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 154,
+          "name": "ColorRGB_R",
+          "fixture": "Wash 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 155,
+          "name": "ColorRGB_G",
+          "fixture": "Wash 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 156,
+          "name": "ColorRGB_B",
+          "fixture": "Wash 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 157,
+          "name": "ColorRGB_W",
+          "fixture": "Wash 4",
           "role": "color",
           "ma3_universe": 1
         }
@@ -319,293 +2506,2285 @@
     }
   ],
   "address_map": {
-    "0:1": {
+    "0:301": {
       "universe": 0,
-      "channel": 1,
+      "channel": 301,
       "name": "Dimmer",
-      "fixture": "DS100RGD 1",
+      "fixture": "Strobe",
       "role": "intensity",
       "ma3_universe": 1
     },
-    "0:2": {
+    "0:300": {
       "universe": 0,
-      "channel": 2,
-      "name": "LASERPATTERN",
-      "fixture": "DS100RGD 1",
-      "role": "other",
-      "ma3_universe": 1
-    },
-    "0:3": {
-      "universe": 0,
-      "channel": 3,
-      "name": "LASERPATTERNMACRORATE",
-      "fixture": "DS100RGD 1",
-      "role": "control",
-      "ma3_universe": 1
-    },
-    "0:4": {
-      "universe": 0,
-      "channel": 4,
-      "name": "SCALEX",
-      "fixture": "DS100RGD 1",
-      "role": "other",
-      "ma3_universe": 1
-    },
-    "0:5": {
-      "universe": 0,
-      "channel": 5,
-      "name": "MACROS",
-      "fixture": "DS100RGD 1",
-      "role": "control",
-      "ma3_universe": 1
-    },
-    "0:6": {
-      "universe": 0,
-      "channel": 6,
-      "name": "POSITIONZ",
-      "fixture": "DS100RGD 1",
-      "role": "position",
-      "ma3_universe": 1
-    },
-    "0:7": {
-      "universe": 0,
-      "channel": 7,
-      "name": "POSITIONX",
-      "fixture": "DS100RGD 1",
-      "role": "position",
-      "ma3_universe": 1
-    },
-    "0:9": {
-      "universe": 0,
-      "channel": 9,
-      "name": "POSITIONY",
-      "fixture": "DS100RGD 1",
-      "role": "position",
-      "ma3_universe": 1
-    },
-    "0:11": {
-      "universe": 0,
-      "channel": 11,
-      "name": "COLORMIXER",
-      "fixture": "DS100RGD 1",
-      "role": "color",
-      "ma3_universe": 1
-    },
-    "0:12": {
-      "universe": 0,
-      "channel": 12,
-      "name": "COLORMIXER2",
-      "fixture": "DS100RGD 1",
-      "role": "color",
-      "ma3_universe": 1
-    },
-    "0:13": {
-      "universe": 0,
-      "channel": 13,
+      "channel": 300,
       "name": "Shutter1",
-      "fixture": "DS100RGD 1",
+      "fixture": "Strobe",
       "role": "beam",
       "ma3_universe": 1
     },
-    "0:14": {
+    "0:59": {
       "universe": 0,
-      "channel": 14,
-      "name": "MODE",
-      "fixture": "DS100RGD 1",
-      "role": "control",
-      "ma3_universe": 1
-    },
-    "0:15": {
-      "universe": 0,
-      "channel": 15,
-      "name": "SCANRATE",
-      "fixture": "DS100RGD 1",
-      "role": "control",
-      "ma3_universe": 1
-    },
-    "0:16": {
-      "universe": 0,
-      "channel": 16,
-      "name": "MACROS2",
-      "fixture": "DS100RGD 1",
-      "role": "control",
-      "ma3_universe": 1
-    },
-    "0:17": {
-      "universe": 0,
-      "channel": 17,
-      "name": "INTENSITYADJUST",
-      "fixture": "DS100RGD 1",
+      "channel": 59,
+      "name": "Dimmer",
+      "fixture": "MH 1",
       "role": "intensity",
       "ma3_universe": 1
     },
-    "0:18": {
+    "0:55": {
       "universe": 0,
-      "channel": 18,
-      "name": "EFFECTMACROS",
-      "fixture": "DS100RGD 1",
+      "channel": 55,
+      "name": "Pan",
+      "fixture": "MH 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:57": {
+      "universe": 0,
+      "channel": 57,
+      "name": "Tilt",
+      "fixture": "MH 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:60": {
+      "universe": 0,
+      "channel": 60,
+      "name": "Shutter1",
+      "fixture": "MH 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:61": {
+      "universe": 0,
+      "channel": 61,
+      "name": "Color1",
+      "fixture": "MH 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:62": {
+      "universe": 0,
+      "channel": 62,
+      "name": "Gobo1",
+      "fixture": "MH 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:63": {
+      "universe": 0,
+      "channel": 63,
+      "name": "Gobo1Pos",
+      "fixture": "MH 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:64": {
+      "universe": 0,
+      "channel": 64,
+      "name": "GOBO1OFFSET",
+      "fixture": "MH 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:65": {
+      "universe": 0,
+      "channel": 65,
+      "name": "EFFECTWHEEL",
+      "fixture": "MH 1",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "0:66": {
+      "universe": 0,
+      "channel": 66,
+      "name": "Focus1",
+      "fixture": "MH 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:67": {
+      "universe": 0,
+      "channel": 67,
+      "name": "FixtureGlobalReset",
+      "fixture": "MH 1",
       "role": "control",
       "ma3_universe": 1
     },
-    "0:19": {
+    "0:72": {
       "universe": 0,
-      "channel": 19,
-      "name": "EFFECTMACROS2",
-      "fixture": "DS100RGD 1",
+      "channel": 72,
+      "name": "Dimmer",
+      "fixture": "MH 2",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:68": {
+      "universe": 0,
+      "channel": 68,
+      "name": "Pan",
+      "fixture": "MH 2",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:70": {
+      "universe": 0,
+      "channel": 70,
+      "name": "Tilt",
+      "fixture": "MH 2",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:73": {
+      "universe": 0,
+      "channel": 73,
+      "name": "Shutter1",
+      "fixture": "MH 2",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:74": {
+      "universe": 0,
+      "channel": 74,
+      "name": "Color1",
+      "fixture": "MH 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:75": {
+      "universe": 0,
+      "channel": 75,
+      "name": "Gobo1",
+      "fixture": "MH 2",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:76": {
+      "universe": 0,
+      "channel": 76,
+      "name": "Gobo1Pos",
+      "fixture": "MH 2",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:77": {
+      "universe": 0,
+      "channel": 77,
+      "name": "GOBO1OFFSET",
+      "fixture": "MH 2",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:78": {
+      "universe": 0,
+      "channel": 78,
+      "name": "EFFECTWHEEL",
+      "fixture": "MH 2",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "0:79": {
+      "universe": 0,
+      "channel": 79,
+      "name": "Focus1",
+      "fixture": "MH 2",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:80": {
+      "universe": 0,
+      "channel": 80,
+      "name": "FixtureGlobalReset",
+      "fixture": "MH 2",
       "role": "control",
+      "ma3_universe": 1
+    },
+    "0:85": {
+      "universe": 0,
+      "channel": 85,
+      "name": "Dimmer",
+      "fixture": "MH 3",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:81": {
+      "universe": 0,
+      "channel": 81,
+      "name": "Pan",
+      "fixture": "MH 3",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:83": {
+      "universe": 0,
+      "channel": 83,
+      "name": "Tilt",
+      "fixture": "MH 3",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:86": {
+      "universe": 0,
+      "channel": 86,
+      "name": "Shutter1",
+      "fixture": "MH 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:87": {
+      "universe": 0,
+      "channel": 87,
+      "name": "Color1",
+      "fixture": "MH 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:88": {
+      "universe": 0,
+      "channel": 88,
+      "name": "Gobo1",
+      "fixture": "MH 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:89": {
+      "universe": 0,
+      "channel": 89,
+      "name": "Gobo1Pos",
+      "fixture": "MH 3",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:90": {
+      "universe": 0,
+      "channel": 90,
+      "name": "GOBO1OFFSET",
+      "fixture": "MH 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:91": {
+      "universe": 0,
+      "channel": 91,
+      "name": "EFFECTWHEEL",
+      "fixture": "MH 3",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "0:92": {
+      "universe": 0,
+      "channel": 92,
+      "name": "Focus1",
+      "fixture": "MH 3",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:93": {
+      "universe": 0,
+      "channel": 93,
+      "name": "FixtureGlobalReset",
+      "fixture": "MH 3",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:98": {
+      "universe": 0,
+      "channel": 98,
+      "name": "Dimmer",
+      "fixture": "MH 4",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:94": {
+      "universe": 0,
+      "channel": 94,
+      "name": "Pan",
+      "fixture": "MH 4",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:96": {
+      "universe": 0,
+      "channel": 96,
+      "name": "Tilt",
+      "fixture": "MH 4",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:99": {
+      "universe": 0,
+      "channel": 99,
+      "name": "Shutter1",
+      "fixture": "MH 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:100": {
+      "universe": 0,
+      "channel": 100,
+      "name": "Color1",
+      "fixture": "MH 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:101": {
+      "universe": 0,
+      "channel": 101,
+      "name": "Gobo1",
+      "fixture": "MH 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:102": {
+      "universe": 0,
+      "channel": 102,
+      "name": "Gobo1Pos",
+      "fixture": "MH 4",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:103": {
+      "universe": 0,
+      "channel": 103,
+      "name": "GOBO1OFFSET",
+      "fixture": "MH 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:104": {
+      "universe": 0,
+      "channel": 104,
+      "name": "EFFECTWHEEL",
+      "fixture": "MH 4",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "0:105": {
+      "universe": 0,
+      "channel": 105,
+      "name": "Focus1",
+      "fixture": "MH 4",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:106": {
+      "universe": 0,
+      "channel": 106,
+      "name": "FixtureGlobalReset",
+      "fixture": "MH 4",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:111": {
+      "universe": 0,
+      "channel": 111,
+      "name": "Dimmer",
+      "fixture": "Wash 1",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:117": {
+      "universe": 0,
+      "channel": 117,
+      "name": "COLORMIXER",
+      "fixture": "Wash 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:112": {
+      "universe": 0,
+      "channel": 112,
+      "name": "Pan",
+      "fixture": "Wash 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:114": {
+      "universe": 0,
+      "channel": 114,
+      "name": "Tilt",
+      "fixture": "Wash 1",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:118": {
+      "universe": 0,
+      "channel": 118,
+      "name": "ColorRGB_R",
+      "fixture": "Wash 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:119": {
+      "universe": 0,
+      "channel": 119,
+      "name": "ColorRGB_G",
+      "fixture": "Wash 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:120": {
+      "universe": 0,
+      "channel": 120,
+      "name": "ColorRGB_B",
+      "fixture": "Wash 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:121": {
+      "universe": 0,
+      "channel": 121,
+      "name": "ColorRGB_W",
+      "fixture": "Wash 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:110": {
+      "universe": 0,
+      "channel": 110,
+      "name": "Shutter1",
+      "fixture": "Wash 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:116": {
+      "universe": 0,
+      "channel": 116,
+      "name": "FixtureGlobalReset",
+      "fixture": "Wash 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:123": {
+      "universe": 0,
+      "channel": 123,
+      "name": "Dimmer",
+      "fixture": "Wash 2",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:129": {
+      "universe": 0,
+      "channel": 129,
+      "name": "COLORMIXER",
+      "fixture": "Wash 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:124": {
+      "universe": 0,
+      "channel": 124,
+      "name": "Pan",
+      "fixture": "Wash 2",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:126": {
+      "universe": 0,
+      "channel": 126,
+      "name": "Tilt",
+      "fixture": "Wash 2",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:130": {
+      "universe": 0,
+      "channel": 130,
+      "name": "ColorRGB_R",
+      "fixture": "Wash 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:131": {
+      "universe": 0,
+      "channel": 131,
+      "name": "ColorRGB_G",
+      "fixture": "Wash 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:132": {
+      "universe": 0,
+      "channel": 132,
+      "name": "ColorRGB_B",
+      "fixture": "Wash 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:133": {
+      "universe": 0,
+      "channel": 133,
+      "name": "ColorRGB_W",
+      "fixture": "Wash 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:122": {
+      "universe": 0,
+      "channel": 122,
+      "name": "Shutter1",
+      "fixture": "Wash 2",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:128": {
+      "universe": 0,
+      "channel": 128,
+      "name": "FixtureGlobalReset",
+      "fixture": "Wash 2",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:135": {
+      "universe": 0,
+      "channel": 135,
+      "name": "Dimmer",
+      "fixture": "Wash 3",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:141": {
+      "universe": 0,
+      "channel": 141,
+      "name": "COLORMIXER",
+      "fixture": "Wash 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:136": {
+      "universe": 0,
+      "channel": 136,
+      "name": "Pan",
+      "fixture": "Wash 3",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:138": {
+      "universe": 0,
+      "channel": 138,
+      "name": "Tilt",
+      "fixture": "Wash 3",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:142": {
+      "universe": 0,
+      "channel": 142,
+      "name": "ColorRGB_R",
+      "fixture": "Wash 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:143": {
+      "universe": 0,
+      "channel": 143,
+      "name": "ColorRGB_G",
+      "fixture": "Wash 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:144": {
+      "universe": 0,
+      "channel": 144,
+      "name": "ColorRGB_B",
+      "fixture": "Wash 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:145": {
+      "universe": 0,
+      "channel": 145,
+      "name": "ColorRGB_W",
+      "fixture": "Wash 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:134": {
+      "universe": 0,
+      "channel": 134,
+      "name": "Shutter1",
+      "fixture": "Wash 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:140": {
+      "universe": 0,
+      "channel": 140,
+      "name": "FixtureGlobalReset",
+      "fixture": "Wash 3",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:147": {
+      "universe": 0,
+      "channel": 147,
+      "name": "Dimmer",
+      "fixture": "Wash 4",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:153": {
+      "universe": 0,
+      "channel": 153,
+      "name": "COLORMIXER",
+      "fixture": "Wash 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:148": {
+      "universe": 0,
+      "channel": 148,
+      "name": "Pan",
+      "fixture": "Wash 4",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:150": {
+      "universe": 0,
+      "channel": 150,
+      "name": "Tilt",
+      "fixture": "Wash 4",
+      "role": "position",
+      "ma3_universe": 1
+    },
+    "0:154": {
+      "universe": 0,
+      "channel": 154,
+      "name": "ColorRGB_R",
+      "fixture": "Wash 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:155": {
+      "universe": 0,
+      "channel": 155,
+      "name": "ColorRGB_G",
+      "fixture": "Wash 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:156": {
+      "universe": 0,
+      "channel": 156,
+      "name": "ColorRGB_B",
+      "fixture": "Wash 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:157": {
+      "universe": 0,
+      "channel": 157,
+      "name": "ColorRGB_W",
+      "fixture": "Wash 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:146": {
+      "universe": 0,
+      "channel": 146,
+      "name": "Shutter1",
+      "fixture": "Wash 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:152": {
+      "universe": 0,
+      "channel": 152,
+      "name": "FixtureGlobalReset",
+      "fixture": "Wash 4",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:165": {
+      "universe": 0,
+      "channel": 165,
+      "name": "Dimmer",
+      "fixture": "Spot 1",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:160": {
+      "universe": 0,
+      "channel": 160,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:161": {
+      "universe": 0,
+      "channel": 161,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:162": {
+      "universe": 0,
+      "channel": 162,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:163": {
+      "universe": 0,
+      "channel": 163,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:164": {
+      "universe": 0,
+      "channel": 164,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:166": {
+      "universe": 0,
+      "channel": 166,
+      "name": "Shutter1",
+      "fixture": "Spot 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:172": {
+      "universe": 0,
+      "channel": 172,
+      "name": "Dimmer",
+      "fixture": "Spot 2",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:167": {
+      "universe": 0,
+      "channel": 167,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:168": {
+      "universe": 0,
+      "channel": 168,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:169": {
+      "universe": 0,
+      "channel": 169,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:170": {
+      "universe": 0,
+      "channel": 170,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:171": {
+      "universe": 0,
+      "channel": 171,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:173": {
+      "universe": 0,
+      "channel": 173,
+      "name": "Shutter1",
+      "fixture": "Spot 2",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:179": {
+      "universe": 0,
+      "channel": 179,
+      "name": "Dimmer",
+      "fixture": "Spot 3",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:174": {
+      "universe": 0,
+      "channel": 174,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:175": {
+      "universe": 0,
+      "channel": 175,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:176": {
+      "universe": 0,
+      "channel": 176,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:177": {
+      "universe": 0,
+      "channel": 177,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:178": {
+      "universe": 0,
+      "channel": 178,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:180": {
+      "universe": 0,
+      "channel": 180,
+      "name": "Shutter1",
+      "fixture": "Spot 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:186": {
+      "universe": 0,
+      "channel": 186,
+      "name": "Dimmer",
+      "fixture": "Spot 4",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:181": {
+      "universe": 0,
+      "channel": 181,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:182": {
+      "universe": 0,
+      "channel": 182,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:183": {
+      "universe": 0,
+      "channel": 183,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:184": {
+      "universe": 0,
+      "channel": 184,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:185": {
+      "universe": 0,
+      "channel": 185,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:187": {
+      "universe": 0,
+      "channel": 187,
+      "name": "Shutter1",
+      "fixture": "Spot 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:193": {
+      "universe": 0,
+      "channel": 193,
+      "name": "Dimmer",
+      "fixture": "Spot 5",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:188": {
+      "universe": 0,
+      "channel": 188,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 5",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:189": {
+      "universe": 0,
+      "channel": 189,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 5",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:190": {
+      "universe": 0,
+      "channel": 190,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 5",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:191": {
+      "universe": 0,
+      "channel": 191,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 5",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:192": {
+      "universe": 0,
+      "channel": 192,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 5",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:194": {
+      "universe": 0,
+      "channel": 194,
+      "name": "Shutter1",
+      "fixture": "Spot 5",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:200": {
+      "universe": 0,
+      "channel": 200,
+      "name": "Dimmer",
+      "fixture": "Spot 6",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:195": {
+      "universe": 0,
+      "channel": 195,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 6",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:196": {
+      "universe": 0,
+      "channel": 196,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 6",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:197": {
+      "universe": 0,
+      "channel": 197,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 6",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:198": {
+      "universe": 0,
+      "channel": 198,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 6",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:199": {
+      "universe": 0,
+      "channel": 199,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 6",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:201": {
+      "universe": 0,
+      "channel": 201,
+      "name": "Shutter1",
+      "fixture": "Spot 6",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:207": {
+      "universe": 0,
+      "channel": 207,
+      "name": "Dimmer",
+      "fixture": "Spot 7",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:202": {
+      "universe": 0,
+      "channel": 202,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 7",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:203": {
+      "universe": 0,
+      "channel": 203,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 7",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:204": {
+      "universe": 0,
+      "channel": 204,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 7",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:205": {
+      "universe": 0,
+      "channel": 205,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 7",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:206": {
+      "universe": 0,
+      "channel": 206,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 7",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:208": {
+      "universe": 0,
+      "channel": 208,
+      "name": "Shutter1",
+      "fixture": "Spot 7",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:214": {
+      "universe": 0,
+      "channel": 214,
+      "name": "Dimmer",
+      "fixture": "Spot 8",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:209": {
+      "universe": 0,
+      "channel": 209,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 8",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:210": {
+      "universe": 0,
+      "channel": 210,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 8",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:211": {
+      "universe": 0,
+      "channel": 211,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 8",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:212": {
+      "universe": 0,
+      "channel": 212,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 8",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:213": {
+      "universe": 0,
+      "channel": 213,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 8",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:215": {
+      "universe": 0,
+      "channel": 215,
+      "name": "Shutter1",
+      "fixture": "Spot 8",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:221": {
+      "universe": 0,
+      "channel": 221,
+      "name": "Dimmer",
+      "fixture": "Spot 9",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:216": {
+      "universe": 0,
+      "channel": 216,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 9",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:217": {
+      "universe": 0,
+      "channel": 217,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 9",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:218": {
+      "universe": 0,
+      "channel": 218,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 9",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:219": {
+      "universe": 0,
+      "channel": 219,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 9",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:220": {
+      "universe": 0,
+      "channel": 220,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 9",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:222": {
+      "universe": 0,
+      "channel": 222,
+      "name": "Shutter1",
+      "fixture": "Spot 9",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:228": {
+      "universe": 0,
+      "channel": 228,
+      "name": "Dimmer",
+      "fixture": "Spot 10",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:223": {
+      "universe": 0,
+      "channel": 223,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 10",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:224": {
+      "universe": 0,
+      "channel": 224,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 10",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:225": {
+      "universe": 0,
+      "channel": 225,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 10",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:226": {
+      "universe": 0,
+      "channel": 226,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 10",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:227": {
+      "universe": 0,
+      "channel": 227,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 10",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:229": {
+      "universe": 0,
+      "channel": 229,
+      "name": "Shutter1",
+      "fixture": "Spot 10",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:235": {
+      "universe": 0,
+      "channel": 235,
+      "name": "Dimmer",
+      "fixture": "Spot 11",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:230": {
+      "universe": 0,
+      "channel": 230,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 11",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:231": {
+      "universe": 0,
+      "channel": 231,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 11",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:232": {
+      "universe": 0,
+      "channel": 232,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 11",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:233": {
+      "universe": 0,
+      "channel": 233,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 11",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:234": {
+      "universe": 0,
+      "channel": 234,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 11",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:236": {
+      "universe": 0,
+      "channel": 236,
+      "name": "Shutter1",
+      "fixture": "Spot 11",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:242": {
+      "universe": 0,
+      "channel": 242,
+      "name": "Dimmer",
+      "fixture": "Spot 12",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:237": {
+      "universe": 0,
+      "channel": 237,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 12",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:238": {
+      "universe": 0,
+      "channel": 238,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 12",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:239": {
+      "universe": 0,
+      "channel": 239,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 12",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:240": {
+      "universe": 0,
+      "channel": 240,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 12",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:241": {
+      "universe": 0,
+      "channel": 241,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 12",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:243": {
+      "universe": 0,
+      "channel": 243,
+      "name": "Shutter1",
+      "fixture": "Spot 12",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:249": {
+      "universe": 0,
+      "channel": 249,
+      "name": "Dimmer",
+      "fixture": "Spot 13",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:244": {
+      "universe": 0,
+      "channel": 244,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 13",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:245": {
+      "universe": 0,
+      "channel": 245,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 13",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:246": {
+      "universe": 0,
+      "channel": 246,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 13",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:247": {
+      "universe": 0,
+      "channel": 247,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 13",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:248": {
+      "universe": 0,
+      "channel": 248,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 13",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:250": {
+      "universe": 0,
+      "channel": 250,
+      "name": "Shutter1",
+      "fixture": "Spot 13",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:256": {
+      "universe": 0,
+      "channel": 256,
+      "name": "Dimmer",
+      "fixture": "Spot 14",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:251": {
+      "universe": 0,
+      "channel": 251,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 14",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:252": {
+      "universe": 0,
+      "channel": 252,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 14",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:253": {
+      "universe": 0,
+      "channel": 253,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 14",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:254": {
+      "universe": 0,
+      "channel": 254,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 14",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:255": {
+      "universe": 0,
+      "channel": 255,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 14",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:257": {
+      "universe": 0,
+      "channel": 257,
+      "name": "Shutter1",
+      "fixture": "Spot 14",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:263": {
+      "universe": 0,
+      "channel": 263,
+      "name": "Dimmer",
+      "fixture": "Spot 15",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:258": {
+      "universe": 0,
+      "channel": 258,
+      "name": "ColorRGB_R",
+      "fixture": "Spot 15",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:259": {
+      "universe": 0,
+      "channel": 259,
+      "name": "ColorRGB_G",
+      "fixture": "Spot 15",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:260": {
+      "universe": 0,
+      "channel": 260,
+      "name": "ColorRGB_B",
+      "fixture": "Spot 15",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:261": {
+      "universe": 0,
+      "channel": 261,
+      "name": "ColorRGB_W",
+      "fixture": "Spot 15",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:262": {
+      "universe": 0,
+      "channel": 262,
+      "name": "ColorRGB_RY",
+      "fixture": "Spot 15",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:264": {
+      "universe": 0,
+      "channel": 264,
+      "name": "Shutter1",
+      "fixture": "Spot 15",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:25": {
+      "universe": 0,
+      "channel": 25,
+      "name": "Dimmer",
+      "fixture": "Flood 1",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:28": {
+      "universe": 0,
+      "channel": 28,
+      "name": "ColorRGB_R",
+      "fixture": "Flood 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:29": {
+      "universe": 0,
+      "channel": 29,
+      "name": "ColorRGB_G",
+      "fixture": "Flood 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:30": {
+      "universe": 0,
+      "channel": 30,
+      "name": "ColorRGB_B",
+      "fixture": "Flood 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:31": {
+      "universe": 0,
+      "channel": 31,
+      "name": "ColorRGB_W",
+      "fixture": "Flood 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:26": {
+      "universe": 0,
+      "channel": 26,
+      "name": "Shutter1",
+      "fixture": "Flood 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:27": {
+      "universe": 0,
+      "channel": 27,
+      "name": "StrobeDuration",
+      "fixture": "Flood 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:32": {
+      "universe": 0,
+      "channel": 32,
+      "name": "Dimmer",
+      "fixture": "Flood 2",
+      "role": "intensity",
       "ma3_universe": 1
     },
     "0:35": {
       "universe": 0,
       "channel": 35,
-      "name": "Dimmer",
-      "fixture": "TWa60W1 1",
-      "role": "intensity",
-      "ma3_universe": 1
-    },
-    "0:38": {
-      "universe": 0,
-      "channel": 38,
       "name": "ColorRGB_R",
-      "fixture": "TWa60W1 1",
-      "role": "color",
-      "ma3_universe": 1
-    },
-    "0:39": {
-      "universe": 0,
-      "channel": 39,
-      "name": "ColorRGB_G",
-      "fixture": "TWa60W1 1",
-      "role": "color",
-      "ma3_universe": 1
-    },
-    "0:40": {
-      "universe": 0,
-      "channel": 40,
-      "name": "ColorRGB_B",
-      "fixture": "TWa60W1 1",
-      "role": "color",
-      "ma3_universe": 1
-    },
-    "0:41": {
-      "universe": 0,
-      "channel": 41,
-      "name": "ColorRGB_W",
-      "fixture": "TWa60W1 1",
+      "fixture": "Flood 2",
       "role": "color",
       "ma3_universe": 1
     },
     "0:36": {
       "universe": 0,
       "channel": 36,
-      "name": "Shutter1",
-      "fixture": "TWa60W1 1",
-      "role": "beam",
+      "name": "ColorRGB_G",
+      "fixture": "Flood 2",
+      "role": "color",
       "ma3_universe": 1
     },
     "0:37": {
       "universe": 0,
       "channel": 37,
-      "name": "StrobeDuration",
-      "fixture": "TWa60W1 1",
+      "name": "ColorRGB_B",
+      "fixture": "Flood 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:38": {
+      "universe": 0,
+      "channel": 38,
+      "name": "ColorRGB_W",
+      "fixture": "Flood 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:33": {
+      "universe": 0,
+      "channel": 33,
+      "name": "Shutter1",
+      "fixture": "Flood 2",
       "role": "beam",
       "ma3_universe": 1
     },
-    "1:381": {
-      "universe": 1,
-      "channel": 381,
+    "0:34": {
+      "universe": 0,
+      "channel": 34,
+      "name": "StrobeDuration",
+      "fixture": "Flood 2",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:39": {
+      "universe": 0,
+      "channel": 39,
       "name": "Dimmer",
-      "fixture": "ASC20013 1",
+      "fixture": "Flood 3",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:42": {
+      "universe": 0,
+      "channel": 42,
+      "name": "ColorRGB_R",
+      "fixture": "Flood 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:43": {
+      "universe": 0,
+      "channel": 43,
+      "name": "ColorRGB_G",
+      "fixture": "Flood 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:44": {
+      "universe": 0,
+      "channel": 44,
+      "name": "ColorRGB_B",
+      "fixture": "Flood 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:45": {
+      "universe": 0,
+      "channel": 45,
+      "name": "ColorRGB_W",
+      "fixture": "Flood 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:40": {
+      "universe": 0,
+      "channel": 40,
+      "name": "Shutter1",
+      "fixture": "Flood 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:41": {
+      "universe": 0,
+      "channel": 41,
+      "name": "StrobeDuration",
+      "fixture": "Flood 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:46": {
+      "universe": 0,
+      "channel": 46,
+      "name": "Dimmer",
+      "fixture": "Flood 4",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:49": {
+      "universe": 0,
+      "channel": 49,
+      "name": "ColorRGB_R",
+      "fixture": "Flood 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:50": {
+      "universe": 0,
+      "channel": 50,
+      "name": "ColorRGB_G",
+      "fixture": "Flood 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:51": {
+      "universe": 0,
+      "channel": 51,
+      "name": "ColorRGB_B",
+      "fixture": "Flood 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:52": {
+      "universe": 0,
+      "channel": 52,
+      "name": "ColorRGB_W",
+      "fixture": "Flood 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:47": {
+      "universe": 0,
+      "channel": 47,
+      "name": "Shutter1",
+      "fixture": "Flood 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:48": {
+      "universe": 0,
+      "channel": 48,
+      "name": "StrobeDuration",
+      "fixture": "Flood 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:9": {
+      "universe": 0,
+      "channel": 9,
+      "name": "Dimmer",
+      "fixture": "Front 1",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:5": {
+      "universe": 0,
+      "channel": 5,
+      "name": "ColorRGB_CW",
+      "fixture": "Front 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:6": {
+      "universe": 0,
+      "channel": 6,
+      "name": "ColorRGB_WW",
+      "fixture": "Front 1",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:7": {
+      "universe": 0,
+      "channel": 7,
+      "name": "Shutter1",
+      "fixture": "Front 1",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:8": {
+      "universe": 0,
+      "channel": 8,
+      "name": "MACROS",
+      "fixture": "Front 1",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:14": {
+      "universe": 0,
+      "channel": 14,
+      "name": "Dimmer",
+      "fixture": "Front 2",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:10": {
+      "universe": 0,
+      "channel": 10,
+      "name": "ColorRGB_CW",
+      "fixture": "Front 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:11": {
+      "universe": 0,
+      "channel": 11,
+      "name": "ColorRGB_WW",
+      "fixture": "Front 2",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:12": {
+      "universe": 0,
+      "channel": 12,
+      "name": "Shutter1",
+      "fixture": "Front 2",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:13": {
+      "universe": 0,
+      "channel": 13,
+      "name": "MACROS",
+      "fixture": "Front 2",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:19": {
+      "universe": 0,
+      "channel": 19,
+      "name": "Dimmer",
+      "fixture": "Front 3",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:15": {
+      "universe": 0,
+      "channel": 15,
+      "name": "ColorRGB_CW",
+      "fixture": "Front 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:16": {
+      "universe": 0,
+      "channel": 16,
+      "name": "ColorRGB_WW",
+      "fixture": "Front 3",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:17": {
+      "universe": 0,
+      "channel": 17,
+      "name": "Shutter1",
+      "fixture": "Front 3",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:18": {
+      "universe": 0,
+      "channel": 18,
+      "name": "MACROS",
+      "fixture": "Front 3",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "0:24": {
+      "universe": 0,
+      "channel": 24,
+      "name": "Dimmer",
+      "fixture": "Front 4",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:20": {
+      "universe": 0,
+      "channel": 20,
+      "name": "ColorRGB_CW",
+      "fixture": "Front 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:21": {
+      "universe": 0,
+      "channel": 21,
+      "name": "ColorRGB_WW",
+      "fixture": "Front 4",
+      "role": "color",
+      "ma3_universe": 1
+    },
+    "0:22": {
+      "universe": 0,
+      "channel": 22,
+      "name": "Shutter1",
+      "fixture": "Front 4",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "0:23": {
+      "universe": 0,
+      "channel": 23,
+      "name": "MACROS",
+      "fixture": "Front 4",
+      "role": "control",
+      "ma3_universe": 1
+    },
+    "1:27": {
+      "universe": 1,
+      "channel": 27,
+      "name": "Dimmer",
+      "fixture": "Theater 1",
       "role": "intensity",
       "ma3_universe": 2
     },
-    "1:377": {
+    "1:29": {
       "universe": 1,
-      "channel": 377,
-      "name": "Pan",
-      "fixture": "ASC20013 1",
-      "role": "position",
-      "ma3_universe": 2
-    },
-    "1:379": {
-      "universe": 1,
-      "channel": 379,
-      "name": "Tilt",
-      "fixture": "ASC20013 1",
-      "role": "position",
-      "ma3_universe": 2
-    },
-    "1:382": {
-      "universe": 1,
-      "channel": 382,
-      "name": "Shutter1",
-      "fixture": "ASC20013 1",
-      "role": "beam",
-      "ma3_universe": 2
-    },
-    "1:383": {
-      "universe": 1,
-      "channel": 383,
-      "name": "Color1",
-      "fixture": "ASC20013 1",
+      "channel": 29,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater 1",
       "role": "color",
       "ma3_universe": 2
     },
-    "1:384": {
+    "1:30": {
       "universe": 1,
-      "channel": 384,
-      "name": "Gobo1",
-      "fixture": "ASC20013 1",
+      "channel": 30,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:28": {
+      "universe": 1,
+      "channel": 28,
+      "name": "Shutter1",
+      "fixture": "Theater 1",
       "role": "beam",
       "ma3_universe": 2
     },
-    "1:385": {
+    "1:31": {
       "universe": 1,
-      "channel": 385,
-      "name": "Gobo1Pos",
-      "fixture": "ASC20013 1",
-      "role": "position",
+      "channel": 31,
+      "name": "Dimmer",
+      "fixture": "Theater 2",
+      "role": "intensity",
       "ma3_universe": 2
     },
-    "1:386": {
+    "1:33": {
       "universe": 1,
-      "channel": 386,
-      "name": "GOBO1OFFSET",
-      "fixture": "ASC20013 1",
+      "channel": 33,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:34": {
+      "universe": 1,
+      "channel": 34,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:32": {
+      "universe": 1,
+      "channel": 32,
+      "name": "Shutter1",
+      "fixture": "Theater 2",
       "role": "beam",
       "ma3_universe": 2
     },
-    "1:387": {
+    "1:35": {
       "universe": 1,
-      "channel": 387,
-      "name": "EFFECTWHEEL",
-      "fixture": "ASC20013 1",
-      "role": "other",
+      "channel": 35,
+      "name": "Dimmer",
+      "fixture": "Theater 3",
+      "role": "intensity",
       "ma3_universe": 2
     },
-    "1:388": {
+    "1:37": {
       "universe": 1,
-      "channel": 388,
-      "name": "Focus1",
-      "fixture": "ASC20013 1",
-      "role": "position",
+      "channel": 37,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater 3",
+      "role": "color",
       "ma3_universe": 2
     },
-    "1:389": {
+    "1:38": {
       "universe": 1,
-      "channel": 389,
-      "name": "FixtureGlobalReset",
-      "fixture": "ASC20013 1",
-      "role": "control",
+      "channel": 38,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater 3",
+      "role": "color",
       "ma3_universe": 2
     },
-    "1:511": {
+    "1:36": {
       "universe": 1,
+      "channel": 36,
+      "name": "Shutter1",
+      "fixture": "Theater 3",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:39": {
+      "universe": 1,
+      "channel": 39,
+      "name": "Dimmer",
+      "fixture": "Theater 4",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:41": {
+      "universe": 1,
+      "channel": 41,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater 4",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:42": {
+      "universe": 1,
+      "channel": 42,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater 4",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:40": {
+      "universe": 1,
+      "channel": 40,
+      "name": "Shutter1",
+      "fixture": "Theater 4",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:1": {
+      "universe": 1,
+      "channel": 1,
+      "name": "Dimmer",
+      "fixture": "Par 1",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:3": {
+      "universe": 1,
+      "channel": 3,
+      "name": "ColorRGB_R",
+      "fixture": "Par 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:4": {
+      "universe": 1,
+      "channel": 4,
+      "name": "ColorRGB_G",
+      "fixture": "Par 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:5": {
+      "universe": 1,
+      "channel": 5,
+      "name": "ColorRGB_B",
+      "fixture": "Par 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:6": {
+      "universe": 1,
+      "channel": 6,
+      "name": "ColorRGB_W",
+      "fixture": "Par 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:7": {
+      "universe": 1,
+      "channel": 7,
+      "name": "ColorRGB_RY",
+      "fixture": "Par 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:8": {
+      "universe": 1,
+      "channel": 8,
+      "name": "ColorRGB_UV",
+      "fixture": "Par 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:2": {
+      "universe": 1,
+      "channel": 2,
+      "name": "Shutter1",
+      "fixture": "Par 1",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:9": {
+      "universe": 1,
+      "channel": 9,
+      "name": "COLORMIXER",
+      "fixture": "Par 1",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:10": {
+      "universe": 1,
+      "channel": 10,
+      "name": "Dimmer",
+      "fixture": "Par 2",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:12": {
+      "universe": 1,
+      "channel": 12,
+      "name": "ColorRGB_R",
+      "fixture": "Par 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:13": {
+      "universe": 1,
+      "channel": 13,
+      "name": "ColorRGB_G",
+      "fixture": "Par 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:14": {
+      "universe": 1,
+      "channel": 14,
+      "name": "ColorRGB_B",
+      "fixture": "Par 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:15": {
+      "universe": 1,
+      "channel": 15,
+      "name": "ColorRGB_W",
+      "fixture": "Par 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:16": {
+      "universe": 1,
+      "channel": 16,
+      "name": "ColorRGB_RY",
+      "fixture": "Par 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:17": {
+      "universe": 1,
+      "channel": 17,
+      "name": "ColorRGB_UV",
+      "fixture": "Par 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:11": {
+      "universe": 1,
+      "channel": 11,
+      "name": "Shutter1",
+      "fixture": "Par 2",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:18": {
+      "universe": 1,
+      "channel": 18,
+      "name": "COLORMIXER",
+      "fixture": "Par 2",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "0:511": {
+      "universe": 0,
       "channel": 511,
       "name": "Fog1",
-      "fixture": "FOG",
+      "fixture": "Fog 1",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "0:510": {
+      "universe": 0,
+      "channel": 510,
+      "name": "Haze1",
+      "fixture": "Haze 1",
+      "role": "other",
+      "ma3_universe": 1
+    },
+    "1:26": {
+      "universe": 1,
+      "channel": 26,
+      "name": "Dimmer",
+      "fixture": "Disco LED",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:25": {
+      "universe": 1,
+      "channel": 25,
+      "name": "COLORMIXER2",
+      "fixture": "Disco LED",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:19": {
+      "universe": 1,
+      "channel": 19,
+      "name": "ColorRGB_R",
+      "fixture": "Disco LED",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:20": {
+      "universe": 1,
+      "channel": 20,
+      "name": "ColorRGB_G",
+      "fixture": "Disco LED",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:21": {
+      "universe": 1,
+      "channel": 21,
+      "name": "ColorRGB_B",
+      "fixture": "Disco LED",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:22": {
+      "universe": 1,
+      "channel": 22,
+      "name": "ColorRGB_W",
+      "fixture": "Disco LED",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:23": {
+      "universe": 1,
+      "channel": 23,
+      "name": "COLORMIXER",
+      "fixture": "Disco LED",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:24": {
+      "universe": 1,
+      "channel": 24,
+      "name": "Shutter1",
+      "fixture": "Disco LED",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:505": {
+      "universe": 1,
+      "channel": 505,
+      "name": "MIRRORBALL",
+      "fixture": "Disco Motor",
       "role": "other",
       "ma3_universe": 2
+    },
+    "0:2": {
+      "universe": 0,
+      "channel": 2,
+      "name": "Dimmer",
+      "fixture": "Blind 1",
+      "role": "intensity",
+      "ma3_universe": 1
     }
   }
 }
