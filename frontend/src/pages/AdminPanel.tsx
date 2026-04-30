@@ -98,12 +98,21 @@ type AdminPanelProps = {
   onControlModeChange: (mode: "panel" | "external") => void;
 };
 
+type NetworkAdapterOption = {
+  id: string;
+  name: string;
+  local_ip: string;
+};
+
 type SettingsState = {
   local_ip: string;
+  local_adapter: string;
+  network_adapters: NetworkAdapterOption[];
   node_ip: string;
   dmx_fps: number;
   poll_interval: number;
   universe_count: number;
+  artnet_universe_map: number[];
   fog_flash_universe: number;
   fog_flash_channel: number;
   haze_universe: number;
@@ -131,8 +140,22 @@ type FixturePlanSummary = {
 };
 
 const FPS_OPTIONS = [15, 24, 30, 40, 44, 60];
+const DEFAULT_ARTNET_UNIVERSE_MAP = [0, 1, 2, 3, 4, 5, 6, 7];
 const IPV4_REGEX =
   /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
+
+const normalizeUniverseMap = (value: unknown): number[] => {
+  if (!Array.isArray(value)) {
+    return [...DEFAULT_ARTNET_UNIVERSE_MAP];
+  }
+  return DEFAULT_ARTNET_UNIVERSE_MAP.map((fallback, index) => {
+    const raw = Number(value[index]);
+    if (!Number.isInteger(raw) || raw < 0) {
+      return fallback;
+    }
+    return raw;
+  });
+};
 
 export default function AdminPanel({
   sceneVersion,
@@ -160,10 +183,13 @@ export default function AdminPanel({
   const [form, setForm] = useState<SceneFormState>(initialFormState);
   const [settingsForm, setSettingsForm] = useState<SettingsState>({
     local_ip: "",
+    local_adapter: "",
+    network_adapters: [],
     node_ip: "",
     dmx_fps: 30,
     poll_interval: 5,
     universe_count: 1,
+    artnet_universe_map: [...DEFAULT_ARTNET_UNIVERSE_MAP],
     fog_flash_universe: 1,
     fog_flash_channel: 0,
     haze_universe: 1,
@@ -237,8 +263,17 @@ export default function AdminPanel({
         if (!res.ok) {
           throw new Error("Failed to load settings");
         }
-        const data = (await res.json()) as SettingsState;
-        setSettingsForm(data);
+        const data = (await res.json()) as Partial<SettingsState>;
+        setSettingsForm((prev) => ({
+          ...prev,
+          ...data,
+          artnet_universe_map: normalizeUniverseMap(data.artnet_universe_map),
+          local_adapter:
+            data.local_adapter ??
+            data.network_adapters?.[0]?.id ??
+            prev.local_adapter,
+          network_adapters: data.network_adapters ?? prev.network_adapters,
+        }));
       } catch {
         setErrorMessage("Settings konnten nicht geladen werden.");
       } finally {
@@ -618,10 +653,13 @@ export default function AdminPanel({
   };
 
   const canApplySettings =
+    settingsForm.local_adapter.trim().length > 0 &&
     IPV4_REGEX.test(settingsForm.node_ip.trim()) &&
     FPS_OPTIONS.includes(Number(settingsForm.dmx_fps)) &&
     Number.isInteger(Number(settingsForm.universe_count)) &&
     Number(settingsForm.universe_count) > 0 &&
+    settingsForm.artnet_universe_map.length === 8 &&
+    settingsForm.artnet_universe_map.every((value) => Number.isInteger(Number(value)) && Number(value) >= 0) &&
     Number.isInteger(Number(settingsForm.fog_flash_universe)) &&
     Number(settingsForm.fog_flash_universe) > 0 &&
     Number.isInteger(Number(settingsForm.haze_universe)) &&
@@ -658,10 +696,12 @@ export default function AdminPanel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          local_adapter: settingsForm.local_adapter,
           node_ip: settingsForm.node_ip.trim(),
           dmx_fps: Number(settingsForm.dmx_fps),
           poll_interval: Number(settingsForm.poll_interval),
           universe_count: Number(settingsForm.universe_count),
+          artnet_universe_map: settingsForm.artnet_universe_map.map((value) => Number(value)),
           fog_flash_universe: Number(settingsForm.fog_flash_universe),
           fog_flash_channel: Number(settingsForm.fog_flash_channel),
           haze_universe: Number(settingsForm.haze_universe),
@@ -673,7 +713,10 @@ export default function AdminPanel({
         throw new Error("Failed to update settings");
       }
       const data = (await res.json()) as SettingsState;
-      setSettingsForm(data);
+      setSettingsForm({
+        ...data,
+        artnet_universe_map: normalizeUniverseMap(data.artnet_universe_map),
+      });
       setActionMessage("Settings angewendet.");
     } catch {
       setErrorMessage("Settings konnten nicht gespeichert werden.");
@@ -1350,6 +1393,42 @@ export default function AdminPanel({
             ) : (
               <Stack spacing={1.5}>
                 <TextField
+                  select
+                  label="Network Adapter"
+                  value={settingsForm.local_adapter}
+                  disabled={settingsForm.network_adapters.length === 0}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => {
+                      const nextAdapter = prev.network_adapters.find(
+                        (adapter) => adapter.id === event.target.value
+                      );
+                      return {
+                        ...prev,
+                        local_adapter: event.target.value,
+                        local_ip: nextAdapter?.local_ip ?? prev.local_ip,
+                      };
+                    })
+                  }
+                  size="small"
+                  fullWidth
+                  helperText={
+                    settingsForm.network_adapters.length > 0
+                      ? "Der Local IP wird automatisch aus dem Adapter übernommen."
+                      : "Kein aktiver IPv4-Adapter gefunden."
+                  }
+                >
+                  {settingsForm.network_adapters.length === 0 ? (
+                    <MenuItem value="" disabled>
+                      No active IPv4 adapters
+                    </MenuItem>
+                  ) : null}
+                  {settingsForm.network_adapters.map((adapter) => (
+                    <MenuItem key={adapter.id} value={adapter.id}>
+                      {`${adapter.name} (${adapter.local_ip})`}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
                   label="Local IP"
                   value={settingsForm.local_ip}
                   size="small"
@@ -1413,6 +1492,35 @@ export default function AdminPanel({
                   fullWidth
                   helperText={universeExampleText}
                 />
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Art-Net Universe Mapping (Local U1..U8)
+                  </Typography>
+                  <Stack spacing={1}>
+                    {settingsForm.artnet_universe_map.map((targetUniverse, index) => (
+                      <TextField
+                        key={`artnet-map-${index + 1}`}
+                        label={`Local U${index + 1} -> Art-Net`}
+                        type="number"
+                        value={targetUniverse}
+                        onChange={(event) => {
+                          const nextValue = Number(event.target.value);
+                          setSettingsForm((prev) => {
+                            const nextMap = [...prev.artnet_universe_map];
+                            nextMap[index] = Number.isInteger(nextValue) && nextValue >= 0 ? nextValue : 0;
+                            return {
+                              ...prev,
+                              artnet_universe_map: nextMap,
+                            };
+                          });
+                        }}
+                        size="small"
+                        fullWidth
+                        inputProps={{ min: 0 }}
+                      />
+                    ))}
+                  </Stack>
+                </Box>
                 <TextField
                   label="Fog Flash Universe"
                   type="number"
@@ -1817,5 +1925,3 @@ export default function AdminPanel({
     </Stack>
   );
 }
-
-
