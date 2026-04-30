@@ -55,6 +55,7 @@ _log = logging.getLogger(__name__)
 
 ACTIVE_SCENE_ID: Optional[str] = None
 CONTROL_MODE: str = "panel"
+PANEL_LOCKED: bool = bool(settings.lock_on_startup)
 MASTER_DIMMER_PERCENT: int = 100
 HAZE_PERCENT: int = 0
 FOG_FLASH_ACTIVE: bool = False
@@ -109,6 +110,8 @@ def _build_streamdeck_snapshot() -> StreamDeckSnapshot:
             id=scene.id,
             name=scene.name,
             scene_type=scene.type,
+            style_icon=scene.style.icon if scene.style is not None else None,
+            style_color=scene.style.color if scene.style is not None else None,
         )
         for scene in list_scenes()
     ]
@@ -128,11 +131,16 @@ def _build_streamdeck_snapshot() -> StreamDeckSnapshot:
         master_dimmer_percent = MASTER_DIMMER_PERCENT
     return StreamDeckSnapshot(
         control_mode=CONTROL_MODE,
+        panel_locked=PANEL_LOCKED,
         active_scene_id=ACTIVE_SCENE_ID,
         master_dimmer_percent=master_dimmer_percent,
         scenes=scenes,
         group_dimmer_available=bool(group_status.get("group_dimmer_available")),
         group_dimmers=group_dimmers,
+        haze_percent=HAZE_PERCENT,
+        haze_configured=_has_haze_channel_configured(),
+        fog_flash_active=FOG_FLASH_ACTIVE,
+        fog_flash_configured=_has_fog_channel_configured(),
     )
 
 
@@ -146,6 +154,12 @@ def _set_control_mode(mode: str) -> None:
     global CONTROL_MODE
     CONTROL_MODE = mode
     _broadcast_event("status", {"control_mode": CONTROL_MODE})
+
+
+def _set_panel_locked(locked: bool) -> None:
+    global PANEL_LOCKED
+    PANEL_LOCKED = bool(locked)
+    _broadcast_event("status", {"panel_locked": PANEL_LOCKED})
 
 
 def _set_master_dimmer_percent(value: int) -> None:
@@ -244,6 +258,7 @@ def _build_status_payload() -> dict:
         "active_scene_id": ACTIVE_SCENE_ID,
         "live_edit_scene_name": _get_live_editor_scene_name(),
         "control_mode": CONTROL_MODE,
+        "panel_locked": PANEL_LOCKED,
         "master_dimmer_percent": MASTER_DIMMER_PERCENT,
         "master_dimmer_mode": _get_master_dimmer_mode(),
         "haze_percent": HAZE_PERCENT,
@@ -661,6 +676,26 @@ def _streamdeck_toggle_group_mute(group_key: str) -> None:
     )
 
 
+def _streamdeck_set_haze(value_percent: int) -> None:
+    api_set_haze(HazeUpdateRequest(value_percent=value_percent))
+
+
+def _streamdeck_set_fog_flash_active(active: bool) -> None:
+    api_set_fog_flash(FogFlashUpdateRequest(active=active))
+
+
+def _streamdeck_set_panel_lock(locked: bool) -> None:
+    api_set_panel_lock(PanelLockUpdateRequest(locked=locked))
+
+
+def _streamdeck_unlock_panel(pin: str) -> bool:
+    try:
+        api_unlock_panel(UnlockRequest(pin=pin))
+        return True
+    except HTTPException:
+        return False
+
+
 def start_streamdeck_service() -> None:
     global _STREAMDECK_SERVICE
     if _STREAMDECK_SERVICE is None:
@@ -672,6 +707,10 @@ def start_streamdeck_service() -> None:
             set_master_dimmer=_streamdeck_set_master_dimmer,
             set_group_dimmer=_streamdeck_set_group_dimmer,
             toggle_group_mute=_streamdeck_toggle_group_mute,
+            set_haze=_streamdeck_set_haze,
+            set_fog_flash_active=_streamdeck_set_fog_flash_active,
+            set_panel_lock=_streamdeck_set_panel_lock,
+            unlock_panel=_streamdeck_unlock_panel,
         )
     _STREAMDECK_SERVICE.start()
     _STREAMDECK_SERVICE.notify_state_changed()
@@ -849,6 +888,10 @@ class UnlockRequest(BaseModel):
     pin: str
 
 
+class PanelLockUpdateRequest(BaseModel):
+    locked: bool
+
+
 class PinChangeRequest(BaseModel):
     current_pin: str
     new_pin: str
@@ -945,7 +988,14 @@ def api_unlock_panel(request: UnlockRequest):
         raise HTTPException(status_code=400, detail="PIN must be exactly 4 digits")
     if not _verify_pin(pin):
         raise HTTPException(status_code=401, detail="Invalid PIN")
+    _set_panel_locked(False)
     return {"status": "ok"}
+
+
+@router.post("/panel-lock")
+def api_set_panel_lock(request: PanelLockUpdateRequest):
+    _set_panel_locked(bool(request.locked))
+    return {"status": "ok", "panel_locked": PANEL_LOCKED}
 
 
 @router.post("/pin/change")
