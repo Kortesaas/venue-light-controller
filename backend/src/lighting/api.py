@@ -42,6 +42,12 @@ from .scenes import (
     save_scene,
     set_scene_order,
 )
+from .streamdeck_service import (
+    StreamDeckGroupDimmer,
+    StreamDeckScene,
+    StreamDeckService,
+    StreamDeckSnapshot,
+)
 from .networking import list_network_adapters, resolve_adapter
 
 router = APIRouter()
@@ -58,6 +64,7 @@ _BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
 _LIVE_EDITOR_STATE: Optional[dict] = None
 _ANIMATED_PLAYBACK_STATE: Optional[dict] = None
 _ANIMATED_RECORDING_STATE: Optional[dict] = None
+_STREAMDECK_SERVICE: Optional[StreamDeckService] = None
 _playback_state_lock = threading.Lock()
 _recording_state_lock = threading.Lock()
 _subscribers: set[asyncio.Queue[str]] = set()
@@ -88,9 +95,45 @@ def _broadcast_event(event: str, data: dict) -> None:
         subscribers = list(_subscribers)
         loop = _event_loop
     if loop is None:
-        return
-    for queue in subscribers:
-        loop.call_soon_threadsafe(queue.put_nowait, message)
+        pass
+    else:
+        for queue in subscribers:
+            loop.call_soon_threadsafe(queue.put_nowait, message)
+    if _STREAMDECK_SERVICE is not None:
+        _STREAMDECK_SERVICE.notify_state_changed()
+
+
+def _build_streamdeck_snapshot() -> StreamDeckSnapshot:
+    scenes = [
+        StreamDeckScene(
+            id=scene.id,
+            name=scene.name,
+            scene_type=scene.type,
+        )
+        for scene in list_scenes()
+    ]
+    group_status = _build_group_dimmer_status()
+    group_dimmers = [
+        StreamDeckGroupDimmer(
+            key=group["key"],
+            name=group["name"],
+            value_percent=int(group["value_percent"]),
+            muted=bool(group["muted"]),
+            fixture_count=int(group["fixture_count"]),
+            channel_count=int(group["channel_count"]),
+        )
+        for group in group_status.get("group_dimmers", [])
+    ]
+    with _playback_state_lock:
+        master_dimmer_percent = MASTER_DIMMER_PERCENT
+    return StreamDeckSnapshot(
+        control_mode=CONTROL_MODE,
+        active_scene_id=ACTIVE_SCENE_ID,
+        master_dimmer_percent=master_dimmer_percent,
+        scenes=scenes,
+        group_dimmer_available=bool(group_status.get("group_dimmer_available")),
+        group_dimmers=group_dimmers,
+    )
 
 
 def _set_active_scene(scene_id: Optional[str]) -> None:
@@ -585,6 +628,60 @@ def _is_valid_pin(pin: str) -> bool:
 
 def _verify_pin(pin: str) -> bool:
     return hash_pin(pin) == settings.operator_pin_hash
+
+
+def _streamdeck_play_scene(scene_id: str) -> None:
+    api_play_scene(scene_id)
+
+
+def _streamdeck_stop() -> None:
+    api_stop()
+
+
+def _streamdeck_blackout() -> None:
+    api_blackout()
+
+
+def _streamdeck_set_master_dimmer(value_percent: int) -> None:
+    api_set_master_dimmer(MasterDimmerUpdateRequest(value_percent=value_percent))
+
+
+def _streamdeck_set_group_dimmer(group_key: str, value_percent: int) -> None:
+    api_set_group_dimmer(
+        group_key=group_key,
+        request=GroupDimmerValueUpdateRequest(value_percent=value_percent),
+    )
+
+
+def _streamdeck_toggle_group_mute(group_key: str) -> None:
+    group = _find_group_dimmer_or_raise(group_key)
+    api_set_group_dimmer_mute(
+        group_key=group_key,
+        request=GroupDimmerMuteUpdateRequest(active=not bool(group["muted"])),
+    )
+
+
+def start_streamdeck_service() -> None:
+    global _STREAMDECK_SERVICE
+    if _STREAMDECK_SERVICE is None:
+        _STREAMDECK_SERVICE = StreamDeckService(
+            get_snapshot=_build_streamdeck_snapshot,
+            play_scene=_streamdeck_play_scene,
+            stop=_streamdeck_stop,
+            blackout=_streamdeck_blackout,
+            set_master_dimmer=_streamdeck_set_master_dimmer,
+            set_group_dimmer=_streamdeck_set_group_dimmer,
+            toggle_group_mute=_streamdeck_toggle_group_mute,
+        )
+    _STREAMDECK_SERVICE.start()
+    _STREAMDECK_SERVICE.notify_state_changed()
+
+
+def stop_streamdeck_service() -> None:
+    global _STREAMDECK_SERVICE
+    if _STREAMDECK_SERVICE is None:
+        return
+    _STREAMDECK_SERVICE.stop()
 
 
 @router.get("/status")
