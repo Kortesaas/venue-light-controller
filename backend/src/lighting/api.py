@@ -42,7 +42,7 @@ from .scenes import (
     save_scene,
     set_scene_order,
 )
-from .networking import resolve_adapter
+from .networking import list_network_adapters, resolve_adapter
 
 router = APIRouter()
 _log = logging.getLogger(__name__)
@@ -1680,16 +1680,29 @@ def api_update_settings(request: SettingsUpdateRequest):
         if request.local_adapter is not None and request.local_adapter.strip()
         else None
     )
-    selected_adapter, _adapters = resolve_adapter(requested_adapter or settings.local_adapter or None)
+    selected_adapter, adapters = resolve_adapter(requested_adapter)
+    if requested_adapter is not None and selected_adapter is None:
+        selected_entry = next((adapter for adapter in adapters if adapter["id"] == requested_adapter), None)
+        if selected_entry is not None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Network adapter '{requested_adapter}' has no usable IPv4 address.",
+            )
+        raise HTTPException(
+            status_code=400,
+            detail=f"Network adapter '{requested_adapter}' is unavailable.",
+        )
+
+    if requested_adapter is None:
+        selected_adapter, adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_adapter is None and requested_adapter is None:
+        selected_adapter, adapters = resolve_adapter(None)
+    if selected_adapter is None and not adapters:
+        adapters = list_network_adapters()
     if selected_adapter is None:
         raise HTTPException(
             status_code=400,
             detail="No active IPv4 network adapter found. Connect a network adapter and try again.",
-        )
-    if requested_adapter is not None and selected_adapter["id"] != requested_adapter:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Network adapter '{requested_adapter}' is unavailable or has no usable IPv4 address.",
         )
 
     settings.local_adapter = selected_adapter["id"]

@@ -1413,7 +1413,7 @@ export default function AdminPanel({
                   fullWidth
                   helperText={
                     settingsForm.network_adapters.length > 0
-                      ? "Der Local IP wird automatisch aus dem Adapter übernommen."
+                      ? "Die lokale IP wird automatisch aus dem Adapter übernommen."
                       : "Kein aktiver IPv4-Adapter gefunden."
                   }
                 >
@@ -1423,13 +1423,15 @@ export default function AdminPanel({
                     </MenuItem>
                   ) : null}
                   {settingsForm.network_adapters.map((adapter) => (
-                    <MenuItem key={adapter.id} value={adapter.id}>
-                      {`${adapter.name} (${adapter.local_ip})`}
+                    <MenuItem key={adapter.id} value={adapter.id} disabled={!adapter.local_ip}>
+                      {adapter.local_ip
+                        ? `${adapter.name} (${adapter.local_ip})`
+                        : `${adapter.name} (keine IPv4)`}
                     </MenuItem>
                   ))}
                 </TextField>
                 <TextField
-                  label="Local IP"
+                  label="Lokale IP"
                   value={settingsForm.local_ip}
                   size="small"
                   fullWidth

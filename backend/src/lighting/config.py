@@ -141,6 +141,8 @@ def persist_runtime_settings() -> None:
 
 def _sync_local_ip_from_adapter() -> None:
     selected_adapter, _adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_adapter is None and settings.local_adapter:
+        selected_adapter, _adapters = resolve_adapter(None)
     if selected_adapter is None:
         return
     settings.local_adapter = selected_adapter["id"]
