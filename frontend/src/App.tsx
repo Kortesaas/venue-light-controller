@@ -31,13 +31,13 @@ type Mode = "operator" | "admin";
 type StatusResponse = {
   status: string;
   local_ip: string;
+  web_local_ip?: string;
   node_ip: string;
   active_scene_id?: string | null;
   live_edit_scene_name?: string | null;
   control_mode?: "panel" | "external";
+  panel_locked?: boolean;
 };
-
-const PANEL_LOCK_STORAGE_KEY = "operator_panel_locked";
 
 function App() {
   const [mode, setMode] = useState<Mode>("operator");
@@ -46,13 +46,7 @@ function App() {
   const [liveEditSceneName, setLiveEditSceneName] = useState<string | null>(null);
   const [sceneVersion, setSceneVersion] = useState(0);
   const [controlMode, setControlMode] = useState<"panel" | "external">("panel");
-  const [panelLocked, setPanelLocked] = useState<boolean>(() => {
-    const persisted = localStorage.getItem(PANEL_LOCK_STORAGE_KEY);
-    if (persisted === "true" || persisted === "false") {
-      return persisted === "true";
-    }
-    return true;
-  });
+  const [panelLocked, setPanelLocked] = useState<boolean>(true);
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState<string | null>(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -80,6 +74,9 @@ function App() {
         if (typeof data.control_mode !== "undefined") {
           setControlMode(data.control_mode);
         }
+        if (typeof data.panel_locked !== "undefined") {
+          setPanelLocked(Boolean(data.panel_locked));
+        }
       } catch {
         // Ignore status fetch errors for initial render.
       }
@@ -96,6 +93,7 @@ function App() {
           active_scene_id?: string | null;
           live_edit_scene_name?: string | null;
           control_mode?: "panel" | "external";
+          panel_locked?: boolean;
         };
         if (typeof data.active_scene_id !== "undefined") {
           setActiveSceneId(data.active_scene_id ?? null);
@@ -105,6 +103,9 @@ function App() {
         }
         if (data.control_mode === "panel" || data.control_mode === "external") {
           setControlMode(data.control_mode);
+        }
+        if (typeof data.panel_locked !== "undefined") {
+          setPanelLocked(Boolean(data.panel_locked));
         }
       } catch {
         // Ignore malformed SSE payloads.
@@ -123,6 +124,7 @@ function App() {
         const data = JSON.parse(event.data) as {
           node_ip: string;
           local_ip?: string;
+          web_local_ip?: string;
         };
         setStatus((prev) =>
           prev
@@ -130,6 +132,7 @@ function App() {
                 ...prev,
                 node_ip: data.node_ip,
                 local_ip: data.local_ip ?? prev.local_ip,
+                web_local_ip: data.web_local_ip ?? prev.web_local_ip,
               }
             : prev
         );
@@ -149,15 +152,23 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(PANEL_LOCK_STORAGE_KEY, panelLocked ? "true" : "false");
-  }, [panelLocked]);
-
   const handleLockPanel = async () => {
-    setPanelLocked(true);
-    setPinInput("");
-    setPinError(null);
-    setSnackbar({ severity: "info", message: "Panel locked." });
+    try {
+      const res = await fetch(`${API_BASE}/api/panel-lock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locked: true }),
+      });
+      if (!res.ok) {
+        throw new Error("Lock failed");
+      }
+      setPanelLocked(true);
+      setPinInput("");
+      setPinError(null);
+      setSnackbar({ severity: "info", message: "Panel locked." });
+    } catch {
+      setSnackbar({ severity: "error", message: "Could not lock panel." });
+    }
   };
 
   const handlePinDigit = (digit: string) => {
@@ -207,7 +218,8 @@ function App() {
     }
   };
 
-  const connectUrl = `http://${status?.local_ip ?? window.location.hostname}:8000`;
+  const connectHost = status?.web_local_ip ?? status?.local_ip ?? window.location.hostname;
+  const connectUrl = `http://${connectHost}:8000`;
 
   const handleCopyConnectUrl = async () => {
     try {
@@ -528,4 +540,3 @@ function App() {
 }
 
 export default App;
-

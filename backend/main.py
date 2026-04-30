@@ -1,12 +1,27 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pathlib import Path
 
-from src.lighting.api import router as lighting_router
+from src.lighting.api import (
+    router as lighting_router,
+    start_streamdeck_service,
+    stop_streamdeck_service,
+)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    start_streamdeck_service()
+    try:
+        yield
+    finally:
+        stop_streamdeck_service()
+
+
+app = FastAPI(lifespan=lifespan)
 
 # CORS for local frontend dev server
 app.add_middleware(
@@ -22,6 +37,7 @@ app.add_middleware(
 
 # API mounten
 app.include_router(lighting_router, prefix="/api", tags=["lighting"])
+
 
 # Frontend-Build mounten (falls vorhanden)
 FRONTEND_DIST = Path(__file__).parent / "frontend_dist"

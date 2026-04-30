@@ -107,6 +107,8 @@ type NetworkAdapterOption = {
 type SettingsState = {
   local_ip: string;
   local_adapter: string;
+  web_local_ip: string;
+  web_local_adapter: string;
   network_adapters: NetworkAdapterOption[];
   node_ip: string;
   dmx_fps: number;
@@ -184,6 +186,8 @@ export default function AdminPanel({
   const [settingsForm, setSettingsForm] = useState<SettingsState>({
     local_ip: "",
     local_adapter: "",
+    web_local_ip: "",
+    web_local_adapter: "",
     network_adapters: [],
     node_ip: "",
     dmx_fps: 30,
@@ -264,16 +268,34 @@ export default function AdminPanel({
           throw new Error("Failed to load settings");
         }
         const data = (await res.json()) as Partial<SettingsState>;
-        setSettingsForm((prev) => ({
-          ...prev,
-          ...data,
-          artnet_universe_map: normalizeUniverseMap(data.artnet_universe_map),
-          local_adapter:
+        setSettingsForm((prev) => {
+          const adapters = data.network_adapters ?? prev.network_adapters;
+          const localAdapter =
             data.local_adapter ??
-            data.network_adapters?.[0]?.id ??
-            prev.local_adapter,
-          network_adapters: data.network_adapters ?? prev.network_adapters,
-        }));
+            adapters[0]?.id ??
+            prev.local_adapter;
+          const webAdapter =
+            data.web_local_adapter ??
+            localAdapter ??
+            adapters[0]?.id ??
+            prev.web_local_adapter;
+          const localAdapterEntry = adapters.find((adapter) => adapter.id === localAdapter);
+          const webAdapterEntry = adapters.find((adapter) => adapter.id === webAdapter);
+          return {
+            ...prev,
+            ...data,
+            artnet_universe_map: normalizeUniverseMap(data.artnet_universe_map),
+            local_adapter: localAdapter,
+            web_local_adapter: webAdapter,
+            local_ip: data.local_ip ?? localAdapterEntry?.local_ip ?? prev.local_ip,
+            web_local_ip:
+              data.web_local_ip ??
+              webAdapterEntry?.local_ip ??
+              data.local_ip ??
+              prev.web_local_ip,
+            network_adapters: adapters,
+          };
+        });
       } catch {
         setErrorMessage("Settings konnten nicht geladen werden.");
       } finally {
@@ -654,6 +676,7 @@ export default function AdminPanel({
 
   const canApplySettings =
     settingsForm.local_adapter.trim().length > 0 &&
+    settingsForm.web_local_adapter.trim().length > 0 &&
     IPV4_REGEX.test(settingsForm.node_ip.trim()) &&
     FPS_OPTIONS.includes(Number(settingsForm.dmx_fps)) &&
     Number.isInteger(Number(settingsForm.universe_count)) &&
@@ -697,6 +720,7 @@ export default function AdminPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           local_adapter: settingsForm.local_adapter,
+          web_local_adapter: settingsForm.web_local_adapter,
           node_ip: settingsForm.node_ip.trim(),
           dmx_fps: Number(settingsForm.dmx_fps),
           poll_interval: Number(settingsForm.poll_interval),
@@ -1433,6 +1457,51 @@ export default function AdminPanel({
                 <TextField
                   label="Lokale IP"
                   value={settingsForm.local_ip}
+                  size="small"
+                  fullWidth
+                  InputProps={{ readOnly: true }}
+                />
+                <TextField
+                  select
+                  label="Web App Adapter (QR/Link)"
+                  value={settingsForm.web_local_adapter}
+                  disabled={settingsForm.network_adapters.length === 0}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => {
+                      const nextAdapter = prev.network_adapters.find(
+                        (adapter) => adapter.id === event.target.value
+                      );
+                      return {
+                        ...prev,
+                        web_local_adapter: event.target.value,
+                        web_local_ip: nextAdapter?.local_ip ?? prev.web_local_ip,
+                      };
+                    })
+                  }
+                  size="small"
+                  fullWidth
+                  helperText={
+                    settingsForm.network_adapters.length > 0
+                      ? "Diese IP wird im QR-Code und Connect-Link angezeigt."
+                      : "Kein aktiver IPv4-Adapter gefunden."
+                  }
+                >
+                  {settingsForm.network_adapters.length === 0 ? (
+                    <MenuItem value="" disabled>
+                      No active IPv4 adapters
+                    </MenuItem>
+                  ) : null}
+                  {settingsForm.network_adapters.map((adapter) => (
+                    <MenuItem key={`web-${adapter.id}`} value={adapter.id} disabled={!adapter.local_ip}>
+                      {adapter.local_ip
+                        ? `${adapter.name} (${adapter.local_ip})`
+                        : `${adapter.name} (keine IPv4)`}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  label="Web App IP (QR)"
+                  value={settingsForm.web_local_ip}
                   size="small"
                   fullWidth
                   InputProps={{ readOnly: true }}

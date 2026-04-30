@@ -42,6 +42,12 @@ from .scenes import (
     save_scene,
     set_scene_order,
 )
+from .streamdeck_service import (
+    StreamDeckGroupDimmer,
+    StreamDeckScene,
+    StreamDeckService,
+    StreamDeckSnapshot,
+)
 from .networking import list_network_adapters, resolve_adapter
 
 router = APIRouter()
@@ -49,6 +55,7 @@ _log = logging.getLogger(__name__)
 
 ACTIVE_SCENE_ID: Optional[str] = None
 CONTROL_MODE: str = "panel"
+PANEL_LOCKED: bool = bool(settings.lock_on_startup)
 MASTER_DIMMER_PERCENT: int = 100
 HAZE_PERCENT: int = 0
 FOG_FLASH_ACTIVE: bool = False
@@ -58,6 +65,7 @@ _BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
 _LIVE_EDITOR_STATE: Optional[dict] = None
 _ANIMATED_PLAYBACK_STATE: Optional[dict] = None
 _ANIMATED_RECORDING_STATE: Optional[dict] = None
+_STREAMDECK_SERVICE: Optional[StreamDeckService] = None
 _playback_state_lock = threading.Lock()
 _recording_state_lock = threading.Lock()
 _subscribers: set[asyncio.Queue[str]] = set()
@@ -88,9 +96,52 @@ def _broadcast_event(event: str, data: dict) -> None:
         subscribers = list(_subscribers)
         loop = _event_loop
     if loop is None:
-        return
-    for queue in subscribers:
-        loop.call_soon_threadsafe(queue.put_nowait, message)
+        pass
+    else:
+        for queue in subscribers:
+            loop.call_soon_threadsafe(queue.put_nowait, message)
+    if _STREAMDECK_SERVICE is not None:
+        _STREAMDECK_SERVICE.notify_state_changed()
+
+
+def _build_streamdeck_snapshot() -> StreamDeckSnapshot:
+    scenes = [
+        StreamDeckScene(
+            id=scene.id,
+            name=scene.name,
+            scene_type=scene.type,
+            style_icon=scene.style.icon if scene.style is not None else None,
+            style_color=scene.style.color if scene.style is not None else None,
+        )
+        for scene in list_scenes()
+    ]
+    group_status = _build_group_dimmer_status()
+    group_dimmers = [
+        StreamDeckGroupDimmer(
+            key=group["key"],
+            name=group["name"],
+            value_percent=int(group["value_percent"]),
+            muted=bool(group["muted"]),
+            fixture_count=int(group["fixture_count"]),
+            channel_count=int(group["channel_count"]),
+        )
+        for group in group_status.get("group_dimmers", [])
+    ]
+    with _playback_state_lock:
+        master_dimmer_percent = MASTER_DIMMER_PERCENT
+    return StreamDeckSnapshot(
+        control_mode=CONTROL_MODE,
+        panel_locked=PANEL_LOCKED,
+        active_scene_id=ACTIVE_SCENE_ID,
+        master_dimmer_percent=master_dimmer_percent,
+        scenes=scenes,
+        group_dimmer_available=bool(group_status.get("group_dimmer_available")),
+        group_dimmers=group_dimmers,
+        haze_percent=HAZE_PERCENT,
+        haze_configured=_has_haze_channel_configured(),
+        fog_flash_active=FOG_FLASH_ACTIVE,
+        fog_flash_configured=_has_fog_channel_configured(),
+    )
 
 
 def _set_active_scene(scene_id: Optional[str]) -> None:
@@ -103,6 +154,12 @@ def _set_control_mode(mode: str) -> None:
     global CONTROL_MODE
     CONTROL_MODE = mode
     _broadcast_event("status", {"control_mode": CONTROL_MODE})
+
+
+def _set_panel_locked(locked: bool) -> None:
+    global PANEL_LOCKED
+    PANEL_LOCKED = bool(locked)
+    _broadcast_event("status", {"panel_locked": PANEL_LOCKED})
 
 
 def _set_master_dimmer_percent(value: int) -> None:
@@ -201,6 +258,7 @@ def _build_status_payload() -> dict:
         "active_scene_id": ACTIVE_SCENE_ID,
         "live_edit_scene_name": _get_live_editor_scene_name(),
         "control_mode": CONTROL_MODE,
+        "panel_locked": PANEL_LOCKED,
         "master_dimmer_percent": MASTER_DIMMER_PERCENT,
         "master_dimmer_mode": _get_master_dimmer_mode(),
         "haze_percent": HAZE_PERCENT,
@@ -587,6 +645,84 @@ def _verify_pin(pin: str) -> bool:
     return hash_pin(pin) == settings.operator_pin_hash
 
 
+def _streamdeck_play_scene(scene_id: str) -> None:
+    api_play_scene(scene_id)
+
+
+def _streamdeck_stop() -> None:
+    api_stop()
+
+
+def _streamdeck_blackout() -> None:
+    api_blackout()
+
+
+def _streamdeck_set_master_dimmer(value_percent: int) -> None:
+    api_set_master_dimmer(MasterDimmerUpdateRequest(value_percent=value_percent))
+
+
+def _streamdeck_set_group_dimmer(group_key: str, value_percent: int) -> None:
+    api_set_group_dimmer(
+        group_key=group_key,
+        request=GroupDimmerValueUpdateRequest(value_percent=value_percent),
+    )
+
+
+def _streamdeck_toggle_group_mute(group_key: str) -> None:
+    group = _find_group_dimmer_or_raise(group_key)
+    api_set_group_dimmer_mute(
+        group_key=group_key,
+        request=GroupDimmerMuteUpdateRequest(active=not bool(group["muted"])),
+    )
+
+
+def _streamdeck_set_haze(value_percent: int) -> None:
+    api_set_haze(HazeUpdateRequest(value_percent=value_percent))
+
+
+def _streamdeck_set_fog_flash_active(active: bool) -> None:
+    api_set_fog_flash(FogFlashUpdateRequest(active=active))
+
+
+def _streamdeck_set_panel_lock(locked: bool) -> None:
+    api_set_panel_lock(PanelLockUpdateRequest(locked=locked))
+
+
+def _streamdeck_unlock_panel(pin: str) -> bool:
+    try:
+        api_unlock_panel(UnlockRequest(pin=pin))
+        return True
+    except HTTPException:
+        return False
+
+
+def start_streamdeck_service() -> None:
+    global _STREAMDECK_SERVICE
+    if _STREAMDECK_SERVICE is None:
+        _STREAMDECK_SERVICE = StreamDeckService(
+            get_snapshot=_build_streamdeck_snapshot,
+            play_scene=_streamdeck_play_scene,
+            stop=_streamdeck_stop,
+            blackout=_streamdeck_blackout,
+            set_master_dimmer=_streamdeck_set_master_dimmer,
+            set_group_dimmer=_streamdeck_set_group_dimmer,
+            toggle_group_mute=_streamdeck_toggle_group_mute,
+            set_haze=_streamdeck_set_haze,
+            set_fog_flash_active=_streamdeck_set_fog_flash_active,
+            set_panel_lock=_streamdeck_set_panel_lock,
+            unlock_panel=_streamdeck_unlock_panel,
+        )
+    _STREAMDECK_SERVICE.start()
+    _STREAMDECK_SERVICE.notify_state_changed()
+
+
+def stop_streamdeck_service() -> None:
+    global _STREAMDECK_SERVICE
+    if _STREAMDECK_SERVICE is None:
+        return
+    _STREAMDECK_SERVICE.stop()
+
+
 @router.get("/status")
 def get_status():
     """
@@ -596,6 +732,7 @@ def get_status():
     return {
         "status": "ok",
         "local_ip": settings.local_ip,
+        "web_local_ip": settings.web_local_ip,
         "node_ip": settings.node_ip,
         **_build_status_payload(),
     }
@@ -709,6 +846,8 @@ class NetworkAdapterResponse(BaseModel):
 class SettingsResponse(BaseModel):
     local_ip: str
     local_adapter: str
+    web_local_ip: str
+    web_local_adapter: str
     network_adapters: List[NetworkAdapterResponse]
     node_ip: str
     dmx_fps: float
@@ -724,6 +863,7 @@ class SettingsResponse(BaseModel):
 
 class SettingsUpdateRequest(BaseModel):
     local_adapter: Optional[str] = None
+    web_local_adapter: Optional[str] = None
     node_ip: str
     dmx_fps: float
     poll_interval: float
@@ -746,6 +886,10 @@ class ControlModeUpdateRequest(BaseModel):
 
 class UnlockRequest(BaseModel):
     pin: str
+
+
+class PanelLockUpdateRequest(BaseModel):
+    locked: bool
 
 
 class PinChangeRequest(BaseModel):
@@ -794,14 +938,28 @@ class SceneEditorLiveStopRequest(BaseModel):
 
 def _get_settings_payload() -> SettingsResponse:
     selected_adapter, adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_adapter is None and settings.local_adapter:
+        selected_adapter, adapters = resolve_adapter(None)
     if selected_adapter is not None:
         settings.local_adapter = selected_adapter["id"]
         settings.local_ip = selected_adapter["local_ip"]
+
+    selected_web_adapter, _web_adapters = resolve_adapter(settings.web_local_adapter or None)
+    if selected_web_adapter is None and settings.web_local_adapter:
+        selected_web_adapter, _web_adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_web_adapter is None:
+        selected_web_adapter = selected_adapter
+    if selected_web_adapter is not None:
+        settings.web_local_adapter = selected_web_adapter["id"]
+        settings.web_local_ip = selected_web_adapter["local_ip"]
+
     settings.artnet_universe_map = normalize_universe_map(settings.artnet_universe_map)
 
     return SettingsResponse(
         local_ip=settings.local_ip,
         local_adapter=settings.local_adapter,
+        web_local_ip=settings.web_local_ip,
+        web_local_adapter=settings.web_local_adapter,
         network_adapters=[
             NetworkAdapterResponse(
                 id=adapter["id"],
@@ -830,7 +988,14 @@ def api_unlock_panel(request: UnlockRequest):
         raise HTTPException(status_code=400, detail="PIN must be exactly 4 digits")
     if not _verify_pin(pin):
         raise HTTPException(status_code=401, detail="Invalid PIN")
+    _set_panel_locked(False)
     return {"status": "ok"}
+
+
+@router.post("/panel-lock")
+def api_set_panel_lock(request: PanelLockUpdateRequest):
+    _set_panel_locked(bool(request.locked))
+    return {"status": "ok", "panel_locked": PANEL_LOCKED}
 
 
 @router.post("/pin/change")
@@ -1675,6 +1840,7 @@ def api_update_settings(request: SettingsUpdateRequest):
     _clear_live_editor_state()
     _cancel_animated_recording_session()
     _stop_animated_playback()
+
     requested_adapter = (
         request.local_adapter.strip()
         if request.local_adapter is not None and request.local_adapter.strip()
@@ -1693,6 +1859,29 @@ def api_update_settings(request: SettingsUpdateRequest):
             detail=f"Network adapter '{requested_adapter}' is unavailable.",
         )
 
+    requested_web_adapter = (
+        request.web_local_adapter.strip()
+        if request.web_local_adapter is not None and request.web_local_adapter.strip()
+        else None
+    )
+    selected_web_adapter = None
+    if requested_web_adapter is not None:
+        selected_web_adapter, web_adapters = resolve_adapter(requested_web_adapter)
+        if selected_web_adapter is None:
+            selected_entry = next(
+                (adapter for adapter in web_adapters if adapter["id"] == requested_web_adapter),
+                None,
+            )
+            if selected_entry is not None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Web adapter '{requested_web_adapter}' has no usable IPv4 address.",
+                )
+            raise HTTPException(
+                status_code=400,
+                detail=f"Web adapter '{requested_web_adapter}' is unavailable.",
+            )
+
     if requested_adapter is None:
         selected_adapter, adapters = resolve_adapter(settings.local_adapter or None)
     if selected_adapter is None and requested_adapter is None:
@@ -1705,8 +1894,17 @@ def api_update_settings(request: SettingsUpdateRequest):
             detail="No active IPv4 network adapter found. Connect a network adapter and try again.",
         )
 
+    if requested_web_adapter is None:
+        selected_web_adapter, _web_adapters = resolve_adapter(
+            settings.web_local_adapter or selected_adapter["id"]
+        )
+    if selected_web_adapter is None:
+        selected_web_adapter = selected_adapter
+
     settings.local_adapter = selected_adapter["id"]
     settings.local_ip = selected_adapter["local_ip"]
+    settings.web_local_adapter = selected_web_adapter["id"]
+    settings.web_local_ip = selected_web_adapter["local_ip"]
     settings.node_ip = request.node_ip
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
