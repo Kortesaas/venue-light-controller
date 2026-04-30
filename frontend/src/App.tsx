@@ -31,6 +31,7 @@ type Mode = "operator" | "admin";
 type StatusResponse = {
   status: string;
   local_ip: string;
+  web_local_ip?: string;
   node_ip: string;
   active_scene_id?: string | null;
   live_edit_scene_name?: string | null;
@@ -123,6 +124,7 @@ function App() {
         const data = JSON.parse(event.data) as {
           node_ip: string;
           local_ip?: string;
+          web_local_ip?: string;
         };
         setStatus((prev) =>
           prev
@@ -130,6 +132,7 @@ function App() {
                 ...prev,
                 node_ip: data.node_ip,
                 local_ip: data.local_ip ?? prev.local_ip,
+                web_local_ip: data.web_local_ip ?? prev.web_local_ip,
               }
             : prev
         );
@@ -207,7 +210,8 @@ function App() {
     }
   };
 
-  const connectUrl = `http://${status?.local_ip ?? window.location.hostname}:8000`;
+  const connectHost = status?.web_local_ip ?? status?.local_ip ?? window.location.hostname;
+  const connectUrl = `http://${connectHost}:8000`;
 
   const handleCopyConnectUrl = async () => {
     try {
@@ -528,4 +532,3 @@ function App() {
 }
 
 export default App;
-

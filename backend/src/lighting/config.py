@@ -44,6 +44,8 @@ class Settings(BaseSettings):
     # IP des PCs im Lichtnetz
     local_ip: str = "2.0.0.30"
     local_adapter: str = ""
+    web_local_ip: str = "2.0.0.30"
+    web_local_adapter: str = ""
     # IP deines Art-Net-Nodes
     node_ip: str = "2.0.0.10"
 
@@ -76,7 +78,7 @@ settings = Settings()
 def load_runtime_settings() -> None:
     path = Path(settings.runtime_settings_path)
     if not path.exists():
-        _sync_local_ip_from_adapter()
+        _sync_local_ips_from_adapters()
         return
 
     try:
@@ -84,16 +86,17 @@ def load_runtime_settings() -> None:
             data = json.load(f)
     except (OSError, json.JSONDecodeError) as exc:
         _log.warning("Failed to load runtime settings from %s: %s", path, exc)
-        _sync_local_ip_from_adapter()
+        _sync_local_ips_from_adapters()
         return
 
     if not isinstance(data, dict):
         _log.warning("Runtime settings file %s is not an object, ignoring", path)
-        _sync_local_ip_from_adapter()
+        _sync_local_ips_from_adapters()
         return
 
     for key in (
         "local_adapter",
+        "web_local_adapter",
         "node_ip",
         "dmx_fps",
         "poll_interval",
@@ -111,13 +114,14 @@ def load_runtime_settings() -> None:
             setattr(settings, key, data[key])
 
     settings.artnet_universe_map = normalize_universe_map(settings.artnet_universe_map)
-    _sync_local_ip_from_adapter()
+    _sync_local_ips_from_adapters()
 
 
 def persist_runtime_settings() -> None:
     path = Path(settings.runtime_settings_path)
     payload = {
         "local_adapter": settings.local_adapter,
+        "web_local_adapter": settings.web_local_adapter,
         "node_ip": settings.node_ip,
         "dmx_fps": settings.dmx_fps,
         "poll_interval": settings.poll_interval,
@@ -139,14 +143,22 @@ def persist_runtime_settings() -> None:
         _log.warning("Failed to persist runtime settings to %s: %s", path, exc)
 
 
-def _sync_local_ip_from_adapter() -> None:
+def _sync_local_ips_from_adapters() -> None:
     selected_adapter, _adapters = resolve_adapter(settings.local_adapter or None)
     if selected_adapter is None and settings.local_adapter:
         selected_adapter, _adapters = resolve_adapter(None)
-    if selected_adapter is None:
-        return
-    settings.local_adapter = selected_adapter["id"]
-    settings.local_ip = selected_adapter["local_ip"]
+    if selected_adapter is not None:
+        settings.local_adapter = selected_adapter["id"]
+        settings.local_ip = selected_adapter["local_ip"]
+
+    selected_web_adapter, _web_adapters = resolve_adapter(settings.web_local_adapter or None)
+    if selected_web_adapter is None and settings.web_local_adapter:
+        selected_web_adapter, _web_adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_web_adapter is None:
+        selected_web_adapter = selected_adapter
+    if selected_web_adapter is not None:
+        settings.web_local_adapter = selected_web_adapter["id"]
+        settings.web_local_ip = selected_web_adapter["local_ip"]
 
 
 load_runtime_settings()

@@ -596,6 +596,7 @@ def get_status():
     return {
         "status": "ok",
         "local_ip": settings.local_ip,
+        "web_local_ip": settings.web_local_ip,
         "node_ip": settings.node_ip,
         **_build_status_payload(),
     }
@@ -709,6 +710,8 @@ class NetworkAdapterResponse(BaseModel):
 class SettingsResponse(BaseModel):
     local_ip: str
     local_adapter: str
+    web_local_ip: str
+    web_local_adapter: str
     network_adapters: List[NetworkAdapterResponse]
     node_ip: str
     dmx_fps: float
@@ -724,6 +727,7 @@ class SettingsResponse(BaseModel):
 
 class SettingsUpdateRequest(BaseModel):
     local_adapter: Optional[str] = None
+    web_local_adapter: Optional[str] = None
     node_ip: str
     dmx_fps: float
     poll_interval: float
@@ -794,14 +798,28 @@ class SceneEditorLiveStopRequest(BaseModel):
 
 def _get_settings_payload() -> SettingsResponse:
     selected_adapter, adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_adapter is None and settings.local_adapter:
+        selected_adapter, adapters = resolve_adapter(None)
     if selected_adapter is not None:
         settings.local_adapter = selected_adapter["id"]
         settings.local_ip = selected_adapter["local_ip"]
+
+    selected_web_adapter, _web_adapters = resolve_adapter(settings.web_local_adapter or None)
+    if selected_web_adapter is None and settings.web_local_adapter:
+        selected_web_adapter, _web_adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_web_adapter is None:
+        selected_web_adapter = selected_adapter
+    if selected_web_adapter is not None:
+        settings.web_local_adapter = selected_web_adapter["id"]
+        settings.web_local_ip = selected_web_adapter["local_ip"]
+
     settings.artnet_universe_map = normalize_universe_map(settings.artnet_universe_map)
 
     return SettingsResponse(
         local_ip=settings.local_ip,
         local_adapter=settings.local_adapter,
+        web_local_ip=settings.web_local_ip,
+        web_local_adapter=settings.web_local_adapter,
         network_adapters=[
             NetworkAdapterResponse(
                 id=adapter["id"],
@@ -1675,6 +1693,7 @@ def api_update_settings(request: SettingsUpdateRequest):
     _clear_live_editor_state()
     _cancel_animated_recording_session()
     _stop_animated_playback()
+
     requested_adapter = (
         request.local_adapter.strip()
         if request.local_adapter is not None and request.local_adapter.strip()
@@ -1693,6 +1712,29 @@ def api_update_settings(request: SettingsUpdateRequest):
             detail=f"Network adapter '{requested_adapter}' is unavailable.",
         )
 
+    requested_web_adapter = (
+        request.web_local_adapter.strip()
+        if request.web_local_adapter is not None and request.web_local_adapter.strip()
+        else None
+    )
+    selected_web_adapter = None
+    if requested_web_adapter is not None:
+        selected_web_adapter, web_adapters = resolve_adapter(requested_web_adapter)
+        if selected_web_adapter is None:
+            selected_entry = next(
+                (adapter for adapter in web_adapters if adapter["id"] == requested_web_adapter),
+                None,
+            )
+            if selected_entry is not None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Web adapter '{requested_web_adapter}' has no usable IPv4 address.",
+                )
+            raise HTTPException(
+                status_code=400,
+                detail=f"Web adapter '{requested_web_adapter}' is unavailable.",
+            )
+
     if requested_adapter is None:
         selected_adapter, adapters = resolve_adapter(settings.local_adapter or None)
     if selected_adapter is None and requested_adapter is None:
@@ -1705,8 +1747,17 @@ def api_update_settings(request: SettingsUpdateRequest):
             detail="No active IPv4 network adapter found. Connect a network adapter and try again.",
         )
 
+    if requested_web_adapter is None:
+        selected_web_adapter, _web_adapters = resolve_adapter(
+            settings.web_local_adapter or selected_adapter["id"]
+        )
+    if selected_web_adapter is None:
+        selected_web_adapter = selected_adapter
+
     settings.local_adapter = selected_adapter["id"]
     settings.local_ip = selected_adapter["local_ip"]
+    settings.web_local_adapter = selected_web_adapter["id"]
+    settings.web_local_ip = selected_web_adapter["local_ip"]
     settings.node_ip = request.node_ip
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
