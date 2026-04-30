@@ -70,6 +70,15 @@ def _broadcast_from_local(local_ip: str) -> str:
     return "255.255.255.255"
 
 
+def _map_local_to_artnet_universe(local_universe: int) -> int:
+    mapping = settings.artnet_universe_map
+    if isinstance(mapping, list) and 0 <= local_universe < len(mapping):
+        target = mapping[local_universe]
+        if isinstance(target, int) and target >= 0:
+            return target
+    return local_universe
+
+
 class _ArtNetController:
     def __init__(
         self,
@@ -148,7 +157,7 @@ class _ArtNetController:
             _log.warning("dmx_fps <= 0, DMX loop will run without throttling")
         frame_time = 1.0 / self.fps if self.fps > 0 else 0.0
         sequence = 0
-        broadcast_addr = (_broadcast_from_local(self.local_ip), ARTNET_PORT)
+        node_addr = (self.node_ip, ARTNET_PORT)
 
         next_frame = time.monotonic()
         while not self._stop.is_set():
@@ -161,10 +170,11 @@ class _ArtNetController:
                 current_items = list(self.universe_to_dmx.items())
 
             for universe, dmx in current_items:
-                packet = _build_artdmx(universe, dmx, sequence)
+                target_universe = _map_local_to_artnet_universe(universe)
+                packet = _build_artdmx(target_universe, dmx, sequence)
                 sequence = (sequence + 1) % 256
                 try:
-                    self.dmx_sock.sendto(packet, broadcast_addr)
+                    self.dmx_sock.sendto(packet, node_addr)
                 except OSError as exc:
                     _log.warning("DMX send error: %s", exc)
 

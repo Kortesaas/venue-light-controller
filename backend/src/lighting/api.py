@@ -21,7 +21,7 @@ from .artnet_core import (
     stop_stream,
     update_stream,
 )
-from .config import hash_pin, persist_runtime_settings, settings
+from .config import hash_pin, normalize_universe_map, persist_runtime_settings, settings
 from .fixture_plan import (
     activate_fixture_plan,
     clear_fixture_plan,
@@ -42,6 +42,7 @@ from .scenes import (
     save_scene,
     set_scene_order,
 )
+from .networking import resolve_adapter
 
 router = APIRouter()
 _log = logging.getLogger(__name__)
@@ -699,12 +700,21 @@ class SceneReorderRequest(BaseModel):
     scene_ids: List[str]
 
 
+class NetworkAdapterResponse(BaseModel):
+    id: str
+    name: str
+    local_ip: str
+
+
 class SettingsResponse(BaseModel):
     local_ip: str
+    local_adapter: str
+    network_adapters: List[NetworkAdapterResponse]
     node_ip: str
     dmx_fps: float
     poll_interval: float
     universe_count: int
+    artnet_universe_map: List[int]
     fog_flash_universe: int
     fog_flash_channel: int
     haze_universe: int
@@ -713,10 +723,12 @@ class SettingsResponse(BaseModel):
 
 
 class SettingsUpdateRequest(BaseModel):
+    local_adapter: Optional[str] = None
     node_ip: str
     dmx_fps: float
     poll_interval: float
     universe_count: int
+    artnet_universe_map: List[int]
     fog_flash_universe: int
     fog_flash_channel: int
     haze_universe: int
@@ -781,12 +793,28 @@ class SceneEditorLiveStopRequest(BaseModel):
 
 
 def _get_settings_payload() -> SettingsResponse:
+    selected_adapter, adapters = resolve_adapter(settings.local_adapter or None)
+    if selected_adapter is not None:
+        settings.local_adapter = selected_adapter["id"]
+        settings.local_ip = selected_adapter["local_ip"]
+    settings.artnet_universe_map = normalize_universe_map(settings.artnet_universe_map)
+
     return SettingsResponse(
         local_ip=settings.local_ip,
+        local_adapter=settings.local_adapter,
+        network_adapters=[
+            NetworkAdapterResponse(
+                id=adapter["id"],
+                name=adapter["name"],
+                local_ip=adapter["local_ip"],
+            )
+            for adapter in adapters
+        ],
         node_ip=settings.node_ip,
         dmx_fps=settings.dmx_fps,
         poll_interval=settings.poll_interval,
         universe_count=settings.universe_count,
+        artnet_universe_map=settings.artnet_universe_map,
         fog_flash_universe=settings.fog_flash_universe,
         fog_flash_channel=settings.fog_flash_channel,
         haze_universe=settings.haze_universe,
@@ -1637,14 +1665,40 @@ def api_update_settings(request: SettingsUpdateRequest):
     ):
         if value < 0 or value > 512:
             raise HTTPException(status_code=400, detail=f"{key} must be in range 0..512")
+    if len(request.artnet_universe_map) != 8:
+        raise HTTPException(status_code=400, detail="artnet_universe_map must contain exactly 8 entries")
+    normalized_map = normalize_universe_map(request.artnet_universe_map)
+    for value in normalized_map:
+        if value < 0:
+            raise HTTPException(status_code=400, detail="artnet_universe_map values must be >= 0")
 
     _clear_live_editor_state()
     _cancel_animated_recording_session()
     _stop_animated_playback()
+    requested_adapter = (
+        request.local_adapter.strip()
+        if request.local_adapter is not None and request.local_adapter.strip()
+        else None
+    )
+    selected_adapter, _adapters = resolve_adapter(requested_adapter or settings.local_adapter or None)
+    if selected_adapter is None:
+        raise HTTPException(
+            status_code=400,
+            detail="No active IPv4 network adapter found. Connect a network adapter and try again.",
+        )
+    if requested_adapter is not None and selected_adapter["id"] != requested_adapter:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Network adapter '{requested_adapter}' is unavailable or has no usable IPv4 address.",
+        )
+
+    settings.local_adapter = selected_adapter["id"]
+    settings.local_ip = selected_adapter["local_ip"]
     settings.node_ip = request.node_ip
     settings.dmx_fps = request.dmx_fps
     settings.poll_interval = request.poll_interval
     settings.universe_count = request.universe_count
+    settings.artnet_universe_map = normalized_map
     settings.fog_flash_universe = request.fog_flash_universe
     settings.fog_flash_channel = request.fog_flash_channel
     settings.haze_universe = request.haze_universe
