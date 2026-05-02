@@ -1,41 +1,42 @@
-# MatriX Saal Lichtszenen
+# Venue Light Controller
 
-Touch-optimierte Lichtsteuerungs-App für feste Venue-Installationen, mit klarem Fokus auf das Speichern und Abrufen von Art-Net-Szenen.
-Die Szenen werden im Vorfeld mit beliebigen Art-Net-fähigen Lichtsteuerungssystemen (z. B. MA-Systemen) erstellt und als Art-Net-Daten aufgezeichnet.
+Touch-first lighting control app for fixed venue installations.
+It records Art-Net snapshots/scenes and lets operators recall them safely from a simple web UI and a local Stream Deck.
 
 <p align="center">
-  <img src="./docs/MatriX_Saal_Light.png" alt="MatriX Saal Lichtszenen – Operator Panel" width="200" />
+  <img src="./docs/MatriX_Saal_Light.png" alt="Venue Light Controller - Operator Panel" width="220" />
 </p>
-
-Die App ermöglicht das sichere, reproduzierbare Abrufen dieser gespeicherten Art-Net-Szenen über ein intuitives Operator-Panel, ohne dass tiefgehende Kenntnisse eines Lichtpults erforderlich sind.
 
 ## Features
 
-- Art-Net Snapshot-Recording (mehrere Universen)
-- Stabiler Art-Net Stream mit konstantem Node-Polling
-- Szenenverwaltung (anlegen, umbenennen, beschreiben, löschen, sortieren)
-- Blackout und Stop aus dem Operator-Panel
-- Control-Mode gegen Konflikte:
-  - `panel`: App darf senden
-  - `external`: MA/externe Quelle hat Vorrang, Panel ist gesperrt
-- Live-Synchronisation zwischen Clients via SSE (`/api/events`)
-- Runtime-Settings (persistiert):
-  - `node_ip`
-  - `dmx_fps`
-  - `poll_interval`
-  - `universe_count`
+- Static and animated scene recording/playback
+- Scene management (create, rename, reorder, delete)
+- Operator-safe controls (blackout, stop, control mode)
+- Live client sync via SSE (`/api/events`)
+- Runtime network/adaptor settings for Node and web access
+- Optional fixture plan import (MA3 XML workflow)
+- Atmosphere controls (fog flash + haze level)
+- Stream Deck integration with:
+  - scenes/levels views
+  - lock screen with PIN keypad
+  - screensaver + wake-to-lock behavior
+  - dynamic scene updates (name/style/order changes)
 
-## Projektstruktur
+## Project Structure
 
 ```text
 venue-light-controller/
 |- backend/
 |  |- main.py
+|  |- requirements.txt
+|  |- assets/streamdeck/icons/
 |  `- src/lighting/
 |     |- api.py
 |     |- artnet_core.py
 |     |- config.py
-|     `- scenes.py
+|     |- fixture_plan.py
+|     |- scenes.py
+|     `- streamdeck_service.py
 |- frontend/
 |  `- src/
 |     |- App.tsx
@@ -48,29 +49,31 @@ venue-light-controller/
 ## Tech Stack
 
 - Backend: Python, FastAPI, Pydantic v2
-- Frontend: React + TypeScript (Vite), MUI
-- Transport: Art-Net (UDP)
-- Realtime UI Sync: Server-Sent Events (SSE)
+- Frontend: React + TypeScript + Vite + MUI
+- Lighting transport: Art-Net (UDP)
+- Realtime updates: Server-Sent Events (SSE)
 
-## Voraussetzungen
+## Requirements
 
 - Python 3.10+
 - Node.js 18+
-- Netzwerkzugang ins Art-Net Segment (typisch `2.x.x.x`)
+- Network access to your Art-Net segment
 
-## Lokale Entwicklung
+## Local Development
 
-### Backend starten
+### 1) Backend setup
 
 ```powershell
 cd backend
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 python main.py
 ```
 
-Backend erreichbar unter `http://localhost:8000`.
+Backend runs on `http://localhost:8000`.
 
-### Frontend starten
+### 2) Frontend setup
 
 ```powershell
 cd frontend
@@ -78,97 +81,163 @@ npm install
 npm run dev
 ```
 
-Frontend Dev-URL: `http://localhost:5173`.
+Frontend dev server runs on `http://localhost:5173`.
 
-## Production / Venue-Modus
+## Production / Venue Mode
 
-Schnellstart aus dem Projekt-Root:
+Quick start from project root:
 
 ```powershell
 .\build_and_run.ps1
 ```
 
-Das Script baut das Frontend und startet anschließend das Backend, sodass UI und API direkt verfügbar sind.
+This script builds the frontend, copies it to `backend/frontend_dist`, and starts the backend.
+Then UI + API are served from `http://localhost:8000`.
 
-1. Frontend bauen:
+## Stream Deck
+
+### Supported hardware
+
+- Stream Deck integration is enabled automatically when a compatible local device is detected.
+- The current layout is optimized for Stream Deck XL (4x8).
+
+### Dependencies
+
+The backend needs these Python packages (already in `backend/requirements.txt`):
+
+- `streamdeck`
+- `hidapi`
+- `pillow`
+
+If device probing fails with a HID backend error, make sure the backend venv is active and reinstall:
 
 ```powershell
-cd frontend
-npm run build
+cd backend
+.\.venv\Scripts\Activate.ps1
+pip install --upgrade hidapi streamdeck pillow
 ```
 
-2. Build nach `backend/frontend_dist` kopieren.
-3. Backend starten (`python main.py`).
-4. UI + API laufen dann gemeinsam über `http://localhost:8000`.
+Then restart the backend.
 
-## Bedienlogik
+### Behavior
 
-### Operator
+- Deck content is rendered dynamically from backend state.
+- Scene edits from web UI (name/icon/color/order) are reflected on the deck.
+- Locking, unlock PIN entry, and screensaver are supported directly on the deck.
+- Fog flash is a hold/flash action.
+- Group "flash" actions in levels view are hold/flash actions.
 
-- Große Szenen-Buttons
-- Aktive Szene sichtbar markiert
-- `Blackout` und `Stop`
-- Bei `MODE: MA` (external) sind Play- und Blackout-Aktionen gesperrt
+### Stream Deck settings in browser UI
 
-### Admin
+In `Admin Panel -> System Settings`:
 
-- Szenen aufnehmen
-- Szenen umbenennen + Beschreibung pflegen
-- Szenen löschen (mit Bestätigungsdialog)
-- Reihenfolge der Szenen verändern
-- System Settings:
-  - `local_ip` (read-only)
-  - `node_ip`
-  - `dmx_fps`
-  - `poll_interval`
-  - `universe_count`
+- `Stream Deck Screensaver (s)` controls idle timeout.
+- `0` disables the screensaver.
 
-Hinweis zu `universe_count`:  
-Wenn z. B. `2` gesetzt ist, werden bei einer Aufnahme automatisch `Universe 1` und `Universe 2` erfasst.
+This value is persisted in `backend/settings.runtime.json` as `streamdeck_screensaver_seconds`.
 
-## API Überblick
+### Custom Stream Deck icons
 
-### Status und Realtime
+Place PNG icons in:
+
+- `backend/assets/streamdeck/icons`
+
+Naming format:
+
+- `<icon_name>.png`
+
+If an icon is missing, built-in placeholders are used.
+
+You can auto-generate icon assets from MUI icons:
+
+```powershell
+python backend/scripts/generate_streamdeck_scene_icons.py --overwrite
+```
+
+Optional flags:
+
+- `--write-svg`
+- `--size 144`
+- `--svg-only`
+
+## Core UI/Control Concepts
+
+- `control_mode`:
+  - `panel`: app is allowed to send output
+  - `external`: external controller has priority, panel actions are restricted
+- Master dimmer and group dimmers are applied on top of the active scene payload.
+- Atmosphere channels (fog/haze) are injected after dimmer processing.
+
+## API Overview
+
+### Status + realtime
 
 - `GET /api/status`
 - `GET /api/events`
 
-### Szenen
+### Scenes
 
 - `GET /api/scenes`
 - `GET /api/scenes/{scene_id}`
 - `POST /api/scenes/record`
+- `POST /api/scenes/{scene_id}/play`
+- `POST /api/scenes/{scene_id}/rerecord`
 - `PUT /api/scenes/{scene_id}`
+- `PUT /api/scenes/{scene_id}/content`
 - `DELETE /api/scenes/{scene_id}`
 - `POST /api/scenes/reorder`
-- `POST /api/scenes/{scene_id}/play`
 
-### Playback
+### Dynamic/animated recording
+
+- `POST /api/scenes/dynamic/start`
+- `POST /api/scenes/dynamic/stop`
+- `POST /api/scenes/dynamic/cancel`
+- `POST /api/scenes/dynamic/save`
+
+### Playback + controls
 
 - `POST /api/blackout`
 - `POST /api/stop`
+- `GET /api/master-dimmer`
+- `POST /api/master-dimmer`
+- `GET /api/group-dimmers`
+- `POST /api/group-dimmers/{group_key}`
+- `POST /api/group-dimmers/{group_key}/mute`
+- `GET /api/atmosphere`
+- `POST /api/atmosphere/haze`
+- `POST /api/atmosphere/fog-flash`
 
-### Settings
+### Settings + lock
 
 - `GET /api/settings`
 - `POST /api/settings`
-
-### Control Mode
-
 - `GET /api/control-mode`
 - `POST /api/control-mode`
+- `POST /api/panel-lock`
+- `POST /api/unlock`
+- `POST /api/pin/change`
 
-## Persistenz
+### Fixture plan
 
-- Szenen liegen als JSON-Dateien im konfigurierten `scenes_path`.
-- Szenenreihenfolge wird in `_order.json` gespeichert.
-- Runtime-Settings werden in `backend/settings.runtime.json` gespeichert und beim Start geladen.
+- `GET /api/fixture-plan`
+- `GET /api/fixture-plan/details`
+- `POST /api/fixture-plan/preview`
+- `POST /api/fixture-plan/activate`
+- `DELETE /api/fixture-plan`
+- `GET /api/fixture-plan/lookup`
 
-## Sicherheit / Betriebshinweise
+## Persistence
 
-- Immer nur **eine** aktive DMX-Quelle verwenden.
-- Bei parallel laufender MA-Steuerung auf `external` schalten.
+- Scenes are stored as JSON in the configured `scenes_path`.
+- Scene order is stored in `_order.json`.
+- Runtime settings are stored in `backend/settings.runtime.json`.
 
-## Lizenz
+## Operational Notes
 
-Aktuell ohne explizite Lizenz.
+- Use only one active DMX source at a time.
+- Switch to `external` mode when an external desk/controller has priority.
+- Keep network adapter selection consistent with your Art-Net and web client paths.
+
+## License
+
+No explicit license yet.
