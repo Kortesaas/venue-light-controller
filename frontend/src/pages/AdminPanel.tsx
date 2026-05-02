@@ -120,6 +120,7 @@ type SettingsState = {
   haze_universe: number;
   haze_channel: number;
   show_scene_created_at_on_operator: boolean;
+  streamdeck_screensaver_seconds: number;
 };
 
 type FixturePlanParameterExample = {
@@ -199,6 +200,7 @@ export default function AdminPanel({
     haze_universe: 1,
     haze_channel: 0,
     show_scene_created_at_on_operator: true,
+    streamdeck_screensaver_seconds: 300,
   });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isApplyingSettings, setIsApplyingSettings] = useState(false);
@@ -693,6 +695,8 @@ export default function AdminPanel({
     Number.isInteger(Number(settingsForm.haze_channel)) &&
     Number(settingsForm.haze_channel) >= 0 &&
     Number(settingsForm.haze_channel) <= 512 &&
+    Number.isInteger(Number(settingsForm.streamdeck_screensaver_seconds)) &&
+    Number(settingsForm.streamdeck_screensaver_seconds) >= 0 &&
     settingsForm.poll_interval > 0 &&
     !isApplyingSettings;
 
@@ -731,6 +735,7 @@ export default function AdminPanel({
           haze_universe: Number(settingsForm.haze_universe),
           haze_channel: Number(settingsForm.haze_channel),
           show_scene_created_at_on_operator: settingsForm.show_scene_created_at_on_operator,
+          streamdeck_screensaver_seconds: Number(settingsForm.streamdeck_screensaver_seconds),
         }),
       });
       if (!res.ok) {
@@ -1647,6 +1652,21 @@ export default function AdminPanel({
                   size="small"
                   fullWidth
                   helperText="0 disables haze, else 1..512"
+                />
+                <TextField
+                  label="Stream Deck Screensaver (s)"
+                  type="number"
+                  value={settingsForm.streamdeck_screensaver_seconds}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      streamdeck_screensaver_seconds: Number(event.target.value),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="0 disables screensaver"
+                  inputProps={{ min: 0 }}
                 />
                 <FormControlLabel
                   control={

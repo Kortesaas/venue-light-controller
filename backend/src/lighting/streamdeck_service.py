@@ -50,7 +50,7 @@ Action = Tuple[str, Optional[str]]
 SCENE_SLOTS_PER_PAGE = 24
 GROUP_COLUMNS_PER_PAGE = 4
 HAZE_STEP_PERCENT = 10
-SCREENSAVER_IDLE_SECONDS = 300.0
+DEFAULT_SCREENSAVER_IDLE_SECONDS = 300.0
 SCREENSAVER_SNAKE_SPEED_CELLS_PER_SEC = 7.0
 SCREENSAVER_SNAKE_LENGTH = 8
 
@@ -312,6 +312,7 @@ class StreamDeckService:
         self._last_user_activity_monotonic = time.monotonic()
         self._screensaver_head_index = 0
         self._screensaver_next_step_monotonic = 0.0
+        self._screensaver_idle_seconds = float(DEFAULT_SCREENSAVER_IDLE_SECONDS)
         self._wake_consumed_releases: set[int] = set()
         self._unlock_pin_buffer = ""
         self._unlock_error_until = 0.0
@@ -352,6 +353,19 @@ class StreamDeckService:
 
     def notify_state_changed(self) -> None:
         self._wake_event.set()
+
+    def set_screensaver_idle_seconds(self, seconds: float) -> None:
+        value = float(seconds)
+        if value < 0:
+            value = 0.0
+        with self._screensaver_lock:
+            self._screensaver_idle_seconds = value
+            if value <= 0:
+                self._screensaver_active = False
+                self._screensaver_head_index = 0
+                self._screensaver_next_step_monotonic = 0.0
+                self._last_user_activity_monotonic = time.monotonic()
+        self.notify_state_changed()
 
     def _run(self) -> None:
         while not self._stop_event.is_set():
@@ -655,9 +669,10 @@ class StreamDeckService:
         with self._screensaver_lock:
             if self._screensaver_active:
                 return True
-            if SCREENSAVER_IDLE_SECONDS <= 0:
+            idle_seconds = float(self._screensaver_idle_seconds)
+            if idle_seconds <= 0:
                 return False
-            if (now - self._last_user_activity_monotonic) < SCREENSAVER_IDLE_SECONDS:
+            if (now - self._last_user_activity_monotonic) < idle_seconds:
                 return False
             self._screensaver_active = True
             self._screensaver_head_index = 0

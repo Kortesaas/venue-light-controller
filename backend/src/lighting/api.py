@@ -712,6 +712,7 @@ def start_streamdeck_service() -> None:
             set_panel_lock=_streamdeck_set_panel_lock,
             unlock_panel=_streamdeck_unlock_panel,
         )
+    _STREAMDECK_SERVICE.set_screensaver_idle_seconds(settings.streamdeck_screensaver_seconds)
     _STREAMDECK_SERVICE.start()
     _STREAMDECK_SERVICE.notify_state_changed()
 
@@ -859,6 +860,7 @@ class SettingsResponse(BaseModel):
     haze_universe: int
     haze_channel: int
     show_scene_created_at_on_operator: bool
+    streamdeck_screensaver_seconds: int
 
 
 class SettingsUpdateRequest(BaseModel):
@@ -874,6 +876,7 @@ class SettingsUpdateRequest(BaseModel):
     haze_universe: int
     haze_channel: int
     show_scene_created_at_on_operator: bool
+    streamdeck_screensaver_seconds: int = 300
 
 
 class ControlModeResponse(BaseModel):
@@ -978,6 +981,7 @@ def _get_settings_payload() -> SettingsResponse:
         haze_universe=settings.haze_universe,
         haze_channel=settings.haze_channel,
         show_scene_created_at_on_operator=settings.show_scene_created_at_on_operator,
+        streamdeck_screensaver_seconds=settings.streamdeck_screensaver_seconds,
     )
 
 
@@ -1829,6 +1833,8 @@ def api_update_settings(request: SettingsUpdateRequest):
     ):
         if value < 0 or value > 512:
             raise HTTPException(status_code=400, detail=f"{key} must be in range 0..512")
+    if request.streamdeck_screensaver_seconds < 0:
+        raise HTTPException(status_code=400, detail="streamdeck_screensaver_seconds must be >= 0")
     if len(request.artnet_universe_map) != 8:
         raise HTTPException(status_code=400, detail="artnet_universe_map must contain exactly 8 entries")
     normalized_map = normalize_universe_map(request.artnet_universe_map)
@@ -1914,6 +1920,9 @@ def api_update_settings(request: SettingsUpdateRequest):
     settings.haze_universe = request.haze_universe
     settings.haze_channel = request.haze_channel
     settings.show_scene_created_at_on_operator = request.show_scene_created_at_on_operator
+    settings.streamdeck_screensaver_seconds = int(request.streamdeck_screensaver_seconds)
+    if _STREAMDECK_SERVICE is not None:
+        _STREAMDECK_SERVICE.set_screensaver_idle_seconds(settings.streamdeck_screensaver_seconds)
     persist_runtime_settings()
 
     # Force reconnect/re-init with updated runtime settings on next play.
