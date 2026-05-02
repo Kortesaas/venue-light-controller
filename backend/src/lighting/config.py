@@ -62,6 +62,7 @@ class Settings(BaseSettings):
     haze_universe: int = 1
     haze_channel: int = 0
     show_scene_created_at_on_operator: bool = True
+    streamdeck_screensaver_seconds: int = 300
 
     # Ordner für Szenen (kannst du später nutzen)
     scenes_path: str = "./scenes"
@@ -109,11 +110,16 @@ def load_runtime_settings() -> None:
         "haze_universe",
         "haze_channel",
         "show_scene_created_at_on_operator",
+        "streamdeck_screensaver_seconds",
     ):
         if key in data:
             setattr(settings, key, data[key])
 
     settings.artnet_universe_map = normalize_universe_map(settings.artnet_universe_map)
+    try:
+        settings.streamdeck_screensaver_seconds = max(0, int(settings.streamdeck_screensaver_seconds))
+    except (TypeError, ValueError):
+        settings.streamdeck_screensaver_seconds = 300
     _sync_local_ips_from_adapters()
 
 
@@ -134,6 +140,7 @@ def persist_runtime_settings() -> None:
         "haze_universe": settings.haze_universe,
         "haze_channel": settings.haze_channel,
         "show_scene_created_at_on_operator": settings.show_scene_created_at_on_operator,
+        "streamdeck_screensaver_seconds": settings.streamdeck_screensaver_seconds,
     }
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
