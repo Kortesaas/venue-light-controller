@@ -50,7 +50,9 @@ Action = Tuple[str, Optional[str]]
 SCENE_SLOTS_PER_PAGE = 24
 GROUP_COLUMNS_PER_PAGE = 4
 HAZE_STEP_PERCENT = 10
-SCREENSAVER_IDLE_SECONDS = 10.0
+SCREENSAVER_IDLE_SECONDS = 300.0
+SCREENSAVER_SNAKE_SPEED_CELLS_PER_SEC = 7.0
+SCREENSAVER_SNAKE_LENGTH = 8
 
 
 PALETTE = {
@@ -92,6 +94,9 @@ FADER_BANK_GRAYS: list[tuple[int, int, int]] = [
     (10, 10, 10),
     (44, 44, 44),
 ]
+
+LEVELS_BANK_LIGHT_GRAY = 46
+LEVELS_BANK_DARK_GRAY = 10
 
 GROUP_DISPLAY_ORDER_HINTS: list[tuple[int, tuple[str, ...]]] = [
     (0, ("front",)),
@@ -244,7 +249,11 @@ class KeyVisual:
     accent_rgb: tuple[int, int, int] = PALETTE["action"]
     disabled: bool = False
     muted: bool = False
-
+    text_y_offset: int = 0
+    icon_below_text: bool = False
+    title_near_top: bool = False
+    icon_y_offset: int = 0
+    subtitle_y_offset: int = 0
 
 class StreamDeckService:
     def __init__(
@@ -301,6 +310,8 @@ class StreamDeckService:
         self._screensaver_lock = threading.Lock()
         self._screensaver_active = False
         self._last_user_activity_monotonic = time.monotonic()
+        self._screensaver_head_index = 0
+        self._screensaver_next_step_monotonic = 0.0
         self._wake_consumed_releases: set[int] = set()
         self._unlock_pin_buffer = ""
         self._unlock_error_until = 0.0
@@ -397,6 +408,8 @@ class StreamDeckService:
             with self._screensaver_lock:
                 self._screensaver_active = False
                 self._last_user_activity_monotonic = time.monotonic()
+                self._screensaver_head_index = 0
+                self._screensaver_next_step_monotonic = 0.0
             self._wake_consumed_releases.clear()
             self._unlock_pin_buffer = ""
             self._unlock_error_until = 0.0
@@ -478,6 +491,8 @@ class StreamDeckService:
         with self._screensaver_lock:
             self._screensaver_active = False
             self._last_user_activity_monotonic = time.monotonic()
+            self._screensaver_head_index = 0
+            self._screensaver_next_step_monotonic = 0.0
         self._wake_consumed_releases.clear()
         self._unlock_pin_buffer = ""
         self._unlock_error_until = 0.0
@@ -510,15 +525,7 @@ class StreamDeckService:
         sleeping = self._screensaver_is_active(now=time.monotonic())
 
         if sleeping:
-            for key in range(key_count):
-                visuals[key] = KeyVisual(
-                    title="",
-                    icon="none",
-                    bg_rgb=PALETTE["base_bg"],
-                    fg_rgb=PALETTE["text_muted"],
-                    accent_rgb=PALETTE["muted_bg"],
-                    disabled=True,
-                )
+            self._build_screensaver_layout(key_count=key_count, visuals=visuals)
         else:
             snapshot = self._get_snapshot()
             self._last_snapshot = snapshot
@@ -566,6 +573,84 @@ class StreamDeckService:
 
         self._action_map = action_map
 
+    def _build_screensaver_layout(
+        self,
+        *,
+        key_count: int,
+        visuals: Dict[int, KeyVisual],
+    ) -> None:
+        for key in range(key_count):
+            visuals[key] = KeyVisual(
+                title="",
+                icon="none",
+                bg_rgb=PALETTE["base_bg"],
+                fg_rgb=PALETTE["text_muted"],
+                accent_rgb=PALETTE["muted_bg"],
+                disabled=True,
+            )
+
+        path = self._screensaver_path(key_count)
+        if not path:
+            return
+
+        now = time.monotonic()
+        head = self._screensaver_head(path_len=len(path), now=now)
+        snake_len = max(1, min(SCREENSAVER_SNAKE_LENGTH, len(path)))
+
+        for offset in range(snake_len):
+            key = path[(head - offset) % len(path)]
+            age = offset / max(1, snake_len - 1)
+            if offset == 0:
+                base = (255, 255, 255)
+                accent = (255, 255, 255)
+                mix = 0.86
+            else:
+                gray = int(round(240 - (age * 140)))
+                gray = max(96, min(240, gray))
+                base = (gray, gray, gray)
+                accent = self._mix_rgb(base, (255, 255, 255), 0.22)
+                mix = 0.74 - (age * 0.50)
+
+            visuals[key] = KeyVisual(
+                title="",
+                icon="none",
+                bg_rgb=self._mix_rgb(PALETTE["base_bg"], base, max(0.18, mix)),
+                fg_rgb=(255, 255, 255),
+                accent_rgb=accent,
+                disabled=False,
+            )
+
+    def _screensaver_head(self, *, path_len: int, now: float) -> int:
+        if path_len <= 0:
+            return 0
+        step_interval = 1.0 / max(0.5, float(SCREENSAVER_SNAKE_SPEED_CELLS_PER_SEC))
+        with self._screensaver_lock:
+            if self._screensaver_next_step_monotonic <= 0.0:
+                self._screensaver_next_step_monotonic = now + step_interval
+                return self._screensaver_head_index % path_len
+            if now >= self._screensaver_next_step_monotonic:
+                # Advance by exactly one cell per render tick to avoid visual jumps.
+                self._screensaver_head_index = (self._screensaver_head_index + 1) % path_len
+                self._screensaver_next_step_monotonic = now + step_interval
+            return self._screensaver_head_index % path_len
+
+    @staticmethod
+    def _screensaver_path(key_count: int) -> list[int]:
+        if key_count == 32:
+            path: list[int] = []
+            cols = 8
+            rows = 4
+            for row in range(rows):
+                row_keys = [row * cols + col for col in range(cols)]
+                if row % 2 == 1:
+                    row_keys.reverse()
+                path.extend(row_keys)
+            # Smooth return leg on the left side before looping:
+            # from bottom-left (24) -> 16 -> 8 -> (wrap to start 0).
+            path.extend([16, 8])
+            return path
+        return list(range(key_count))
+
     def _screensaver_is_active(self, *, now: float) -> bool:
         with self._screensaver_lock:
             if self._screensaver_active:
@@ -575,6 +660,8 @@ class StreamDeckService:
             if (now - self._last_user_activity_monotonic) < SCREENSAVER_IDLE_SECONDS:
                 return False
             self._screensaver_active = True
+            self._screensaver_head_index = 0
+            self._screensaver_next_step_monotonic = 0.0
             return True
 
     def _record_user_activity(self, *, now: Optional[float] = None) -> None:
@@ -588,6 +675,8 @@ class StreamDeckService:
                 return False
             self._screensaver_active = False
             self._last_user_activity_monotonic = time.monotonic()
+            self._screensaver_head_index = 0
+            self._screensaver_next_step_monotonic = 0.0
         self._wake_consumed_releases.add(int(key))
         try:
             self._set_panel_lock(True)
@@ -643,36 +732,37 @@ class StreamDeckService:
         panel_mode = snapshot.control_mode == "panel"
         locked = (not panel_mode) or snapshot.panel_locked
         master_col = 7
-        # Leave the 2nd and penultimate columns empty as visual spacers.
+        # Scenes area: columns 3+4 (zero-based 2+3), filled top->bottom per column.
+        scene_columns = [2, 3]
+        rows_per_column = 4
         scene_keys = [
-            key
-            for key in range(32)
-            if key not in {
-                0, 1, 4, 5, 6, 7,       # row 0: keep only cols 2,3 for scenes
-                8, 9, 12, 13, 14, 15,   # row 1
-                16, 17, 20, 21, 22, 23, # row 2
-                24, 25, 28, 29, 30, 31, # row 3
-            }
+            (row * 8) + col
+            for col in scene_columns
+            for row in range(rows_per_column)
         ]
 
         scenes = snapshot.scenes
         slots_per_page = len(scene_keys)
-        # Sliding window: Prev/Next shifts by one scene.
-        max_scene_pages = max(1, len(scenes) - slots_per_page + 1)
+        # Prev/Next shift by one full scene column, but stop once the last
+        # real scene column is visible (no paging into fully empty columns).
+        total_scene_columns = max(1, (len(scenes) + rows_per_column - 1) // rows_per_column)
+        visible_scene_columns = len(scene_columns)
+        max_scene_pages = max(1, total_scene_columns - visible_scene_columns + 1)
         self._scene_page = max(0, min(self._scene_page, max_scene_pages - 1))
-        scene_start = self._scene_page
+        scene_start = self._scene_page * rows_per_column
         page_scenes = scenes[scene_start : scene_start + slots_per_page]
 
-        lock_disabled = (not panel_mode) or snapshot.panel_locked
-        lock_title = "Locked" if snapshot.panel_locked else "Lock"
-        lock_bg = (56, 14, 18) if snapshot.panel_locked else LEFT_RAIL_BG
-        lock_accent = (255, 84, 84) if snapshot.panel_locked else LEFT_RAIL_ACCENT
+        lock_disabled = not panel_mode
+        lock_title = "Lock"
+        lock_bg = (56, 14, 18)
+        lock_accent = (255, 84, 84)
         visuals[0] = KeyVisual(
             title=lock_title,
             icon="lock",
             bg_rgb=lock_bg,
             accent_rgb=lock_accent,
             disabled=lock_disabled,
+            text_y_offset=-6,
         )
         if panel_mode and not snapshot.panel_locked:
             action_map[0] = ("panel_lock", "true")
@@ -683,6 +773,7 @@ class StreamDeckService:
             bg_rgb=LEFT_RAIL_BG,
             accent_rgb=LEFT_RAIL_INACTIVE_ACCENT,
             disabled=locked,
+            text_y_offset=-6,
         )
         if not locked:
             action_map[8] = ("toggle_page", None)
@@ -692,6 +783,7 @@ class StreamDeckService:
             bg_rgb=LEFT_RAIL_BG,
             accent_rgb=LEFT_RAIL_INACTIVE_ACCENT,
             disabled=self._scene_page == 0,
+            text_y_offset=-6,
         )
         if self._scene_page > 0:
             action_map[16] = ("prev_scene_page", None)
@@ -701,6 +793,7 @@ class StreamDeckService:
             bg_rgb=LEFT_RAIL_BG,
             accent_rgb=LEFT_RAIL_INACTIVE_ACCENT,
             disabled=self._scene_page >= max_scene_pages - 1,
+            text_y_offset=-6,
         )
         if self._scene_page < max_scene_pages - 1:
             action_map[24] = ("next_scene_page", None)
@@ -712,6 +805,7 @@ class StreamDeckService:
             bg_rgb=fog_bg,
             accent_rgb=PALETTE["danger"],
             disabled=locked or (not snapshot.fog_flash_configured),
+            text_y_offset=-6,
         )
         if not locked and snapshot.fog_flash_configured:
             action_map[5] = ("fog_flash_hold", None)
@@ -745,6 +839,7 @@ class StreamDeckService:
             bg_rgb=(12, 12, 12),
             accent_rgb=PALETTE["warning"],
             disabled=locked or (blind_group is None),
+            text_y_offset=-6,
         )
         if not locked and blind_group is not None:
             action_map[29] = ("group_flash_hold", blind_group.key)
@@ -761,26 +856,30 @@ class StreamDeckService:
             disabled=locked,
         )
         visuals[8 + master_col] = KeyVisual(
-            title="Master +",
-            subtitle="+10%",
+            title="10%",
             icon="up",
             bg_rgb=master_col_bg,
             accent_rgb=(255, 255, 255),
             disabled=locked,
+            text_y_offset=-18,
         )
         visuals[16 + master_col] = KeyVisual(
-            title="Master -",
-            subtitle="-10%",
+            title="10%",
             icon="down",
             bg_rgb=master_col_bg,
             accent_rgb=(255, 255, 255),
             disabled=locked,
+            title_near_top=True,
+            text_y_offset=11,
+            icon_below_text=True,
+            icon_y_offset=5,
         )
         visuals[24 + master_col] = KeyVisual(
             title="Blackout",
             icon="blackout",
             bg_rgb=(109, 28, 35),
             accent_rgb=(180, 64, 74),
+            text_y_offset=-6,
         )
         if not locked:
             action_map[master_col] = ("master_toggle_mute", None)
@@ -811,6 +910,7 @@ class StreamDeckService:
                 icon=icon_name,
                 bg_rgb=bg,
                 accent_rgb=(255, 255, 255) if is_active else self._mix_rgb(scene_color, (0, 0, 0), 0.40),
+                text_y_offset=-6,
             )
             if not locked:
                 action_map[key] = ("play_scene", scene.id)
@@ -838,16 +938,17 @@ class StreamDeckService:
         locked = (not panel_mode) or snapshot.panel_locked
 
         # Left rail: lock (top), page toggle (2nd row), pagination (3rd/4th rows)
-        lock_disabled = (not panel_mode) or snapshot.panel_locked
-        lock_title = "Locked" if snapshot.panel_locked else "Lock"
-        lock_bg = (56, 14, 18) if snapshot.panel_locked else LEFT_RAIL_BG
-        lock_accent = (255, 84, 84) if snapshot.panel_locked else LEFT_RAIL_ACCENT
+        lock_disabled = not panel_mode
+        lock_title = "Lock"
+        lock_bg = (56, 14, 18)
+        lock_accent = (255, 84, 84)
         visuals[0] = KeyVisual(
             title=lock_title,
             icon="lock",
             bg_rgb=lock_bg,
             accent_rgb=lock_accent,
             disabled=lock_disabled,
+            text_y_offset=-6,
         )
         if panel_mode and not snapshot.panel_locked:
             action_map[0] = ("panel_lock", "true")
@@ -857,6 +958,7 @@ class StreamDeckService:
             bg_rgb=LEFT_RAIL_BG,
             accent_rgb=LEFT_RAIL_INACTIVE_ACCENT,
             disabled=locked,
+            text_y_offset=-6,
         )
         if not locked:
             action_map[8] = ("toggle_page", None)
@@ -867,6 +969,7 @@ class StreamDeckService:
             bg_rgb=LEFT_RAIL_BG,
             accent_rgb=LEFT_RAIL_INACTIVE_ACCENT,
             disabled=self._group_page == 0,
+            text_y_offset=-6,
         )
         if self._group_page > 0:
             action_map[16] = ("prev_group_page", None)
@@ -876,6 +979,7 @@ class StreamDeckService:
             bg_rgb=LEFT_RAIL_BG,
             accent_rgb=LEFT_RAIL_INACTIVE_ACCENT,
             disabled=self._group_page >= max_group_pages - 1,
+            text_y_offset=-6,
         )
         if self._group_page < max_group_pages - 1:
             action_map[24] = ("next_group_page", None)
@@ -893,26 +997,30 @@ class StreamDeckService:
             disabled=locked,
         )
         visuals[8 + master_col] = KeyVisual(
-            title="Master +",
-            subtitle="+10%",
+            title="10%",
             icon="up",
             bg_rgb=master_col_bg,
             accent_rgb=(255, 255, 255),
             disabled=locked,
+            text_y_offset=-18,
         )
         visuals[16 + master_col] = KeyVisual(
-            title="Master -",
-            subtitle="-10%",
+            title="10%",
             icon="down",
             bg_rgb=master_col_bg,
             accent_rgb=(255, 255, 255),
             disabled=locked,
+            title_near_top=True,
+            text_y_offset=11,
+            icon_below_text=True,
+            icon_y_offset=5,
         )
         visuals[24 + master_col] = KeyVisual(
             title="Blackout",
             icon="blackout",
-            bg_rgb=(24, 8, 8),
-            accent_rgb=PALETTE["danger"],
+            bg_rgb=(109, 28, 35),
+            accent_rgb=(180, 64, 74),
+            text_y_offset=-6,
         )
         if not locked:
             action_map[master_col] = ("master_toggle_mute", None)
@@ -932,7 +1040,7 @@ class StreamDeckService:
 
             group = page_groups[group_index]
             absolute_group_index = group_start + group_index
-            bank_bg = FADER_BANK_GRAYS[absolute_group_index % len(FADER_BANK_GRAYS)]
+            bank_bg = self._levels_bank_gradient_gray(absolute_group_index, len(groups))
             bank_accent = (255, 255, 255)
             muted_text = "MUTED" if group.muted else f"{group.value_percent}%"
             visuals[top_key] = KeyVisual(
@@ -945,20 +1053,23 @@ class StreamDeckService:
                 muted=group.muted,
             )
             visuals[brighter_key] = KeyVisual(
-                title="Brighter",
-                subtitle="+10%",
+                title="10%",
                 icon="up",
                 bg_rgb=bank_bg,
                 accent_rgb=bank_accent,
                 disabled=locked,
+                text_y_offset=-18,
             )
             visuals[dimmer_key] = KeyVisual(
-                title="Dimmer",
-                subtitle="-10%",
+                title="10%",
                 icon="down",
                 bg_rgb=bank_bg,
                 accent_rgb=bank_accent,
                 disabled=locked,
+                title_near_top=True,
+                text_y_offset=11,
+                icon_below_text=True,
+                icon_y_offset=5,
             )
             visuals[full_key] = KeyVisual(
                 title="Flash",
@@ -966,6 +1077,7 @@ class StreamDeckService:
                 bg_rgb=bank_bg,
                 accent_rgb=bank_accent,
                 disabled=locked,
+                text_y_offset=-6,
             )
 
             if locked:
@@ -987,62 +1099,66 @@ class StreamDeckService:
         status_subtitle = masked if masked else "----"
         error_active = now < self._unlock_error_until
 
-        visuals[0] = KeyVisual(
+        # Lockscreen content is constrained to columns 3..6 (zero-based cols 2..5).
+        locked_bg = (56, 14, 18)
+        neutral_bg = (18, 18, 18)
+        keypad_bg = (22, 22, 22)
+        accent_dim = (190, 190, 190)
+
+        # Left-most lockscreen column (inside col 3) for context/status.
+        # Keep only two status tiles and move them one row down.
+        visuals[10] = KeyVisual(
             title="Locked",
             icon="lock",
-            bg_rgb=(56, 14, 18),
+            bg_rgb=locked_bg,
             accent_rgb=(255, 84, 84),
+            text_y_offset=-6,
         )
-        visuals[1] = KeyVisual(
+        visuals[18] = KeyVisual(
             title="PIN",
-            subtitle=status_subtitle,
+            subtitle="Wrong PIN" if error_active else status_subtitle,
             icon="none",
-            bg_rgb=(18, 18, 18),
-            accent_rgb=(255, 255, 255),
-        )
-        visuals[5] = KeyVisual(
-            title="Wrong PIN" if error_active else "Enter PIN",
-            icon="none",
-            bg_rgb=(40, 10, 14) if error_active else (18, 18, 18),
-            accent_rgb=(255, 90, 100) if error_active else (190, 190, 190),
+            bg_rgb=(40, 10, 14) if error_active else neutral_bg,
+            accent_rgb=(255, 90, 100) if error_active else (255, 255, 255),
+            text_y_offset=-10,
+            subtitle_y_offset=-10,
         )
 
+        # Match the PC lockscreen keypad layout exactly:
+        # 1 2 3
+        # 4 5 6
+        # 7 8 9
+        # Clear 0 OK
         digit_keys = {
-            2: "1",
-            3: "2",
-            4: "3",
-            10: "4",
-            11: "5",
-            12: "6",
-            18: "7",
-            19: "8",
-            20: "9",
-            27: "0",
+            3: "1", 4: "2", 5: "3",
+            11: "4", 12: "5", 13: "6",
+            19: "7", 20: "8", 21: "9",
+            28: "0",
         }
         for key, digit in digit_keys.items():
             visuals[key] = KeyVisual(
                 title=digit,
                 icon="none",
-                bg_rgb=(20, 20, 20),
+                bg_rgb=keypad_bg,
                 accent_rgb=(255, 255, 255),
             )
             action_map[key] = ("pin_digit", digit)
 
-        visuals[26] = KeyVisual(
+        visuals[27] = KeyVisual(
             title="Clear",
             icon="none",
             bg_rgb=(24, 16, 16),
             accent_rgb=(220, 220, 220),
         )
-        action_map[26] = ("pin_clear", None)
+        action_map[27] = ("pin_clear", None)
 
-        visuals[28] = KeyVisual(
+        visuals[29] = KeyVisual(
             title="OK",
             icon="none",
-            bg_rgb=(16, 30, 20),
-            accent_rgb=(176, 255, 206),
+            bg_rgb=(20, 74, 30),
+            accent_rgb=(120, 255, 140),
         )
-        action_map[28] = ("pin_submit", None)
+        action_map[29] = ("pin_submit", None)
 
     @staticmethod
     def _group_sort_key(group: StreamDeckGroupDimmer) -> tuple[int, str]:
@@ -1056,6 +1172,23 @@ class StreamDeckService:
     @staticmethod
     def _is_blind_group(group: StreamDeckGroupDimmer) -> bool:
         return "blind" in (group.name or "").strip().lower()
+
+    @staticmethod
+    def _levels_bank_gradient_gray(bank_index: int, total_banks: int) -> tuple[int, int, int]:
+        # One continuous gradient over the full bank range: dark -> light -> dark.
+        if total_banks <= 1:
+            v = LEVELS_BANK_DARK_GRAY
+            return (v, v, v)
+
+        clamped_index = max(0, min(int(bank_index), total_banks - 1))
+        t = clamped_index / float(total_banks - 1)  # 0..1
+        edge_weight = abs(t - 0.5) * 2.0            # 1 at edges, 0 at center
+        gray = int(round(
+            LEVELS_BANK_DARK_GRAY
+            + (LEVELS_BANK_LIGHT_GRAY - LEVELS_BANK_DARK_GRAY) * (1.0 - edge_weight)
+        ))
+        gray = max(0, min(255, gray))
+        return (gray, gray, gray)
 
     def _render_key_image(self, visual: KeyVisual):
         if self._deck is None or PILHelper is None or Image is None or ImageDraw is None or ImageFont is None:
@@ -1097,7 +1230,11 @@ class StreamDeckService:
             draw.line((8, 10, width - 9, height - 11), fill=mute_red, width=8)
             draw.line((6, 8, width - 11, height - 13), fill=(255, 140, 156), width=3)
 
-        icon_box = (width // 2 - 20, 16, width // 2 + 20, 56)
+        icon_y_offset = int(visual.icon_y_offset)
+        if visual.icon_below_text:
+            icon_box = (width // 2 - 20, 36 + icon_y_offset, width // 2 + 20, 76 + icon_y_offset)
+        else:
+            icon_box = (width // 2 - 20, 16 + icon_y_offset, width // 2 + 20, 56 + icon_y_offset)
         icon_color = (
             (255, 255, 255)
             if not visual.disabled
@@ -1110,13 +1247,31 @@ class StreamDeckService:
         fg_rgb = visual.fg_rgb if not visual.disabled else self._mix_rgb(visual.fg_rgb, PALETTE["disabled"], 0.58)
         title_fg = (255, 255, 255)
         shadow = (5, 8, 18)
+        title_y_offset = int(visual.text_y_offset)
+        subtitle_y_offset = int(visual.subtitle_y_offset)
 
         title_only = bool(title) and not subtitle and not footer and visual.icon in {"", "none"}
         icon_title_only = bool(title) and not subtitle and not footer and visual.icon not in {"", "none"}
-        if title_only:
+        is_keypad_digit = (
+            bool(title_only)
+            and len(title.strip()) == 1
+            and title.strip().isdigit()
+        )
+        if is_keypad_digit:
+            font_digit = self._get_font("keypad_digit")
+            self._draw_text_centered(
+                draw,
+                width // 2,
+                (height // 2) + title_y_offset,
+                title.strip(),
+                font_digit,
+                title_fg,
+                shadow,
+            )
+        elif title_only:
             font_scene = self._get_font("scene_title")
             title_lines = self._split_lines(title, max_chars=10, max_lines=3)
-            y_positions = [53, 64, 75]
+            y_positions = [53 + title_y_offset, 64 + title_y_offset, 75 + title_y_offset]
             start = max(0, (len(y_positions) - len(title_lines)) // 2)
             for idx, line in enumerate(title_lines):
                 self._draw_text_centered(
@@ -1133,22 +1288,24 @@ class StreamDeckService:
                 self._draw_icon(draw, image, visual.icon, icon_box, icon_color)
             title_lines = self._split_lines(title, max_chars=11, max_lines=2)
             if title_lines:
-                if icon_title_only and len(title_lines) == 1:
-                    self._draw_text_centered(draw, width // 2, 79, title_lines[0], font_title, title_fg, shadow)
+                if icon_title_only and len(title_lines) == 1 and visual.title_near_top:
+                    self._draw_text_centered(draw, width // 2, 24 + title_y_offset, title_lines[0], font_title, title_fg, shadow)
+                elif icon_title_only and len(title_lines) == 1:
+                    self._draw_text_centered(draw, width // 2, 79 + title_y_offset, title_lines[0], font_title, title_fg, shadow)
                 elif icon_title_only and len(title_lines) > 1:
-                    self._draw_text_centered(draw, width // 2, 72, title_lines[0], font_title, title_fg, shadow)
-                    self._draw_text_centered(draw, width // 2, 86, title_lines[1], font_title, title_fg, shadow)
+                    self._draw_text_centered(draw, width // 2, 72 + title_y_offset, title_lines[0], font_title, title_fg, shadow)
+                    self._draw_text_centered(draw, width // 2, 86 + title_y_offset, title_lines[1], font_title, title_fg, shadow)
                 elif len(title_lines) == 1:
-                    self._draw_text_centered(draw, width // 2, 56, title_lines[0], font_title, title_fg, shadow)
+                    self._draw_text_centered(draw, width // 2, 56 + title_y_offset, title_lines[0], font_title, title_fg, shadow)
                 else:
-                    self._draw_text_centered(draw, width // 2, 51, title_lines[0], font_title, title_fg, shadow)
-                    self._draw_text_centered(draw, width // 2, 63, title_lines[1], font_title, title_fg, shadow)
+                    self._draw_text_centered(draw, width // 2, 51 + title_y_offset, title_lines[0], font_title, title_fg, shadow)
+                    self._draw_text_centered(draw, width // 2, 63 + title_y_offset, title_lines[1], font_title, title_fg, shadow)
 
             if subtitle:
                 self._draw_text_centered(
                     draw,
                     width // 2,
-                    76,
+                    76 + subtitle_y_offset,
                     subtitle.upper(),
                     font_subtitle,
                     self._mix_rgb(fg_rgb, (255, 255, 255), 0.08),
@@ -1178,6 +1335,7 @@ class StreamDeckService:
         size_map = {
             "title": 15,
             "scene_title": 17,
+            "keypad_digit": 30,
             "subtitle": 11,
             "footer": 10,
         }
@@ -1540,3 +1698,4 @@ class StreamDeckService:
             _log.warning("Stream Deck action '%s' failed: %s", action_name, exc)
         finally:
             self.notify_state_changed()
+

@@ -159,7 +159,6 @@ def _set_control_mode(mode: str) -> None:
 def _set_panel_locked(locked: bool) -> None:
     global PANEL_LOCKED
     PANEL_LOCKED = bool(locked)
-    _broadcast_event("status", {"panel_locked": PANEL_LOCKED})
 
 
 def _set_master_dimmer_percent(value: int) -> None:
@@ -258,7 +257,6 @@ def _build_status_payload() -> dict:
         "active_scene_id": ACTIVE_SCENE_ID,
         "live_edit_scene_name": _get_live_editor_scene_name(),
         "control_mode": CONTROL_MODE,
-        "panel_locked": PANEL_LOCKED,
         "master_dimmer_percent": MASTER_DIMMER_PERCENT,
         "master_dimmer_mode": _get_master_dimmer_mode(),
         "haze_percent": HAZE_PERCENT,
@@ -689,11 +687,13 @@ def _streamdeck_set_panel_lock(locked: bool) -> None:
 
 
 def _streamdeck_unlock_panel(pin: str) -> bool:
-    try:
-        api_unlock_panel(UnlockRequest(pin=pin))
-        return True
-    except HTTPException:
+    pin = (pin or "").strip()
+    if not _is_valid_pin(pin):
         return False
+    if not _verify_pin(pin):
+        return False
+    _set_panel_locked(False)
+    return True
 
 
 def start_streamdeck_service() -> None:
@@ -988,7 +988,6 @@ def api_unlock_panel(request: UnlockRequest):
         raise HTTPException(status_code=400, detail="PIN must be exactly 4 digits")
     if not _verify_pin(pin):
         raise HTTPException(status_code=401, detail="Invalid PIN")
-    _set_panel_locked(False)
     return {"status": "ok"}
 
 
