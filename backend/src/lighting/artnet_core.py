@@ -300,6 +300,31 @@ def update_stream(universe_to_dmx: dict[int, bytes]) -> None:
         _controller.set_universe_to_dmx(universe_to_dmx)
 
 
+def send_frame_once(universe_to_dmx: dict[int, bytes]) -> None:
+    """
+    Send a single Art-Net DMX frame per universe without starting the background stream.
+    """
+    if not universe_to_dmx:
+        return
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.bind((settings.local_ip, 0))
+        node_addr = (settings.node_ip, ARTNET_PORT)
+        sequence = 0
+        for universe in sorted(universe_to_dmx.keys()):
+            dmx = universe_to_dmx[universe]
+            packet = _build_artdmx(int(universe), bytes(dmx), sequence)
+            sequence = (sequence + 1) % 256
+            sock.sendto(packet, node_addr)
+    finally:
+        try:
+            sock.close()
+        except OSError:
+            pass
+
+
 def is_stream_running() -> bool:
     with _controller_lock:
         return _controller is not None

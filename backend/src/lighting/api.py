@@ -17,6 +17,7 @@ from .artnet_core import (
     ARTNET_PORT,
     is_stream_running,
     record_snapshots,
+    send_frame_once,
     start_stream,
     stop_stream,
     update_stream,
@@ -1435,9 +1436,14 @@ def _clear_live_editor_state() -> None:
 
 def _build_blackout_payload() -> Dict[int, bytes]:
     # Universes are zero-based internally (UI/user-facing numbering may be 1-based).
+    universes = set(range(settings.universe_count))
+    if settings.fog_flash_universe > 0:
+        universes.add(settings.fog_flash_universe - 1)
+    if settings.haze_universe > 0:
+        universes.add(settings.haze_universe - 1)
     return {
         universe: bytes([0] * 512)
-        for universe in range(settings.universe_count)
+        for universe in sorted(universes)
     }
 
 
@@ -2039,9 +2045,15 @@ def api_blackout():
     _cancel_animated_recording_session()
     _stop_animated_playback()
     _set_fog_flash_active(False)
-    _set_base_stream_payload(_build_blackout_payload())
-    _refresh_stream_from_base_payload()
+    blackout_payload = _build_blackout_payload()
+    # Keep blackout on the line briefly so nodes/fixtures reliably latch zero.
+    start_stream(blackout_payload)
+    time.sleep(1.0)
+    send_frame_once(blackout_payload)
+    _set_base_stream_payload(None)
+    stop_stream()
     _set_active_scene("__blackout__")
+    _broadcast_master_dimmer_status()
     return {"status": "blackout"}
 
 
