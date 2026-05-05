@@ -133,6 +133,7 @@ def _build_streamdeck_snapshot() -> StreamDeckSnapshot:
             scene_type=scene.type,
             style_icon=scene.style.icon if scene.style is not None else None,
             style_color=scene.style.color if scene.style is not None else None,
+            style_color_secondary=scene.style.color_secondary if scene.style is not None else None,
         )
         for scene in list_scenes()
     ]

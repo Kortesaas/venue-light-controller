@@ -88,6 +88,7 @@ const initialFormState: SceneFormState = {
   description: "",
   style: {
     color: "default",
+    color_secondary: "default",
     icon: "none",
   },
 };
@@ -1166,6 +1167,7 @@ export default function AdminPanel({
                             setRenameDescription(scene.description ?? "");
                             setRenameStyle({
                               color: scene.style?.color ?? "default",
+                              color_secondary: scene.style?.color_secondary ?? "default",
                               icon: scene.style?.icon ?? "none",
                             });
                           }}
@@ -1231,13 +1233,16 @@ export default function AdminPanel({
                             size="small"
                             fullWidth
                             label="Color"
-                            value={renameStyle.color ?? "default"}
-                            onChange={(event) =>
-                              handleRenameStyleChange(
-                                "color",
-                                event.target.value as SceneStyleMeta["color"]
-                              )
-                            }
+                              value={renameStyle.color ?? "default"}
+                              onChange={(event) => {
+                                const nextColor = event.target.value as SceneStyleMeta["color"];
+                                setRenameStyle((prev) => ({
+                                  ...prev,
+                                  color: nextColor,
+                                  color_secondary:
+                                    nextColor === "default" ? "default" : prev.color_secondary,
+                                }));
+                              }}
                           >
                             {SCENE_COLOR_OPTIONS.map((option) => (
                               <MenuItem key={option} value={option}>
@@ -1246,8 +1251,61 @@ export default function AdminPanel({
                                   <span>{SCENE_STYLE_LABELS.color[option]}</span>
                                 </Stack>
                               </MenuItem>
-                            ))}
-                          </TextField>
+                              ))}
+                            </TextField>
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={
+                                    Boolean(renameStyle.color_secondary) &&
+                                    renameStyle.color_secondary !== "default"
+                                  }
+                                  onChange={(_event, checked) => {
+                                    setRenameStyle((prev) => {
+                                      const nextPrimary =
+                                        !prev.color || prev.color === "default"
+                                          ? "cyan"
+                                          : prev.color;
+                                      return {
+                                        ...prev,
+                                        color: checked ? nextPrimary : prev.color,
+                                        color_secondary: checked ? nextPrimary : "default",
+                                      };
+                                    });
+                                  }}
+                                />
+                              }
+                              label="Gradient"
+                              sx={{ mx: 0.5 }}
+                            />
+                            <TextField
+                              select
+                              size="small"
+                              fullWidth
+                              disabled={
+                                !(
+                                  Boolean(renameStyle.color_secondary) &&
+                                  renameStyle.color_secondary !== "default"
+                                )
+                              }
+                              label="Gradient Color"
+                              value={renameStyle.color_secondary ?? "default"}
+                              onChange={(event) =>
+                                handleRenameStyleChange(
+                                  "color_secondary",
+                                  event.target.value as SceneStyleMeta["color_secondary"]
+                                )
+                              }
+                            >
+                              {SCENE_COLOR_OPTIONS.filter((option) => option !== "default").map((option) => (
+                                <MenuItem key={`rename-gradient-${option}`} value={option}>
+                                  <Stack direction="row" spacing={1} alignItems="center">
+                                    <Box sx={getColorSwatchSx(option)} />
+                                    <span>{SCENE_STYLE_LABELS.color[option]}</span>
+                                  </Stack>
+                                </MenuItem>
+                              ))}
+                            </TextField>
                         </Stack>
                         <Typography variant="caption" color="text.secondary">
                           Icon
@@ -1305,9 +1363,18 @@ export default function AdminPanel({
                   fullWidth
                   label="Color"
                   value={form.style.color ?? "default"}
-                  onChange={(event) =>
-                    handleFormStyleChange("color", event.target.value as SceneStyleMeta["color"])
-                  }
+                  onChange={(event) => {
+                    const nextColor = event.target.value as SceneStyleMeta["color"];
+                    setForm((prev) => ({
+                      ...prev,
+                      style: {
+                        ...prev.style,
+                        color: nextColor,
+                        color_secondary:
+                          nextColor === "default" ? "default" : prev.style.color_secondary,
+                      },
+                    }));
+                  }}
                 >
                   {SCENE_COLOR_OPTIONS.map((option) => (
                     <MenuItem key={option} value={option}>
@@ -1316,8 +1383,64 @@ export default function AdminPanel({
                         <span>{SCENE_STYLE_LABELS.color[option]}</span>
                       </Stack>
                     </MenuItem>
-                  ))}
-                </TextField>
+                    ))}
+                  </TextField>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={
+                          Boolean(form.style.color_secondary) &&
+                          form.style.color_secondary !== "default"
+                        }
+                        onChange={(_event, checked) => {
+                          setForm((prev) => {
+                            const nextPrimary =
+                              !prev.style.color || prev.style.color === "default"
+                                ? "cyan"
+                                : prev.style.color;
+                            return {
+                              ...prev,
+                              style: {
+                                ...prev.style,
+                                color: checked ? nextPrimary : prev.style.color,
+                                color_secondary: checked ? nextPrimary : "default",
+                              },
+                            };
+                          });
+                        }}
+                      />
+                    }
+                    label="Gradient"
+                    sx={{ mx: 0.5 }}
+                  />
+                  <TextField
+                    select
+                    size="small"
+                    fullWidth
+                    disabled={
+                      !(
+                        Boolean(form.style.color_secondary) &&
+                        form.style.color_secondary !== "default"
+                      )
+                    }
+                    label="Gradient Color"
+                    value={form.style.color_secondary ?? "default"}
+                    onChange={(event) =>
+                      handleFormStyleChange(
+                        "color_secondary",
+                        event.target.value as SceneStyleMeta["color_secondary"]
+                      )
+                    }
+                  >
+                    {SCENE_COLOR_OPTIONS.filter((option) => option !== "default").map((option) => (
+                      <MenuItem key={`form-gradient-${option}`} value={option}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box sx={getColorSwatchSx(option)} />
+                          <span>{SCENE_STYLE_LABELS.color[option]}</span>
+                        </Stack>
+                      </MenuItem>
+                    ))}
+                  </TextField>
               </Stack>
               <Typography variant="caption" color="text.secondary">
                 Icon

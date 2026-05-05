@@ -22,6 +22,17 @@ export type SceneStyleMeta = {
     | "red"
     | "rainbow";
   variant?: "default" | "solid" | "soft" | "outline";
+  color_secondary?:
+    | "default"
+    | "cyan"
+    | "blue"
+    | "teal"
+    | "green"
+    | "violet"
+    | "amber"
+    | "rose"
+    | "red"
+    | "rainbow";
   icon?:
     | "none"
     | "speaker"
@@ -138,8 +149,11 @@ export function getSceneCardSx(
   style: SceneStyleMeta | undefined,
   isActive: boolean
 ): SxProps<Theme> {
-  const hasCustomVisualStyle =
-    style?.color && style.color !== "default";
+  const primaryColor = style?.color ?? "default";
+  const secondaryColor = style?.color_secondary ?? "default";
+  const hasPrimary = primaryColor !== "default";
+  const hasSecondary = secondaryColor !== "default";
+  const hasCustomVisualStyle = hasPrimary || hasSecondary;
 
   if (!hasCustomVisualStyle) {
     return {
@@ -149,17 +163,25 @@ export function getSceneCardSx(
     };
   }
 
-  const colorKey = style?.color ?? "default";
+  const colorKey = primaryColor;
   const accent = COLOR_MAP[colorKey];
   const borderColor = isActive ? accent : "divider";
   const borderWidth = isActive ? 2 : 1;
   const glow = isActive ? `0 0 0 1px ${accent}33 inset` : "none";
+  const secondaryAccent = COLOR_MAP[secondaryColor];
 
   return {
     borderColor,
     borderWidth,
     height: "100%",
-    ...(colorKey === "rainbow"
+    ...(hasPrimary && hasSecondary
+      ? {
+          backgroundImage:
+            colorKey === "rainbow" || secondaryColor === "rainbow"
+              ? `linear-gradient(135deg, ${COLOR_RGBA[colorKey](SOFT_ALPHA)} 0%, ${COLOR_RGBA[secondaryColor](SOFT_ALPHA)} 100%)`
+              : `linear-gradient(135deg, ${COLOR_RGBA[colorKey](SOFT_ALPHA)} 0%, ${COLOR_RGBA[secondaryColor](SOFT_ALPHA)} 100%)`,
+        }
+      : colorKey === "rainbow"
       ? {
           backgroundImage:
             "linear-gradient(135deg, rgba(255, 84, 84, 0.16) 0%, rgba(255, 171, 64, 0.16) 18%, rgba(255, 238, 88, 0.16) 36%, rgba(102, 187, 106, 0.16) 54%, rgba(66, 165, 245, 0.16) 72%, rgba(171, 71, 188, 0.16) 100%)",
@@ -168,6 +190,19 @@ export function getSceneCardSx(
           backgroundColor: COLOR_RGBA[colorKey](SOFT_ALPHA),
         }),
     boxShadow: glow,
+    "&::after":
+      hasPrimary && hasSecondary
+        ? {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            borderRadius: "inherit",
+            border: `1px solid ${isActive ? secondaryAccent : "transparent"}`,
+            pointerEvents: "none",
+            opacity: isActive ? 0.35 : 0,
+          }
+        : undefined,
+    position: "relative",
   };
 }
 
@@ -180,6 +215,13 @@ export function normalizeSceneStyleForPayload(
   const normalized: SceneStyleMeta = {};
   if (style.color && style.color !== "default") {
     normalized.color = style.color;
+  }
+  if (
+    style.color_secondary &&
+    style.color_secondary !== "default" &&
+    style.color_secondary !== style.color
+  ) {
+    normalized.color_secondary = style.color_secondary;
   }
   normalized.variant = "soft";
   if (style.icon && style.icon !== "none") {

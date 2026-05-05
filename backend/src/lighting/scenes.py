@@ -33,6 +33,20 @@ class SceneStyle(BaseModel):
         ]
     ] = None
     variant: Optional[Literal["default", "solid", "soft", "outline"]] = None
+    color_secondary: Optional[
+        Literal[
+            "default",
+            "cyan",
+            "blue",
+            "teal",
+            "green",
+            "violet",
+            "amber",
+            "rose",
+            "red",
+            "rainbow",
+        ]
+    ] = None
     icon: Optional[
         Literal[
             "none",
@@ -52,6 +66,18 @@ class SceneStyle(BaseModel):
         ]
     ] = None
     emphasis: Optional[Literal["normal", "primary", "warning"]] = None
+
+    @model_validator(mode="after")
+    def _normalize_gradient_fields(self) -> "SceneStyle":
+        primary = self.color
+        secondary = self.color_secondary
+        if primary in {None, "default"}:
+            self.color = None
+            self.color_secondary = None
+            return self
+        if secondary in {None, "default", primary}:
+            self.color_secondary = None
+        return self
 
 
 class AnimatedFrame(BaseModel):
