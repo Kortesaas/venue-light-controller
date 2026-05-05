@@ -1318,6 +1318,10 @@ def api_set_fog_flash(request: FogFlashUpdateRequest):
             "fog_flash_configured": _has_fog_channel_configured(),
         }
     _set_fog_flash_active(active)
+    if not active:
+        off_payload = _build_fog_flash_payload(False)
+        if off_payload is not None:
+            send_frame_once(off_payload)
     _refresh_stream_from_base_payload()
     return {
         "fog_flash_active": FOG_FLASH_ACTIVE,
@@ -1335,6 +1339,10 @@ def api_set_blinder_flash(request: BlinderFlashUpdateRequest):
             "blinder_flash_configured": _has_blinder_flash_targets_configured(),
         }
     _set_blinder_flash_active(active)
+    if not active:
+        off_payload = _build_blinder_flash_payload(False)
+        if off_payload is not None:
+            send_frame_once(off_payload)
     _refresh_stream_from_base_payload()
     return {
         "blinder_flash_active": BLINDER_FLASH_ACTIVE,
