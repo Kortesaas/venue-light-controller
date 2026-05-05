@@ -1,556 +1,1905 @@
 {
   "version": 1,
-  "imported_at": "2026-02-09T12:52:43.078554+00:00",
-  "source_filename": "ParameterListExport (3) (1).xml",
-  "fixture_count": 43,
-  "parameter_count": 285,
+  "imported_at": "2026-05-05T07:37:04.719650+00:00",
+  "source_filename": "ParameterListExport_MatriX_05_05_2026.xml",
+  "fixture_count": 49,
+  "parameter_count": 480,
   "universes": [
     0,
-    1
+    1,
+    2
   ],
   "fixtures": [
     {
-      "fixture": "Blind 1",
+      "fixture": "Bar 1",
       "parameters": [
         {
-          "universe": 0,
-          "channel": 2,
-          "name": "Dimmer",
-          "fixture": "Blind 1",
-          "role": "intensity",
-          "ma3_universe": 1
-        }
-      ]
-    },
-    {
-      "fixture": "Disco LED",
-      "parameters": [
-        {
-          "universe": 1,
-          "channel": 19,
+          "universe": 2,
+          "channel": 100,
           "name": "ColorRGB_R",
-          "fixture": "Disco LED",
+          "fixture": "Bar 1",
           "role": "color",
-          "ma3_universe": 2
+          "ma3_universe": 3
         },
         {
-          "universe": 1,
-          "channel": 20,
+          "universe": 2,
+          "channel": 101,
           "name": "ColorRGB_G",
-          "fixture": "Disco LED",
+          "fixture": "Bar 1",
           "role": "color",
-          "ma3_universe": 2
+          "ma3_universe": 3
         },
         {
-          "universe": 1,
-          "channel": 21,
+          "universe": 2,
+          "channel": 102,
           "name": "ColorRGB_B",
-          "fixture": "Disco LED",
+          "fixture": "Bar 1",
           "role": "color",
-          "ma3_universe": 2
+          "ma3_universe": 3
         },
         {
-          "universe": 1,
-          "channel": 22,
-          "name": "ColorRGB_W",
-          "fixture": "Disco LED",
+          "universe": 2,
+          "channel": 103,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 1",
           "role": "color",
-          "ma3_universe": 2
+          "ma3_universe": 3
         },
         {
-          "universe": 1,
-          "channel": 23,
-          "name": "COLORMIXER",
-          "fixture": "Disco LED",
+          "universe": 2,
+          "channel": 104,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 1",
           "role": "color",
-          "ma3_universe": 2
+          "ma3_universe": 3
         },
         {
-          "universe": 1,
-          "channel": 24,
-          "name": "Shutter1",
-          "fixture": "Disco LED",
-          "role": "beam",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 25,
-          "name": "COLORMIXER2",
-          "fixture": "Disco LED",
+          "universe": 2,
+          "channel": 105,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 1",
           "role": "color",
-          "ma3_universe": 2
+          "ma3_universe": 3
         },
         {
-          "universe": 1,
-          "channel": 26,
-          "name": "Dimmer",
-          "fixture": "Disco LED",
-          "role": "intensity",
-          "ma3_universe": 2
+          "universe": 2,
+          "channel": 106,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 107,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 108,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 109,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 110,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 111,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 112,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 113,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 114,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 115,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 116,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 117,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 118,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 119,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 120,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 121,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 122,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 123,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 1",
+          "role": "color",
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Disco Motor",
+      "fixture": "Bar 2",
       "parameters": [
         {
-          "universe": 1,
-          "channel": 505,
-          "name": "MIRRORBALL",
-          "fixture": "Disco Motor",
-          "role": "other",
-          "ma3_universe": 2
+          "universe": 2,
+          "channel": 124,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 125,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 126,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 127,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 128,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 129,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 130,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 131,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 132,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 133,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 134,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 135,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 136,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 137,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 138,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 139,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 140,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 141,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 142,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 143,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 144,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 145,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 146,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 147,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 2",
+          "role": "color",
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Flood 1",
+      "fixture": "Bar 3",
+      "parameters": [
+        {
+          "universe": 2,
+          "channel": 148,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 149,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 150,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 151,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 152,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 153,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 154,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 155,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 156,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 157,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 158,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 159,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 160,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 161,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 162,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 163,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 164,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 165,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 166,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 167,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 168,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 169,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 170,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 171,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 3",
+          "role": "color",
+          "ma3_universe": 3
+        }
+      ]
+    },
+    {
+      "fixture": "Bar 4",
+      "parameters": [
+        {
+          "universe": 2,
+          "channel": 172,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 173,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 174,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 175,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 176,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 177,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 178,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 179,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 180,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 181,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 182,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 183,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 184,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 185,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 186,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 187,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 188,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 189,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 190,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 191,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 192,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 193,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 194,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 195,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 4",
+          "role": "color",
+          "ma3_universe": 3
+        }
+      ]
+    },
+    {
+      "fixture": "Bar 5",
+      "parameters": [
+        {
+          "universe": 2,
+          "channel": 196,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 197,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 198,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 199,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 200,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 201,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 202,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 203,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 204,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 205,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 206,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 207,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 208,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 209,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 210,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 211,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 212,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 213,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 214,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 215,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 216,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 217,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 218,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 219,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 5",
+          "role": "color",
+          "ma3_universe": 3
+        }
+      ]
+    },
+    {
+      "fixture": "Bar 6",
+      "parameters": [
+        {
+          "universe": 2,
+          "channel": 220,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 221,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 222,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 223,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 224,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 225,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 226,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 227,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 228,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 229,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 230,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 231,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 232,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 233,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 234,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 235,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 236,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 237,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 238,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 239,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 240,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 241,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 242,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 243,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 6",
+          "role": "color",
+          "ma3_universe": 3
+        }
+      ]
+    },
+    {
+      "fixture": "Bar 7",
+      "parameters": [
+        {
+          "universe": 2,
+          "channel": 244,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 245,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 246,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 247,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 248,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 249,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 250,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 251,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 252,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 253,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 254,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 255,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 256,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 257,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 258,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 259,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 260,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 261,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 262,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 263,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 264,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 265,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 266,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 267,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 7",
+          "role": "color",
+          "ma3_universe": 3
+        }
+      ]
+    },
+    {
+      "fixture": "Bar 8",
+      "parameters": [
+        {
+          "universe": 2,
+          "channel": 268,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 269,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 270,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 271,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 272,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 273,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 274,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 275,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 276,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 277,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 278,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 279,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 280,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 281,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 282,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 283,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 284,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 285,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 286,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 287,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 288,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 289,
+          "name": "ColorRGB_R",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 290,
+          "name": "ColorRGB_G",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
+          "channel": 291,
+          "name": "ColorRGB_B",
+          "fixture": "Bar 8",
+          "role": "color",
+          "ma3_universe": 3
+        }
+      ]
+    },
+    {
+      "fixture": "Blinder L",
       "parameters": [
         {
           "universe": 0,
-          "channel": 25,
+          "channel": 4,
           "name": "Dimmer",
-          "fixture": "Flood 1",
+          "fixture": "Blinder L",
           "role": "intensity",
           "ma3_universe": 1
-        },
+        }
+      ]
+    },
+    {
+      "fixture": "Blinder R",
+      "parameters": [
         {
           "universe": 0,
+          "channel": 3,
+          "name": "Dimmer",
+          "fixture": "Blinder R",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Fluter 1",
+      "parameters": [
+        {
+          "universe": 2,
+          "channel": 25,
+          "name": "Dimmer",
+          "fixture": "Fluter 1",
+          "role": "intensity",
+          "ma3_universe": 3
+        },
+        {
+          "universe": 2,
           "channel": 26,
           "name": "Shutter1",
-          "fixture": "Flood 1",
+          "fixture": "Fluter 1",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 27,
           "name": "StrobeDuration",
-          "fixture": "Flood 1",
+          "fixture": "Fluter 1",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 28,
           "name": "ColorRGB_R",
-          "fixture": "Flood 1",
+          "fixture": "Fluter 1",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 29,
           "name": "ColorRGB_G",
-          "fixture": "Flood 1",
+          "fixture": "Fluter 1",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 30,
           "name": "ColorRGB_B",
-          "fixture": "Flood 1",
+          "fixture": "Fluter 1",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 31,
           "name": "ColorRGB_W",
-          "fixture": "Flood 1",
+          "fixture": "Fluter 1",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "parameters": [
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 32,
           "name": "Dimmer",
-          "fixture": "Flood 2",
+          "fixture": "Fluter 2",
           "role": "intensity",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 33,
           "name": "Shutter1",
-          "fixture": "Flood 2",
+          "fixture": "Fluter 2",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 34,
           "name": "StrobeDuration",
-          "fixture": "Flood 2",
+          "fixture": "Fluter 2",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 35,
           "name": "ColorRGB_R",
-          "fixture": "Flood 2",
+          "fixture": "Fluter 2",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 36,
           "name": "ColorRGB_G",
-          "fixture": "Flood 2",
+          "fixture": "Fluter 2",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 37,
           "name": "ColorRGB_B",
-          "fixture": "Flood 2",
+          "fixture": "Fluter 2",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 38,
           "name": "ColorRGB_W",
-          "fixture": "Flood 2",
+          "fixture": "Fluter 2",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "parameters": [
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 39,
           "name": "Dimmer",
-          "fixture": "Flood 3",
+          "fixture": "Fluter 3",
           "role": "intensity",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 40,
           "name": "Shutter1",
-          "fixture": "Flood 3",
+          "fixture": "Fluter 3",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 41,
           "name": "StrobeDuration",
-          "fixture": "Flood 3",
+          "fixture": "Fluter 3",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 42,
           "name": "ColorRGB_R",
-          "fixture": "Flood 3",
+          "fixture": "Fluter 3",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 43,
           "name": "ColorRGB_G",
-          "fixture": "Flood 3",
+          "fixture": "Fluter 3",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 44,
           "name": "ColorRGB_B",
-          "fixture": "Flood 3",
+          "fixture": "Fluter 3",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 45,
           "name": "ColorRGB_W",
-          "fixture": "Flood 3",
+          "fixture": "Fluter 3",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "parameters": [
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 46,
           "name": "Dimmer",
-          "fixture": "Flood 4",
+          "fixture": "Fluter 4",
           "role": "intensity",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 47,
           "name": "Shutter1",
-          "fixture": "Flood 4",
+          "fixture": "Fluter 4",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 48,
           "name": "StrobeDuration",
-          "fixture": "Flood 4",
+          "fixture": "Fluter 4",
           "role": "beam",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 49,
           "name": "ColorRGB_R",
-          "fixture": "Flood 4",
+          "fixture": "Fluter 4",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 50,
           "name": "ColorRGB_G",
-          "fixture": "Flood 4",
+          "fixture": "Fluter 4",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 51,
           "name": "ColorRGB_B",
-          "fixture": "Flood 4",
+          "fixture": "Fluter 4",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
+          "universe": 2,
           "channel": 52,
           "name": "ColorRGB_W",
-          "fixture": "Flood 4",
+          "fixture": "Fluter 4",
           "role": "color",
-          "ma3_universe": 1
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Fog 1",
+      "fixture": "Fog",
       "parameters": [
         {
-          "universe": 0,
-          "channel": 511,
+          "universe": 2,
+          "channel": 1,
           "name": "Fog1",
-          "fixture": "Fog 1",
+          "fixture": "Fog",
           "role": "other",
-          "ma3_universe": 1
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Front 1",
+      "fixture": "Groundfog",
       "parameters": [
         {
-          "universe": 0,
-          "channel": 5,
-          "name": "ColorRGB_CW",
-          "fixture": "Front 1",
-          "role": "color",
-          "ma3_universe": 1
+          "universe": 2,
+          "channel": 500,
+          "name": "Fog1",
+          "fixture": "Groundfog",
+          "role": "other",
+          "ma3_universe": 3
         },
         {
-          "universe": 0,
-          "channel": 6,
-          "name": "ColorRGB_WW",
-          "fixture": "Front 1",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 7,
-          "name": "Shutter1",
-          "fixture": "Front 1",
-          "role": "beam",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 8,
-          "name": "MACROS",
-          "fixture": "Front 1",
-          "role": "control",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 9,
-          "name": "Dimmer",
-          "fixture": "Front 1",
-          "role": "intensity",
-          "ma3_universe": 1
+          "universe": 2,
+          "channel": 501,
+          "name": "Fan1",
+          "fixture": "Groundfog",
+          "role": "other",
+          "ma3_universe": 3
         }
       ]
     },
     {
-      "fixture": "Front 2",
+      "fixture": "Hazer",
       "parameters": [
         {
-          "universe": 0,
-          "channel": 10,
-          "name": "ColorRGB_CW",
-          "fixture": "Front 2",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 11,
-          "name": "ColorRGB_WW",
-          "fixture": "Front 2",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 12,
-          "name": "Shutter1",
-          "fixture": "Front 2",
-          "role": "beam",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 13,
-          "name": "MACROS",
-          "fixture": "Front 2",
-          "role": "control",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 14,
-          "name": "Dimmer",
-          "fixture": "Front 2",
-          "role": "intensity",
-          "ma3_universe": 1
-        }
-      ]
-    },
-    {
-      "fixture": "Front 3",
-      "parameters": [
-        {
-          "universe": 0,
-          "channel": 15,
-          "name": "ColorRGB_CW",
-          "fixture": "Front 3",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 16,
-          "name": "ColorRGB_WW",
-          "fixture": "Front 3",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 17,
-          "name": "Shutter1",
-          "fixture": "Front 3",
-          "role": "beam",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 18,
-          "name": "MACROS",
-          "fixture": "Front 3",
-          "role": "control",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 19,
-          "name": "Dimmer",
-          "fixture": "Front 3",
-          "role": "intensity",
-          "ma3_universe": 1
-        }
-      ]
-    },
-    {
-      "fixture": "Front 4",
-      "parameters": [
-        {
-          "universe": 0,
-          "channel": 20,
-          "name": "ColorRGB_CW",
-          "fixture": "Front 4",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 21,
-          "name": "ColorRGB_WW",
-          "fixture": "Front 4",
-          "role": "color",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 22,
-          "name": "Shutter1",
-          "fixture": "Front 4",
-          "role": "beam",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 23,
-          "name": "MACROS",
-          "fixture": "Front 4",
-          "role": "control",
-          "ma3_universe": 1
-        },
-        {
-          "universe": 0,
-          "channel": 24,
-          "name": "Dimmer",
-          "fixture": "Front 4",
-          "role": "intensity",
-          "ma3_universe": 1
-        }
-      ]
-    },
-    {
-      "fixture": "Haze 1",
-      "parameters": [
-        {
-          "universe": 0,
-          "channel": 510,
+          "universe": 2,
+          "channel": 2,
           "name": "Haze1",
-          "fixture": "Haze 1",
+          "fixture": "Hazer",
           "role": "other",
-          "ma3_universe": 1
+          "ma3_universe": 3
         }
       ]
     },
@@ -927,155 +2276,83 @@
       ]
     },
     {
-      "fixture": "Par 1",
+      "fixture": "Mirrormotor",
       "parameters": [
         {
           "universe": 1,
-          "channel": 1,
-          "name": "Dimmer",
-          "fixture": "Par 1",
-          "role": "intensity",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 2,
-          "name": "Shutter1",
-          "fixture": "Par 1",
-          "role": "beam",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 3,
-          "name": "ColorRGB_R",
-          "fixture": "Par 1",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 4,
-          "name": "ColorRGB_G",
-          "fixture": "Par 1",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 5,
-          "name": "ColorRGB_B",
-          "fixture": "Par 1",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 6,
-          "name": "ColorRGB_W",
-          "fixture": "Par 1",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 7,
-          "name": "ColorRGB_RY",
-          "fixture": "Par 1",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 8,
-          "name": "ColorRGB_UV",
-          "fixture": "Par 1",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 9,
-          "name": "COLORMIXER",
-          "fixture": "Par 1",
-          "role": "color",
+          "channel": 505,
+          "name": "Control1",
+          "fixture": "Mirrormotor",
+          "role": "control",
           "ma3_universe": 2
         }
       ]
     },
     {
-      "fixture": "Par 2",
+      "fixture": "Mirrorspot",
       "parameters": [
         {
           "universe": 1,
-          "channel": 10,
-          "name": "Dimmer",
-          "fixture": "Par 2",
-          "role": "intensity",
+          "channel": 19,
+          "name": "ColorRGB_R",
+          "fixture": "Mirrorspot",
+          "role": "color",
           "ma3_universe": 2
         },
         {
           "universe": 1,
-          "channel": 11,
+          "channel": 20,
+          "name": "ColorRGB_G",
+          "fixture": "Mirrorspot",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 21,
+          "name": "ColorRGB_B",
+          "fixture": "Mirrorspot",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 22,
+          "name": "ColorRGB_W",
+          "fixture": "Mirrorspot",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 23,
+          "name": "COLORMIXER",
+          "fixture": "Mirrorspot",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 24,
           "name": "Shutter1",
-          "fixture": "Par 2",
+          "fixture": "Mirrorspot",
           "role": "beam",
           "ma3_universe": 2
         },
         {
           "universe": 1,
-          "channel": 12,
-          "name": "ColorRGB_R",
-          "fixture": "Par 2",
+          "channel": 25,
+          "name": "COLORMIXER2",
+          "fixture": "Mirrorspot",
           "role": "color",
           "ma3_universe": 2
         },
         {
           "universe": 1,
-          "channel": 13,
-          "name": "ColorRGB_G",
-          "fixture": "Par 2",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 14,
-          "name": "ColorRGB_B",
-          "fixture": "Par 2",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 15,
-          "name": "ColorRGB_W",
-          "fixture": "Par 2",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 16,
-          "name": "ColorRGB_RY",
-          "fixture": "Par 2",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 17,
-          "name": "ColorRGB_UV",
-          "fixture": "Par 2",
-          "role": "color",
-          "ma3_universe": 2
-        },
-        {
-          "universe": 1,
-          "channel": 18,
-          "name": "COLORMIXER",
-          "fixture": "Par 2",
-          "role": "color",
+          "channel": 26,
+          "name": "Dimmer",
+          "fixture": "Mirrorspot",
+          "role": "intensity",
           "ma3_universe": 2
         }
       ]
@@ -2000,7 +3277,7 @@
       "parameters": [
         {
           "universe": 0,
-          "channel": 300,
+          "channel": 1,
           "name": "Shutter1",
           "fixture": "Strobe",
           "role": "beam",
@@ -2008,7 +3285,7 @@
         },
         {
           "universe": 0,
-          "channel": 301,
+          "channel": 2,
           "name": "Dimmer",
           "fixture": "Strobe",
           "role": "intensity",
@@ -2017,21 +3294,350 @@
       ]
     },
     {
-      "fixture": "Theater 1",
+      "fixture": "Studio",
+      "parameters": [
+        {
+          "universe": 1,
+          "channel": 417,
+          "name": "Dimmer",
+          "fixture": "Studio",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 418,
+          "name": "Shutter1",
+          "fixture": "Studio",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 419,
+          "name": "ColorRGB_R",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 420,
+          "name": "ColorRGB_G",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 421,
+          "name": "ColorRGB_B",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 422,
+          "name": "ColorRGB_W",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 423,
+          "name": "ColorRGB_RY",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 424,
+          "name": "ColorRGB_UV",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 425,
+          "name": "COLORMIXER",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 426,
+          "name": "Dimmer",
+          "fixture": "Studio",
+          "role": "intensity",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 427,
+          "name": "Shutter1",
+          "fixture": "Studio",
+          "role": "beam",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 428,
+          "name": "ColorRGB_R",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 429,
+          "name": "ColorRGB_G",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 430,
+          "name": "ColorRGB_B",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 431,
+          "name": "ColorRGB_W",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 432,
+          "name": "ColorRGB_RY",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 433,
+          "name": "ColorRGB_UV",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        },
+        {
+          "universe": 1,
+          "channel": 434,
+          "name": "COLORMIXER",
+          "fixture": "Studio",
+          "role": "color",
+          "ma3_universe": 2
+        }
+      ]
+    },
+    {
+      "fixture": "Stufe 1",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 5,
+          "name": "ColorRGB_CW",
+          "fixture": "Stufe 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 6,
+          "name": "ColorRGB_WW",
+          "fixture": "Stufe 1",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 7,
+          "name": "Shutter1",
+          "fixture": "Stufe 1",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 8,
+          "name": "MACROS",
+          "fixture": "Stufe 1",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 9,
+          "name": "Dimmer",
+          "fixture": "Stufe 1",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Stufe 2",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 10,
+          "name": "ColorRGB_CW",
+          "fixture": "Stufe 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 11,
+          "name": "ColorRGB_WW",
+          "fixture": "Stufe 2",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 12,
+          "name": "Shutter1",
+          "fixture": "Stufe 2",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 13,
+          "name": "MACROS",
+          "fixture": "Stufe 2",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 14,
+          "name": "Dimmer",
+          "fixture": "Stufe 2",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Stufe 3",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 15,
+          "name": "ColorRGB_CW",
+          "fixture": "Stufe 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 16,
+          "name": "ColorRGB_WW",
+          "fixture": "Stufe 3",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 17,
+          "name": "Shutter1",
+          "fixture": "Stufe 3",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 18,
+          "name": "MACROS",
+          "fixture": "Stufe 3",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 19,
+          "name": "Dimmer",
+          "fixture": "Stufe 3",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Stufe 4",
+      "parameters": [
+        {
+          "universe": 0,
+          "channel": 20,
+          "name": "ColorRGB_CW",
+          "fixture": "Stufe 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 21,
+          "name": "ColorRGB_WW",
+          "fixture": "Stufe 4",
+          "role": "color",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 22,
+          "name": "Shutter1",
+          "fixture": "Stufe 4",
+          "role": "beam",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 23,
+          "name": "MACROS",
+          "fixture": "Stufe 4",
+          "role": "control",
+          "ma3_universe": 1
+        },
+        {
+          "universe": 0,
+          "channel": 24,
+          "name": "Dimmer",
+          "fixture": "Stufe 4",
+          "role": "intensity",
+          "ma3_universe": 1
+        }
+      ]
+    },
+    {
+      "fixture": "Theater",
       "parameters": [
         {
           "universe": 1,
           "channel": 27,
           "name": "Dimmer",
-          "fixture": "Theater 1",
+          "fixture": "Theater",
           "role": "intensity",
           "ma3_universe": 2
         },
         {
           "universe": 1,
           "channel": 28,
-          "name": "Shutter1",
-          "fixture": "Theater 1",
+          "name": "StrobeDuration",
+          "fixture": "Theater",
           "role": "beam",
           "ma3_universe": 2
         },
@@ -2039,7 +3645,7 @@
           "universe": 1,
           "channel": 29,
           "name": "ColorRGB_WW",
-          "fixture": "Theater 1",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
         },
@@ -2047,28 +3653,23 @@
           "universe": 1,
           "channel": 30,
           "name": "ColorRGB_CW",
-          "fixture": "Theater 1",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
-        }
-      ]
-    },
-    {
-      "fixture": "Theater 2",
-      "parameters": [
+        },
         {
           "universe": 1,
           "channel": 31,
           "name": "Dimmer",
-          "fixture": "Theater 2",
+          "fixture": "Theater",
           "role": "intensity",
           "ma3_universe": 2
         },
         {
           "universe": 1,
           "channel": 32,
-          "name": "Shutter1",
-          "fixture": "Theater 2",
+          "name": "StrobeDuration",
+          "fixture": "Theater",
           "role": "beam",
           "ma3_universe": 2
         },
@@ -2076,7 +3677,7 @@
           "universe": 1,
           "channel": 33,
           "name": "ColorRGB_WW",
-          "fixture": "Theater 2",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
         },
@@ -2084,28 +3685,23 @@
           "universe": 1,
           "channel": 34,
           "name": "ColorRGB_CW",
-          "fixture": "Theater 2",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
-        }
-      ]
-    },
-    {
-      "fixture": "Theater 3",
-      "parameters": [
+        },
         {
           "universe": 1,
           "channel": 35,
           "name": "Dimmer",
-          "fixture": "Theater 3",
+          "fixture": "Theater",
           "role": "intensity",
           "ma3_universe": 2
         },
         {
           "universe": 1,
           "channel": 36,
-          "name": "Shutter1",
-          "fixture": "Theater 3",
+          "name": "StrobeDuration",
+          "fixture": "Theater",
           "role": "beam",
           "ma3_universe": 2
         },
@@ -2113,7 +3709,7 @@
           "universe": 1,
           "channel": 37,
           "name": "ColorRGB_WW",
-          "fixture": "Theater 3",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
         },
@@ -2121,28 +3717,23 @@
           "universe": 1,
           "channel": 38,
           "name": "ColorRGB_CW",
-          "fixture": "Theater 3",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
-        }
-      ]
-    },
-    {
-      "fixture": "Theater 4",
-      "parameters": [
+        },
         {
           "universe": 1,
           "channel": 39,
           "name": "Dimmer",
-          "fixture": "Theater 4",
+          "fixture": "Theater",
           "role": "intensity",
           "ma3_universe": 2
         },
         {
           "universe": 1,
           "channel": 40,
-          "name": "Shutter1",
-          "fixture": "Theater 4",
+          "name": "StrobeDuration",
+          "fixture": "Theater",
           "role": "beam",
           "ma3_universe": 2
         },
@@ -2150,7 +3741,7 @@
           "universe": 1,
           "channel": 41,
           "name": "ColorRGB_WW",
-          "fixture": "Theater 4",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
         },
@@ -2158,7 +3749,7 @@
           "universe": 1,
           "channel": 42,
           "name": "ColorRGB_CW",
-          "fixture": "Theater 4",
+          "fixture": "Theater",
           "role": "color",
           "ma3_universe": 2
         }
@@ -2506,22 +4097,6 @@
     }
   ],
   "address_map": {
-    "0:301": {
-      "universe": 0,
-      "channel": 301,
-      "name": "Dimmer",
-      "fixture": "Strobe",
-      "role": "intensity",
-      "ma3_universe": 1
-    },
-    "0:300": {
-      "universe": 0,
-      "channel": 300,
-      "name": "Shutter1",
-      "fixture": "Strobe",
-      "role": "beam",
-      "ma3_universe": 1
-    },
     "0:59": {
       "universe": 0,
       "channel": 59,
@@ -4034,235 +5609,235 @@
       "role": "beam",
       "ma3_universe": 1
     },
-    "0:25": {
-      "universe": 0,
+    "2:25": {
+      "universe": 2,
       "channel": 25,
       "name": "Dimmer",
-      "fixture": "Flood 1",
+      "fixture": "Fluter 1",
       "role": "intensity",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:28": {
-      "universe": 0,
+    "2:28": {
+      "universe": 2,
       "channel": 28,
       "name": "ColorRGB_R",
-      "fixture": "Flood 1",
+      "fixture": "Fluter 1",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:29": {
-      "universe": 0,
+    "2:29": {
+      "universe": 2,
       "channel": 29,
       "name": "ColorRGB_G",
-      "fixture": "Flood 1",
+      "fixture": "Fluter 1",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:30": {
-      "universe": 0,
+    "2:30": {
+      "universe": 2,
       "channel": 30,
       "name": "ColorRGB_B",
-      "fixture": "Flood 1",
+      "fixture": "Fluter 1",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:31": {
-      "universe": 0,
+    "2:31": {
+      "universe": 2,
       "channel": 31,
       "name": "ColorRGB_W",
-      "fixture": "Flood 1",
+      "fixture": "Fluter 1",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:26": {
-      "universe": 0,
+    "2:26": {
+      "universe": 2,
       "channel": 26,
       "name": "Shutter1",
-      "fixture": "Flood 1",
+      "fixture": "Fluter 1",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:27": {
-      "universe": 0,
+    "2:27": {
+      "universe": 2,
       "channel": 27,
       "name": "StrobeDuration",
-      "fixture": "Flood 1",
+      "fixture": "Fluter 1",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:32": {
-      "universe": 0,
+    "2:32": {
+      "universe": 2,
       "channel": 32,
       "name": "Dimmer",
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "role": "intensity",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:35": {
-      "universe": 0,
+    "2:35": {
+      "universe": 2,
       "channel": 35,
       "name": "ColorRGB_R",
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:36": {
-      "universe": 0,
+    "2:36": {
+      "universe": 2,
       "channel": 36,
       "name": "ColorRGB_G",
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:37": {
-      "universe": 0,
+    "2:37": {
+      "universe": 2,
       "channel": 37,
       "name": "ColorRGB_B",
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:38": {
-      "universe": 0,
+    "2:38": {
+      "universe": 2,
       "channel": 38,
       "name": "ColorRGB_W",
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:33": {
-      "universe": 0,
+    "2:33": {
+      "universe": 2,
       "channel": 33,
       "name": "Shutter1",
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:34": {
-      "universe": 0,
+    "2:34": {
+      "universe": 2,
       "channel": 34,
       "name": "StrobeDuration",
-      "fixture": "Flood 2",
+      "fixture": "Fluter 2",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:39": {
-      "universe": 0,
+    "2:39": {
+      "universe": 2,
       "channel": 39,
       "name": "Dimmer",
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "role": "intensity",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:42": {
-      "universe": 0,
+    "2:42": {
+      "universe": 2,
       "channel": 42,
       "name": "ColorRGB_R",
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:43": {
-      "universe": 0,
+    "2:43": {
+      "universe": 2,
       "channel": 43,
       "name": "ColorRGB_G",
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:44": {
-      "universe": 0,
+    "2:44": {
+      "universe": 2,
       "channel": 44,
       "name": "ColorRGB_B",
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:45": {
-      "universe": 0,
+    "2:45": {
+      "universe": 2,
       "channel": 45,
       "name": "ColorRGB_W",
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:40": {
-      "universe": 0,
+    "2:40": {
+      "universe": 2,
       "channel": 40,
       "name": "Shutter1",
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:41": {
-      "universe": 0,
+    "2:41": {
+      "universe": 2,
       "channel": 41,
       "name": "StrobeDuration",
-      "fixture": "Flood 3",
+      "fixture": "Fluter 3",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:46": {
-      "universe": 0,
+    "2:46": {
+      "universe": 2,
       "channel": 46,
       "name": "Dimmer",
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "role": "intensity",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:49": {
-      "universe": 0,
+    "2:49": {
+      "universe": 2,
       "channel": 49,
       "name": "ColorRGB_R",
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:50": {
-      "universe": 0,
+    "2:50": {
+      "universe": 2,
       "channel": 50,
       "name": "ColorRGB_G",
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:51": {
-      "universe": 0,
+    "2:51": {
+      "universe": 2,
       "channel": 51,
       "name": "ColorRGB_B",
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:52": {
-      "universe": 0,
+    "2:52": {
+      "universe": 2,
       "channel": 52,
       "name": "ColorRGB_W",
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "role": "color",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:47": {
-      "universe": 0,
+    "2:47": {
+      "universe": 2,
       "channel": 47,
       "name": "Shutter1",
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
-    "0:48": {
-      "universe": 0,
+    "2:48": {
+      "universe": 2,
       "channel": 48,
       "name": "StrobeDuration",
-      "fixture": "Flood 4",
+      "fixture": "Fluter 4",
       "role": "beam",
-      "ma3_universe": 1
+      "ma3_universe": 3
     },
     "0:9": {
       "universe": 0,
       "channel": 9,
       "name": "Dimmer",
-      "fixture": "Front 1",
+      "fixture": "Stufe 1",
       "role": "intensity",
       "ma3_universe": 1
     },
@@ -4270,7 +5845,7 @@
       "universe": 0,
       "channel": 5,
       "name": "ColorRGB_CW",
-      "fixture": "Front 1",
+      "fixture": "Stufe 1",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4278,7 +5853,7 @@
       "universe": 0,
       "channel": 6,
       "name": "ColorRGB_WW",
-      "fixture": "Front 1",
+      "fixture": "Stufe 1",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4286,7 +5861,7 @@
       "universe": 0,
       "channel": 7,
       "name": "Shutter1",
-      "fixture": "Front 1",
+      "fixture": "Stufe 1",
       "role": "beam",
       "ma3_universe": 1
     },
@@ -4294,7 +5869,7 @@
       "universe": 0,
       "channel": 8,
       "name": "MACROS",
-      "fixture": "Front 1",
+      "fixture": "Stufe 1",
       "role": "control",
       "ma3_universe": 1
     },
@@ -4302,7 +5877,7 @@
       "universe": 0,
       "channel": 14,
       "name": "Dimmer",
-      "fixture": "Front 2",
+      "fixture": "Stufe 2",
       "role": "intensity",
       "ma3_universe": 1
     },
@@ -4310,7 +5885,7 @@
       "universe": 0,
       "channel": 10,
       "name": "ColorRGB_CW",
-      "fixture": "Front 2",
+      "fixture": "Stufe 2",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4318,7 +5893,7 @@
       "universe": 0,
       "channel": 11,
       "name": "ColorRGB_WW",
-      "fixture": "Front 2",
+      "fixture": "Stufe 2",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4326,7 +5901,7 @@
       "universe": 0,
       "channel": 12,
       "name": "Shutter1",
-      "fixture": "Front 2",
+      "fixture": "Stufe 2",
       "role": "beam",
       "ma3_universe": 1
     },
@@ -4334,7 +5909,7 @@
       "universe": 0,
       "channel": 13,
       "name": "MACROS",
-      "fixture": "Front 2",
+      "fixture": "Stufe 2",
       "role": "control",
       "ma3_universe": 1
     },
@@ -4342,7 +5917,7 @@
       "universe": 0,
       "channel": 19,
       "name": "Dimmer",
-      "fixture": "Front 3",
+      "fixture": "Stufe 3",
       "role": "intensity",
       "ma3_universe": 1
     },
@@ -4350,7 +5925,7 @@
       "universe": 0,
       "channel": 15,
       "name": "ColorRGB_CW",
-      "fixture": "Front 3",
+      "fixture": "Stufe 3",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4358,7 +5933,7 @@
       "universe": 0,
       "channel": 16,
       "name": "ColorRGB_WW",
-      "fixture": "Front 3",
+      "fixture": "Stufe 3",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4366,7 +5941,7 @@
       "universe": 0,
       "channel": 17,
       "name": "Shutter1",
-      "fixture": "Front 3",
+      "fixture": "Stufe 3",
       "role": "beam",
       "ma3_universe": 1
     },
@@ -4374,7 +5949,7 @@
       "universe": 0,
       "channel": 18,
       "name": "MACROS",
-      "fixture": "Front 3",
+      "fixture": "Stufe 3",
       "role": "control",
       "ma3_universe": 1
     },
@@ -4382,7 +5957,7 @@
       "universe": 0,
       "channel": 24,
       "name": "Dimmer",
-      "fixture": "Front 4",
+      "fixture": "Stufe 4",
       "role": "intensity",
       "ma3_universe": 1
     },
@@ -4390,7 +5965,7 @@
       "universe": 0,
       "channel": 20,
       "name": "ColorRGB_CW",
-      "fixture": "Front 4",
+      "fixture": "Stufe 4",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4398,7 +5973,7 @@
       "universe": 0,
       "channel": 21,
       "name": "ColorRGB_WW",
-      "fixture": "Front 4",
+      "fixture": "Stufe 4",
       "role": "color",
       "ma3_universe": 1
     },
@@ -4406,7 +5981,7 @@
       "universe": 0,
       "channel": 22,
       "name": "Shutter1",
-      "fixture": "Front 4",
+      "fixture": "Stufe 4",
       "role": "beam",
       "ma3_universe": 1
     },
@@ -4414,303 +5989,23 @@
       "universe": 0,
       "channel": 23,
       "name": "MACROS",
-      "fixture": "Front 4",
+      "fixture": "Stufe 4",
       "role": "control",
       "ma3_universe": 1
     },
-    "1:27": {
+    "1:505": {
       "universe": 1,
-      "channel": 27,
-      "name": "Dimmer",
-      "fixture": "Theater 1",
-      "role": "intensity",
+      "channel": 505,
+      "name": "Control1",
+      "fixture": "Mirrormotor",
+      "role": "control",
       "ma3_universe": 2
-    },
-    "1:29": {
-      "universe": 1,
-      "channel": 29,
-      "name": "ColorRGB_WW",
-      "fixture": "Theater 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:30": {
-      "universe": 1,
-      "channel": 30,
-      "name": "ColorRGB_CW",
-      "fixture": "Theater 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:28": {
-      "universe": 1,
-      "channel": 28,
-      "name": "Shutter1",
-      "fixture": "Theater 1",
-      "role": "beam",
-      "ma3_universe": 2
-    },
-    "1:31": {
-      "universe": 1,
-      "channel": 31,
-      "name": "Dimmer",
-      "fixture": "Theater 2",
-      "role": "intensity",
-      "ma3_universe": 2
-    },
-    "1:33": {
-      "universe": 1,
-      "channel": 33,
-      "name": "ColorRGB_WW",
-      "fixture": "Theater 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:34": {
-      "universe": 1,
-      "channel": 34,
-      "name": "ColorRGB_CW",
-      "fixture": "Theater 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:32": {
-      "universe": 1,
-      "channel": 32,
-      "name": "Shutter1",
-      "fixture": "Theater 2",
-      "role": "beam",
-      "ma3_universe": 2
-    },
-    "1:35": {
-      "universe": 1,
-      "channel": 35,
-      "name": "Dimmer",
-      "fixture": "Theater 3",
-      "role": "intensity",
-      "ma3_universe": 2
-    },
-    "1:37": {
-      "universe": 1,
-      "channel": 37,
-      "name": "ColorRGB_WW",
-      "fixture": "Theater 3",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:38": {
-      "universe": 1,
-      "channel": 38,
-      "name": "ColorRGB_CW",
-      "fixture": "Theater 3",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:36": {
-      "universe": 1,
-      "channel": 36,
-      "name": "Shutter1",
-      "fixture": "Theater 3",
-      "role": "beam",
-      "ma3_universe": 2
-    },
-    "1:39": {
-      "universe": 1,
-      "channel": 39,
-      "name": "Dimmer",
-      "fixture": "Theater 4",
-      "role": "intensity",
-      "ma3_universe": 2
-    },
-    "1:41": {
-      "universe": 1,
-      "channel": 41,
-      "name": "ColorRGB_WW",
-      "fixture": "Theater 4",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:42": {
-      "universe": 1,
-      "channel": 42,
-      "name": "ColorRGB_CW",
-      "fixture": "Theater 4",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:40": {
-      "universe": 1,
-      "channel": 40,
-      "name": "Shutter1",
-      "fixture": "Theater 4",
-      "role": "beam",
-      "ma3_universe": 2
-    },
-    "1:1": {
-      "universe": 1,
-      "channel": 1,
-      "name": "Dimmer",
-      "fixture": "Par 1",
-      "role": "intensity",
-      "ma3_universe": 2
-    },
-    "1:3": {
-      "universe": 1,
-      "channel": 3,
-      "name": "ColorRGB_R",
-      "fixture": "Par 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:4": {
-      "universe": 1,
-      "channel": 4,
-      "name": "ColorRGB_G",
-      "fixture": "Par 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:5": {
-      "universe": 1,
-      "channel": 5,
-      "name": "ColorRGB_B",
-      "fixture": "Par 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:6": {
-      "universe": 1,
-      "channel": 6,
-      "name": "ColorRGB_W",
-      "fixture": "Par 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:7": {
-      "universe": 1,
-      "channel": 7,
-      "name": "ColorRGB_RY",
-      "fixture": "Par 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:8": {
-      "universe": 1,
-      "channel": 8,
-      "name": "ColorRGB_UV",
-      "fixture": "Par 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:2": {
-      "universe": 1,
-      "channel": 2,
-      "name": "Shutter1",
-      "fixture": "Par 1",
-      "role": "beam",
-      "ma3_universe": 2
-    },
-    "1:9": {
-      "universe": 1,
-      "channel": 9,
-      "name": "COLORMIXER",
-      "fixture": "Par 1",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:10": {
-      "universe": 1,
-      "channel": 10,
-      "name": "Dimmer",
-      "fixture": "Par 2",
-      "role": "intensity",
-      "ma3_universe": 2
-    },
-    "1:12": {
-      "universe": 1,
-      "channel": 12,
-      "name": "ColorRGB_R",
-      "fixture": "Par 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:13": {
-      "universe": 1,
-      "channel": 13,
-      "name": "ColorRGB_G",
-      "fixture": "Par 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:14": {
-      "universe": 1,
-      "channel": 14,
-      "name": "ColorRGB_B",
-      "fixture": "Par 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:15": {
-      "universe": 1,
-      "channel": 15,
-      "name": "ColorRGB_W",
-      "fixture": "Par 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:16": {
-      "universe": 1,
-      "channel": 16,
-      "name": "ColorRGB_RY",
-      "fixture": "Par 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:17": {
-      "universe": 1,
-      "channel": 17,
-      "name": "ColorRGB_UV",
-      "fixture": "Par 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "1:11": {
-      "universe": 1,
-      "channel": 11,
-      "name": "Shutter1",
-      "fixture": "Par 2",
-      "role": "beam",
-      "ma3_universe": 2
-    },
-    "1:18": {
-      "universe": 1,
-      "channel": 18,
-      "name": "COLORMIXER",
-      "fixture": "Par 2",
-      "role": "color",
-      "ma3_universe": 2
-    },
-    "0:511": {
-      "universe": 0,
-      "channel": 511,
-      "name": "Fog1",
-      "fixture": "Fog 1",
-      "role": "other",
-      "ma3_universe": 1
-    },
-    "0:510": {
-      "universe": 0,
-      "channel": 510,
-      "name": "Haze1",
-      "fixture": "Haze 1",
-      "role": "other",
-      "ma3_universe": 1
     },
     "1:26": {
       "universe": 1,
       "channel": 26,
       "name": "Dimmer",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "intensity",
       "ma3_universe": 2
     },
@@ -4718,7 +6013,7 @@
       "universe": 1,
       "channel": 25,
       "name": "COLORMIXER2",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "color",
       "ma3_universe": 2
     },
@@ -4726,7 +6021,7 @@
       "universe": 1,
       "channel": 19,
       "name": "ColorRGB_R",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "color",
       "ma3_universe": 2
     },
@@ -4734,7 +6029,7 @@
       "universe": 1,
       "channel": 20,
       "name": "ColorRGB_G",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "color",
       "ma3_universe": 2
     },
@@ -4742,7 +6037,7 @@
       "universe": 1,
       "channel": 21,
       "name": "ColorRGB_B",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "color",
       "ma3_universe": 2
     },
@@ -4750,7 +6045,7 @@
       "universe": 1,
       "channel": 22,
       "name": "ColorRGB_W",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "color",
       "ma3_universe": 2
     },
@@ -4758,7 +6053,7 @@
       "universe": 1,
       "channel": 23,
       "name": "COLORMIXER",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "color",
       "ma3_universe": 2
     },
@@ -4766,25 +6061,1881 @@
       "universe": 1,
       "channel": 24,
       "name": "Shutter1",
-      "fixture": "Disco LED",
+      "fixture": "Mirrorspot",
       "role": "beam",
       "ma3_universe": 2
     },
-    "1:505": {
+    "1:27": {
       "universe": 1,
-      "channel": 505,
-      "name": "MIRRORBALL",
-      "fixture": "Disco Motor",
-      "role": "other",
+      "channel": 27,
+      "name": "Dimmer",
+      "fixture": "Theater",
+      "role": "intensity",
       "ma3_universe": 2
+    },
+    "1:29": {
+      "universe": 1,
+      "channel": 29,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:30": {
+      "universe": 1,
+      "channel": 30,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:28": {
+      "universe": 1,
+      "channel": 28,
+      "name": "StrobeDuration",
+      "fixture": "Theater",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:31": {
+      "universe": 1,
+      "channel": 31,
+      "name": "Dimmer",
+      "fixture": "Theater",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:33": {
+      "universe": 1,
+      "channel": 33,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:34": {
+      "universe": 1,
+      "channel": 34,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:32": {
+      "universe": 1,
+      "channel": 32,
+      "name": "StrobeDuration",
+      "fixture": "Theater",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:35": {
+      "universe": 1,
+      "channel": 35,
+      "name": "Dimmer",
+      "fixture": "Theater",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:37": {
+      "universe": 1,
+      "channel": 37,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:38": {
+      "universe": 1,
+      "channel": 38,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:36": {
+      "universe": 1,
+      "channel": 36,
+      "name": "StrobeDuration",
+      "fixture": "Theater",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:39": {
+      "universe": 1,
+      "channel": 39,
+      "name": "Dimmer",
+      "fixture": "Theater",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:41": {
+      "universe": 1,
+      "channel": 41,
+      "name": "ColorRGB_WW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:42": {
+      "universe": 1,
+      "channel": 42,
+      "name": "ColorRGB_CW",
+      "fixture": "Theater",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:40": {
+      "universe": 1,
+      "channel": 40,
+      "name": "StrobeDuration",
+      "fixture": "Theater",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:417": {
+      "universe": 1,
+      "channel": 417,
+      "name": "Dimmer",
+      "fixture": "Studio",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:419": {
+      "universe": 1,
+      "channel": 419,
+      "name": "ColorRGB_R",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:420": {
+      "universe": 1,
+      "channel": 420,
+      "name": "ColorRGB_G",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:421": {
+      "universe": 1,
+      "channel": 421,
+      "name": "ColorRGB_B",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:422": {
+      "universe": 1,
+      "channel": 422,
+      "name": "ColorRGB_W",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:423": {
+      "universe": 1,
+      "channel": 423,
+      "name": "ColorRGB_RY",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:424": {
+      "universe": 1,
+      "channel": 424,
+      "name": "ColorRGB_UV",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:418": {
+      "universe": 1,
+      "channel": 418,
+      "name": "Shutter1",
+      "fixture": "Studio",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:425": {
+      "universe": 1,
+      "channel": 425,
+      "name": "COLORMIXER",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:426": {
+      "universe": 1,
+      "channel": 426,
+      "name": "Dimmer",
+      "fixture": "Studio",
+      "role": "intensity",
+      "ma3_universe": 2
+    },
+    "1:428": {
+      "universe": 1,
+      "channel": 428,
+      "name": "ColorRGB_R",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:429": {
+      "universe": 1,
+      "channel": 429,
+      "name": "ColorRGB_G",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:430": {
+      "universe": 1,
+      "channel": 430,
+      "name": "ColorRGB_B",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:431": {
+      "universe": 1,
+      "channel": 431,
+      "name": "ColorRGB_W",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:432": {
+      "universe": 1,
+      "channel": 432,
+      "name": "ColorRGB_RY",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:433": {
+      "universe": 1,
+      "channel": 433,
+      "name": "ColorRGB_UV",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "1:427": {
+      "universe": 1,
+      "channel": 427,
+      "name": "Shutter1",
+      "fixture": "Studio",
+      "role": "beam",
+      "ma3_universe": 2
+    },
+    "1:434": {
+      "universe": 1,
+      "channel": 434,
+      "name": "COLORMIXER",
+      "fixture": "Studio",
+      "role": "color",
+      "ma3_universe": 2
+    },
+    "0:3": {
+      "universe": 0,
+      "channel": 3,
+      "name": "Dimmer",
+      "fixture": "Blinder R",
+      "role": "intensity",
+      "ma3_universe": 1
+    },
+    "0:4": {
+      "universe": 0,
+      "channel": 4,
+      "name": "Dimmer",
+      "fixture": "Blinder L",
+      "role": "intensity",
+      "ma3_universe": 1
     },
     "0:2": {
       "universe": 0,
       "channel": 2,
       "name": "Dimmer",
-      "fixture": "Blind 1",
+      "fixture": "Strobe",
       "role": "intensity",
       "ma3_universe": 1
+    },
+    "0:1": {
+      "universe": 0,
+      "channel": 1,
+      "name": "Shutter1",
+      "fixture": "Strobe",
+      "role": "beam",
+      "ma3_universe": 1
+    },
+    "2:2": {
+      "universe": 2,
+      "channel": 2,
+      "name": "Haze1",
+      "fixture": "Hazer",
+      "role": "other",
+      "ma3_universe": 3
+    },
+    "2:1": {
+      "universe": 2,
+      "channel": 1,
+      "name": "Fog1",
+      "fixture": "Fog",
+      "role": "other",
+      "ma3_universe": 3
+    },
+    "2:501": {
+      "universe": 2,
+      "channel": 501,
+      "name": "Fan1",
+      "fixture": "Groundfog",
+      "role": "other",
+      "ma3_universe": 3
+    },
+    "2:500": {
+      "universe": 2,
+      "channel": 500,
+      "name": "Fog1",
+      "fixture": "Groundfog",
+      "role": "other",
+      "ma3_universe": 3
+    },
+    "2:100": {
+      "universe": 2,
+      "channel": 100,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:101": {
+      "universe": 2,
+      "channel": 101,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:102": {
+      "universe": 2,
+      "channel": 102,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:103": {
+      "universe": 2,
+      "channel": 103,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:104": {
+      "universe": 2,
+      "channel": 104,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:105": {
+      "universe": 2,
+      "channel": 105,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:106": {
+      "universe": 2,
+      "channel": 106,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:107": {
+      "universe": 2,
+      "channel": 107,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:108": {
+      "universe": 2,
+      "channel": 108,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:109": {
+      "universe": 2,
+      "channel": 109,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:110": {
+      "universe": 2,
+      "channel": 110,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:111": {
+      "universe": 2,
+      "channel": 111,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:112": {
+      "universe": 2,
+      "channel": 112,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:113": {
+      "universe": 2,
+      "channel": 113,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:114": {
+      "universe": 2,
+      "channel": 114,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:115": {
+      "universe": 2,
+      "channel": 115,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:116": {
+      "universe": 2,
+      "channel": 116,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:117": {
+      "universe": 2,
+      "channel": 117,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:118": {
+      "universe": 2,
+      "channel": 118,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:119": {
+      "universe": 2,
+      "channel": 119,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:120": {
+      "universe": 2,
+      "channel": 120,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:121": {
+      "universe": 2,
+      "channel": 121,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:122": {
+      "universe": 2,
+      "channel": 122,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:123": {
+      "universe": 2,
+      "channel": 123,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 1",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:124": {
+      "universe": 2,
+      "channel": 124,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:125": {
+      "universe": 2,
+      "channel": 125,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:126": {
+      "universe": 2,
+      "channel": 126,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:127": {
+      "universe": 2,
+      "channel": 127,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:128": {
+      "universe": 2,
+      "channel": 128,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:129": {
+      "universe": 2,
+      "channel": 129,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:130": {
+      "universe": 2,
+      "channel": 130,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:131": {
+      "universe": 2,
+      "channel": 131,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:132": {
+      "universe": 2,
+      "channel": 132,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:133": {
+      "universe": 2,
+      "channel": 133,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:134": {
+      "universe": 2,
+      "channel": 134,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:135": {
+      "universe": 2,
+      "channel": 135,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:136": {
+      "universe": 2,
+      "channel": 136,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:137": {
+      "universe": 2,
+      "channel": 137,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:138": {
+      "universe": 2,
+      "channel": 138,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:139": {
+      "universe": 2,
+      "channel": 139,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:140": {
+      "universe": 2,
+      "channel": 140,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:141": {
+      "universe": 2,
+      "channel": 141,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:142": {
+      "universe": 2,
+      "channel": 142,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:143": {
+      "universe": 2,
+      "channel": 143,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:144": {
+      "universe": 2,
+      "channel": 144,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:145": {
+      "universe": 2,
+      "channel": 145,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:146": {
+      "universe": 2,
+      "channel": 146,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:147": {
+      "universe": 2,
+      "channel": 147,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 2",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:148": {
+      "universe": 2,
+      "channel": 148,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:149": {
+      "universe": 2,
+      "channel": 149,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:150": {
+      "universe": 2,
+      "channel": 150,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:151": {
+      "universe": 2,
+      "channel": 151,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:152": {
+      "universe": 2,
+      "channel": 152,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:153": {
+      "universe": 2,
+      "channel": 153,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:154": {
+      "universe": 2,
+      "channel": 154,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:155": {
+      "universe": 2,
+      "channel": 155,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:156": {
+      "universe": 2,
+      "channel": 156,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:157": {
+      "universe": 2,
+      "channel": 157,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:158": {
+      "universe": 2,
+      "channel": 158,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:159": {
+      "universe": 2,
+      "channel": 159,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:160": {
+      "universe": 2,
+      "channel": 160,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:161": {
+      "universe": 2,
+      "channel": 161,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:162": {
+      "universe": 2,
+      "channel": 162,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:163": {
+      "universe": 2,
+      "channel": 163,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:164": {
+      "universe": 2,
+      "channel": 164,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:165": {
+      "universe": 2,
+      "channel": 165,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:166": {
+      "universe": 2,
+      "channel": 166,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:167": {
+      "universe": 2,
+      "channel": 167,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:168": {
+      "universe": 2,
+      "channel": 168,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:169": {
+      "universe": 2,
+      "channel": 169,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:170": {
+      "universe": 2,
+      "channel": 170,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:171": {
+      "universe": 2,
+      "channel": 171,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 3",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:172": {
+      "universe": 2,
+      "channel": 172,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:173": {
+      "universe": 2,
+      "channel": 173,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:174": {
+      "universe": 2,
+      "channel": 174,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:175": {
+      "universe": 2,
+      "channel": 175,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:176": {
+      "universe": 2,
+      "channel": 176,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:177": {
+      "universe": 2,
+      "channel": 177,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:178": {
+      "universe": 2,
+      "channel": 178,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:179": {
+      "universe": 2,
+      "channel": 179,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:180": {
+      "universe": 2,
+      "channel": 180,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:181": {
+      "universe": 2,
+      "channel": 181,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:182": {
+      "universe": 2,
+      "channel": 182,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:183": {
+      "universe": 2,
+      "channel": 183,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:184": {
+      "universe": 2,
+      "channel": 184,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:185": {
+      "universe": 2,
+      "channel": 185,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:186": {
+      "universe": 2,
+      "channel": 186,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:187": {
+      "universe": 2,
+      "channel": 187,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:188": {
+      "universe": 2,
+      "channel": 188,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:189": {
+      "universe": 2,
+      "channel": 189,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:190": {
+      "universe": 2,
+      "channel": 190,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:191": {
+      "universe": 2,
+      "channel": 191,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:192": {
+      "universe": 2,
+      "channel": 192,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:193": {
+      "universe": 2,
+      "channel": 193,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:194": {
+      "universe": 2,
+      "channel": 194,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:195": {
+      "universe": 2,
+      "channel": 195,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 4",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:196": {
+      "universe": 2,
+      "channel": 196,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:197": {
+      "universe": 2,
+      "channel": 197,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:198": {
+      "universe": 2,
+      "channel": 198,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:199": {
+      "universe": 2,
+      "channel": 199,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:200": {
+      "universe": 2,
+      "channel": 200,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:201": {
+      "universe": 2,
+      "channel": 201,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:202": {
+      "universe": 2,
+      "channel": 202,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:203": {
+      "universe": 2,
+      "channel": 203,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:204": {
+      "universe": 2,
+      "channel": 204,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:205": {
+      "universe": 2,
+      "channel": 205,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:206": {
+      "universe": 2,
+      "channel": 206,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:207": {
+      "universe": 2,
+      "channel": 207,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:208": {
+      "universe": 2,
+      "channel": 208,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:209": {
+      "universe": 2,
+      "channel": 209,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:210": {
+      "universe": 2,
+      "channel": 210,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:211": {
+      "universe": 2,
+      "channel": 211,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:212": {
+      "universe": 2,
+      "channel": 212,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:213": {
+      "universe": 2,
+      "channel": 213,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:214": {
+      "universe": 2,
+      "channel": 214,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:215": {
+      "universe": 2,
+      "channel": 215,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:216": {
+      "universe": 2,
+      "channel": 216,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:217": {
+      "universe": 2,
+      "channel": 217,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:218": {
+      "universe": 2,
+      "channel": 218,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:219": {
+      "universe": 2,
+      "channel": 219,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 5",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:220": {
+      "universe": 2,
+      "channel": 220,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:221": {
+      "universe": 2,
+      "channel": 221,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:222": {
+      "universe": 2,
+      "channel": 222,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:223": {
+      "universe": 2,
+      "channel": 223,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:224": {
+      "universe": 2,
+      "channel": 224,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:225": {
+      "universe": 2,
+      "channel": 225,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:226": {
+      "universe": 2,
+      "channel": 226,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:227": {
+      "universe": 2,
+      "channel": 227,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:228": {
+      "universe": 2,
+      "channel": 228,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:229": {
+      "universe": 2,
+      "channel": 229,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:230": {
+      "universe": 2,
+      "channel": 230,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:231": {
+      "universe": 2,
+      "channel": 231,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:232": {
+      "universe": 2,
+      "channel": 232,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:233": {
+      "universe": 2,
+      "channel": 233,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:234": {
+      "universe": 2,
+      "channel": 234,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:235": {
+      "universe": 2,
+      "channel": 235,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:236": {
+      "universe": 2,
+      "channel": 236,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:237": {
+      "universe": 2,
+      "channel": 237,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:238": {
+      "universe": 2,
+      "channel": 238,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:239": {
+      "universe": 2,
+      "channel": 239,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:240": {
+      "universe": 2,
+      "channel": 240,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:241": {
+      "universe": 2,
+      "channel": 241,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:242": {
+      "universe": 2,
+      "channel": 242,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:243": {
+      "universe": 2,
+      "channel": 243,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 6",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:244": {
+      "universe": 2,
+      "channel": 244,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:245": {
+      "universe": 2,
+      "channel": 245,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:246": {
+      "universe": 2,
+      "channel": 246,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:247": {
+      "universe": 2,
+      "channel": 247,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:248": {
+      "universe": 2,
+      "channel": 248,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:249": {
+      "universe": 2,
+      "channel": 249,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:250": {
+      "universe": 2,
+      "channel": 250,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:251": {
+      "universe": 2,
+      "channel": 251,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:252": {
+      "universe": 2,
+      "channel": 252,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:253": {
+      "universe": 2,
+      "channel": 253,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:254": {
+      "universe": 2,
+      "channel": 254,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:255": {
+      "universe": 2,
+      "channel": 255,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:256": {
+      "universe": 2,
+      "channel": 256,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:257": {
+      "universe": 2,
+      "channel": 257,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:258": {
+      "universe": 2,
+      "channel": 258,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:259": {
+      "universe": 2,
+      "channel": 259,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:260": {
+      "universe": 2,
+      "channel": 260,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:261": {
+      "universe": 2,
+      "channel": 261,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:262": {
+      "universe": 2,
+      "channel": 262,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:263": {
+      "universe": 2,
+      "channel": 263,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:264": {
+      "universe": 2,
+      "channel": 264,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:265": {
+      "universe": 2,
+      "channel": 265,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:266": {
+      "universe": 2,
+      "channel": 266,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:267": {
+      "universe": 2,
+      "channel": 267,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 7",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:268": {
+      "universe": 2,
+      "channel": 268,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:269": {
+      "universe": 2,
+      "channel": 269,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:270": {
+      "universe": 2,
+      "channel": 270,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:271": {
+      "universe": 2,
+      "channel": 271,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:272": {
+      "universe": 2,
+      "channel": 272,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:273": {
+      "universe": 2,
+      "channel": 273,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:274": {
+      "universe": 2,
+      "channel": 274,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:275": {
+      "universe": 2,
+      "channel": 275,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:276": {
+      "universe": 2,
+      "channel": 276,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:277": {
+      "universe": 2,
+      "channel": 277,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:278": {
+      "universe": 2,
+      "channel": 278,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:279": {
+      "universe": 2,
+      "channel": 279,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:280": {
+      "universe": 2,
+      "channel": 280,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:281": {
+      "universe": 2,
+      "channel": 281,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:282": {
+      "universe": 2,
+      "channel": 282,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:283": {
+      "universe": 2,
+      "channel": 283,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:284": {
+      "universe": 2,
+      "channel": 284,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:285": {
+      "universe": 2,
+      "channel": 285,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:286": {
+      "universe": 2,
+      "channel": 286,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:287": {
+      "universe": 2,
+      "channel": 287,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:288": {
+      "universe": 2,
+      "channel": 288,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:289": {
+      "universe": 2,
+      "channel": 289,
+      "name": "ColorRGB_R",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:290": {
+      "universe": 2,
+      "channel": 290,
+      "name": "ColorRGB_G",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
+    },
+    "2:291": {
+      "universe": 2,
+      "channel": 291,
+      "name": "ColorRGB_B",
+      "fixture": "Bar 8",
+      "role": "color",
+      "ma3_universe": 3
     }
   }
 }

@@ -51,8 +51,10 @@ type StatusResponse = {
   master_dimmer_mode?: "parameter-aware" | "raw";
   haze_percent?: number;
   fog_flash_active?: boolean;
+  blinder_flash_active?: boolean;
   haze_configured?: boolean;
   fog_flash_configured?: boolean;
+  blinder_flash_configured?: boolean;
   show_scene_created_at_on_operator?: boolean;
   group_dimmer_available?: boolean;
   group_dimmers?: GroupDimmerState[];
@@ -97,8 +99,10 @@ export default function OperatorDashboard({
   const [masterDimmerPercent, setMasterDimmerPercent] = useState(100);
   const [hazePercent, setHazePercent] = useState(0);
   const [fogFlashActive, setFogFlashActive] = useState(false);
+  const [blinderFlashActive, setBlinderFlashActive] = useState(false);
   const [isHazeConfigured, setIsHazeConfigured] = useState(false);
   const [isFogConfigured, setIsFogConfigured] = useState(false);
+  const [isBlinderConfigured, setIsBlinderConfigured] = useState(false);
   const [isMasterDimmerExpandedMobile, setIsMasterDimmerExpandedMobile] = useState(false);
   const [isGroupMixerExpanded, setIsGroupMixerExpanded] = useState(false);
   const [isGroupDimmerAvailable, setIsGroupDimmerAvailable] = useState(false);
@@ -115,6 +119,9 @@ export default function OperatorDashboard({
   const fogDesiredRef = useRef(false);
   const fogRequestSeqRef = useRef(0);
   const fogLocalHoldUntilRef = useRef(0);
+  const blinderDesiredRef = useRef(false);
+  const blinderRequestSeqRef = useRef(0);
+  const blinderLocalHoldUntilRef = useRef(0);
   const groupDimmerTargetRef = useRef<Record<string, number>>({});
   const groupDimmerTimerRef = useRef<Record<string, number>>({});
   const groupDimmerRequestSeqRef = useRef<Record<string, number>>({});
@@ -153,6 +160,16 @@ export default function OperatorDashboard({
 
   const shouldIgnoreRemoteFog = (incomingValue: boolean) =>
     Date.now() < fogLocalHoldUntilRef.current && incomingValue !== fogDesiredRef.current;
+
+  const holdBlinderRemoteSync = (durationMs: number) => {
+    const nextUntil = Date.now() + durationMs;
+    if (nextUntil > blinderLocalHoldUntilRef.current) {
+      blinderLocalHoldUntilRef.current = nextUntil;
+    }
+  };
+
+  const shouldIgnoreRemoteBlinder = (incomingValue: boolean) =>
+    Date.now() < blinderLocalHoldUntilRef.current && incomingValue !== blinderDesiredRef.current;
 
   const holdGroupDimmerRemoteSync = (key: string, durationMs: number) => {
     const nextUntil = Date.now() + durationMs;
@@ -257,8 +274,15 @@ export default function OperatorDashboard({
           fogDesiredRef.current = statusData.fog_flash_active;
         }
       }
+      if (typeof statusData.blinder_flash_active === "boolean") {
+        if (!shouldIgnoreRemoteBlinder(statusData.blinder_flash_active)) {
+          setBlinderFlashActive(statusData.blinder_flash_active);
+          blinderDesiredRef.current = statusData.blinder_flash_active;
+        }
+      }
       setIsHazeConfigured(Boolean(statusData.haze_configured));
       setIsFogConfigured(Boolean(statusData.fog_flash_configured));
+      setIsBlinderConfigured(Boolean(statusData.blinder_flash_configured));
       if (typeof statusData.show_scene_created_at_on_operator === "boolean") {
         setShowSceneCreatedAt(statusData.show_scene_created_at_on_operator);
       }
@@ -283,8 +307,10 @@ export default function OperatorDashboard({
           master_dimmer_mode?: "parameter-aware" | "raw";
           haze_percent?: number;
           fog_flash_active?: boolean;
+          blinder_flash_active?: boolean;
           haze_configured?: boolean;
           fog_flash_configured?: boolean;
+          blinder_flash_configured?: boolean;
           show_scene_created_at_on_operator?: boolean;
           group_dimmer_available?: boolean;
           group_dimmers?: GroupDimmerState[];
@@ -307,11 +333,20 @@ export default function OperatorDashboard({
             fogDesiredRef.current = data.fog_flash_active;
           }
         }
+        if (typeof data.blinder_flash_active === "boolean") {
+          if (!shouldIgnoreRemoteBlinder(data.blinder_flash_active)) {
+            setBlinderFlashActive(data.blinder_flash_active);
+            blinderDesiredRef.current = data.blinder_flash_active;
+          }
+        }
         if (typeof data.haze_configured === "boolean") {
           setIsHazeConfigured(data.haze_configured);
         }
         if (typeof data.fog_flash_configured === "boolean") {
           setIsFogConfigured(data.fog_flash_configured);
+        }
+        if (typeof data.blinder_flash_configured === "boolean") {
+          setIsBlinderConfigured(data.blinder_flash_configured);
         }
         if (typeof data.show_scene_created_at_on_operator === "boolean") {
           setShowSceneCreatedAt(data.show_scene_created_at_on_operator);
@@ -489,6 +524,39 @@ export default function OperatorDashboard({
       }
     } catch {
       setErrorMessage("Fog Flash konnte nicht gesetzt werden.");
+    }
+  };
+
+  const setBlinderFlash = async (active: boolean) => {
+    if (!isBlinderConfigured || panelLocked || controlMode !== "panel") {
+      return;
+    }
+    const requestSeq = blinderRequestSeqRef.current + 1;
+    blinderRequestSeqRef.current = requestSeq;
+    blinderDesiredRef.current = active;
+    holdBlinderRemoteSync(500);
+    setBlinderFlashActive(active);
+    try {
+      const res = await fetch(`${API_BASE}/api/atmosphere/blinder-flash`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active }),
+      });
+      if (!res.ok) {
+        throw new Error("blinder flash update failed");
+      }
+      const data = (await res.json()) as {
+        blinder_flash_active?: boolean;
+      };
+      if (requestSeq !== blinderRequestSeqRef.current) {
+        return;
+      }
+      if (typeof data.blinder_flash_active === "boolean") {
+        setBlinderFlashActive(data.blinder_flash_active);
+        blinderDesiredRef.current = data.blinder_flash_active;
+      }
+    } catch {
+      setErrorMessage("Blind Flash konnte nicht gesetzt werden.");
     }
   };
 
@@ -933,6 +1001,28 @@ export default function OperatorDashboard({
                 }}
               >
                 {"FOG\nFLASH"}
+              </Button>
+              <Button
+                size="small"
+                variant={blinderFlashActive ? "contained" : "outlined"}
+                color={blinderFlashActive ? "warning" : "inherit"}
+                disabled={panelLocked || controlMode !== "panel" || !isBlinderConfigured}
+                onPointerDown={() => void setBlinderFlash(true)}
+                onPointerUp={() => void setBlinderFlash(false)}
+                onPointerCancel={() => void setBlinderFlash(false)}
+                onPointerLeave={() => void setBlinderFlash(false)}
+                sx={{
+                  minWidth: 0,
+                  width: "100%",
+                  minHeight: 38,
+                  py: 0.2,
+                  fontWeight: 800,
+                  lineHeight: 1,
+                  fontSize: 10.5,
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {"BLIND\nFLASH"}
               </Button>
               <Stack spacing={0.2} sx={{ width: "100%" }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">

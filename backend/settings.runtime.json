@@ -4,7 +4,7 @@
   "node_ip": "2.0.0.2",
   "dmx_fps": 30.0,
   "poll_interval": 5.0,
-  "universe_count": 2,
+  "universe_count": 3,
   "artnet_universe_map": [
     0,
     1,
@@ -19,7 +19,12 @@
   "operator_pin_hash": "c57a5df4f97ed6914116e5fd1348406064834f22503d890eb571af442ac4b4c3",
   "fog_flash_universe": 3,
   "fog_flash_channel": 1,
+  "blinder_flash_targets": [
+    "1:3",
+    "1:4"
+  ],
   "haze_universe": 3,
   "haze_channel": 2,
-  "show_scene_created_at_on_operator": false
+  "show_scene_created_at_on_operator": false,
+  "streamdeck_screensaver_seconds": 300
 }

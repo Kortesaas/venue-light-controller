@@ -2,6 +2,7 @@
 
 Touch-first lighting control app for fixed venue installations.
 It records Art-Net snapshots/scenes and lets operators recall them safely from a simple web UI and a local Stream Deck.
+It supports both a screenshot/replay mode (raw Art-Net snapshot playback) and a full parameter mode (semantic fixture/parameter interpretation via MA3 ParameterList export).
 
 <p align="center">
   <img src="./docs/MatriX_Saal_Light.png" alt="Venue Light Controller - Operator Panel" width="220" />
@@ -43,6 +44,10 @@ venue-light-controller/
 |     `- pages/
 |        |- OperatorDashboard.tsx
 |        `- AdminPanel.tsx
+|- integrations/
+|  `- ma3/
+|     |- plugin/
+|     `- parameter-list-exports/
 `- build_and_run.ps1
 ```
 
@@ -93,6 +98,36 @@ Quick start from project root:
 
 This script builds the frontend, copies it to `backend/frontend_dist`, and starts the backend.
 Then UI + API are served from `http://localhost:8000`.
+
+## MA3 Plugin + ParameterList Exports
+
+For MA3-related export tooling/assets, use:
+
+- `integrations/ma3/plugin/`
+- `integrations/ma3/parameter-list-exports/`
+
+Why this export matters:
+
+- without it, the controller is mostly a raw Art-Net snapshot/replay tool
+- with it, DMX channels get semantic meaning (`Dimmer`, `Pan`, `Tilt`, color channels, fixture names)
+- this enables smarter interpretation and targeted adjustments instead of only replaying byte snapshots
+
+Current examples in this repository:
+
+- `integrations/ma3/plugin/ParameterListExportPlugin.lua`
+- `integrations/ma3/parameter-list-exports/ParameterListExport_MatriX_05_05_2026.xml`
+
+`ParameterListExportPlugin.lua` writes an export file named:
+
+- `ParameterListExport.xml` (inside MA3 `gma3_library/export`)
+
+Then copy/rename that file into:
+
+- `integrations/ma3/parameter-list-exports/`
+
+Recommended naming:
+
+- `ParameterListExport_<ShowOrVenue>_<DD_MM_YYYY>.xml`
 
 ## Stream Deck
 

@@ -1,0 +1,482 @@
+<ParameterListExport>
+  <Parameter universe="1" number="59" name="Dimmer" fixture="MH 1"/>
+  <Parameter universe="1" number="55" name="Pan" fixture="MH 1"/>
+  <Parameter universe="1" number="57" name="Tilt" fixture="MH 1"/>
+  <Parameter universe="1" number="60" name="Shutter1" fixture="MH 1"/>
+  <Parameter universe="1" number="61" name="Color1" fixture="MH 1"/>
+  <Parameter universe="1" number="62" name="Gobo1" fixture="MH 1"/>
+  <Parameter universe="1" number="63" name="Gobo1Pos" fixture="MH 1"/>
+  <Parameter universe="1" number="64" name="GOBO1OFFSET" fixture="MH 1"/>
+  <Parameter universe="1" number="65" name="EFFECTWHEEL" fixture="MH 1"/>
+  <Parameter universe="1" number="66" name="Focus1" fixture="MH 1"/>
+  <Parameter universe="1" number="67" name="FixtureGlobalReset" fixture="MH 1"/>
+  <Parameter universe="1" number="72" name="Dimmer" fixture="MH 2"/>
+  <Parameter universe="1" number="68" name="Pan" fixture="MH 2"/>
+  <Parameter universe="1" number="70" name="Tilt" fixture="MH 2"/>
+  <Parameter universe="1" number="73" name="Shutter1" fixture="MH 2"/>
+  <Parameter universe="1" number="74" name="Color1" fixture="MH 2"/>
+  <Parameter universe="1" number="75" name="Gobo1" fixture="MH 2"/>
+  <Parameter universe="1" number="76" name="Gobo1Pos" fixture="MH 2"/>
+  <Parameter universe="1" number="77" name="GOBO1OFFSET" fixture="MH 2"/>
+  <Parameter universe="1" number="78" name="EFFECTWHEEL" fixture="MH 2"/>
+  <Parameter universe="1" number="79" name="Focus1" fixture="MH 2"/>
+  <Parameter universe="1" number="80" name="FixtureGlobalReset" fixture="MH 2"/>
+  <Parameter universe="1" number="85" name="Dimmer" fixture="MH 3"/>
+  <Parameter universe="1" number="81" name="Pan" fixture="MH 3"/>
+  <Parameter universe="1" number="83" name="Tilt" fixture="MH 3"/>
+  <Parameter universe="1" number="86" name="Shutter1" fixture="MH 3"/>
+  <Parameter universe="1" number="87" name="Color1" fixture="MH 3"/>
+  <Parameter universe="1" number="88" name="Gobo1" fixture="MH 3"/>
+  <Parameter universe="1" number="89" name="Gobo1Pos" fixture="MH 3"/>
+  <Parameter universe="1" number="90" name="GOBO1OFFSET" fixture="MH 3"/>
+  <Parameter universe="1" number="91" name="EFFECTWHEEL" fixture="MH 3"/>
+  <Parameter universe="1" number="92" name="Focus1" fixture="MH 3"/>
+  <Parameter universe="1" number="93" name="FixtureGlobalReset" fixture="MH 3"/>
+  <Parameter universe="1" number="98" name="Dimmer" fixture="MH 4"/>
+  <Parameter universe="1" number="94" name="Pan" fixture="MH 4"/>
+  <Parameter universe="1" number="96" name="Tilt" fixture="MH 4"/>
+  <Parameter universe="1" number="99" name="Shutter1" fixture="MH 4"/>
+  <Parameter universe="1" number="100" name="Color1" fixture="MH 4"/>
+  <Parameter universe="1" number="101" name="Gobo1" fixture="MH 4"/>
+  <Parameter universe="1" number="102" name="Gobo1Pos" fixture="MH 4"/>
+  <Parameter universe="1" number="103" name="GOBO1OFFSET" fixture="MH 4"/>
+  <Parameter universe="1" number="104" name="EFFECTWHEEL" fixture="MH 4"/>
+  <Parameter universe="1" number="105" name="Focus1" fixture="MH 4"/>
+  <Parameter universe="1" number="106" name="FixtureGlobalReset" fixture="MH 4"/>
+  <Parameter universe="1" number="111" name="Dimmer" fixture="Wash 1"/>
+  <Parameter universe="1" number="117" name="COLORMIXER" fixture="Wash 1"/>
+  <Parameter universe="1" number="112" name="Pan" fixture="Wash 1"/>
+  <Parameter universe="1" number="114" name="Tilt" fixture="Wash 1"/>
+  <Parameter universe="1" number="118" name="ColorRGB_R" fixture="Wash 1"/>
+  <Parameter universe="1" number="119" name="ColorRGB_G" fixture="Wash 1"/>
+  <Parameter universe="1" number="120" name="ColorRGB_B" fixture="Wash 1"/>
+  <Parameter universe="1" number="121" name="ColorRGB_W" fixture="Wash 1"/>
+  <Parameter universe="1" number="110" name="Shutter1" fixture="Wash 1"/>
+  <Parameter universe="1" number="116" name="FixtureGlobalReset" fixture="Wash 1"/>
+  <Parameter universe="1" number="123" name="Dimmer" fixture="Wash 2"/>
+  <Parameter universe="1" number="129" name="COLORMIXER" fixture="Wash 2"/>
+  <Parameter universe="1" number="124" name="Pan" fixture="Wash 2"/>
+  <Parameter universe="1" number="126" name="Tilt" fixture="Wash 2"/>
+  <Parameter universe="1" number="130" name="ColorRGB_R" fixture="Wash 2"/>
+  <Parameter universe="1" number="131" name="ColorRGB_G" fixture="Wash 2"/>
+  <Parameter universe="1" number="132" name="ColorRGB_B" fixture="Wash 2"/>
+  <Parameter universe="1" number="133" name="ColorRGB_W" fixture="Wash 2"/>
+  <Parameter universe="1" number="122" name="Shutter1" fixture="Wash 2"/>
+  <Parameter universe="1" number="128" name="FixtureGlobalReset" fixture="Wash 2"/>
+  <Parameter universe="1" number="135" name="Dimmer" fixture="Wash 3"/>
+  <Parameter universe="1" number="141" name="COLORMIXER" fixture="Wash 3"/>
+  <Parameter universe="1" number="136" name="Pan" fixture="Wash 3"/>
+  <Parameter universe="1" number="138" name="Tilt" fixture="Wash 3"/>
+  <Parameter universe="1" number="142" name="ColorRGB_R" fixture="Wash 3"/>
+  <Parameter universe="1" number="143" name="ColorRGB_G" fixture="Wash 3"/>
+  <Parameter universe="1" number="144" name="ColorRGB_B" fixture="Wash 3"/>
+  <Parameter universe="1" number="145" name="ColorRGB_W" fixture="Wash 3"/>
+  <Parameter universe="1" number="134" name="Shutter1" fixture="Wash 3"/>
+  <Parameter universe="1" number="140" name="FixtureGlobalReset" fixture="Wash 3"/>
+  <Parameter universe="1" number="147" name="Dimmer" fixture="Wash 4"/>
+  <Parameter universe="1" number="153" name="COLORMIXER" fixture="Wash 4"/>
+  <Parameter universe="1" number="148" name="Pan" fixture="Wash 4"/>
+  <Parameter universe="1" number="150" name="Tilt" fixture="Wash 4"/>
+  <Parameter universe="1" number="154" name="ColorRGB_R" fixture="Wash 4"/>
+  <Parameter universe="1" number="155" name="ColorRGB_G" fixture="Wash 4"/>
+  <Parameter universe="1" number="156" name="ColorRGB_B" fixture="Wash 4"/>
+  <Parameter universe="1" number="157" name="ColorRGB_W" fixture="Wash 4"/>
+  <Parameter universe="1" number="146" name="Shutter1" fixture="Wash 4"/>
+  <Parameter universe="1" number="152" name="FixtureGlobalReset" fixture="Wash 4"/>
+  <Parameter universe="1" number="165" name="Dimmer" fixture="Spot 1"/>
+  <Parameter universe="1" number="160" name="ColorRGB_R" fixture="Spot 1"/>
+  <Parameter universe="1" number="161" name="ColorRGB_G" fixture="Spot 1"/>
+  <Parameter universe="1" number="162" name="ColorRGB_B" fixture="Spot 1"/>
+  <Parameter universe="1" number="163" name="ColorRGB_W" fixture="Spot 1"/>
+  <Parameter universe="1" number="164" name="ColorRGB_RY" fixture="Spot 1"/>
+  <Parameter universe="1" number="166" name="Shutter1" fixture="Spot 1"/>
+  <Parameter universe="1" number="172" name="Dimmer" fixture="Spot 2"/>
+  <Parameter universe="1" number="167" name="ColorRGB_R" fixture="Spot 2"/>
+  <Parameter universe="1" number="168" name="ColorRGB_G" fixture="Spot 2"/>
+  <Parameter universe="1" number="169" name="ColorRGB_B" fixture="Spot 2"/>
+  <Parameter universe="1" number="170" name="ColorRGB_W" fixture="Spot 2"/>
+  <Parameter universe="1" number="171" name="ColorRGB_RY" fixture="Spot 2"/>
+  <Parameter universe="1" number="173" name="Shutter1" fixture="Spot 2"/>
+  <Parameter universe="1" number="179" name="Dimmer" fixture="Spot 3"/>
+  <Parameter universe="1" number="174" name="ColorRGB_R" fixture="Spot 3"/>
+  <Parameter universe="1" number="175" name="ColorRGB_G" fixture="Spot 3"/>
+  <Parameter universe="1" number="176" name="ColorRGB_B" fixture="Spot 3"/>
+  <Parameter universe="1" number="177" name="ColorRGB_W" fixture="Spot 3"/>
+  <Parameter universe="1" number="178" name="ColorRGB_RY" fixture="Spot 3"/>
+  <Parameter universe="1" number="180" name="Shutter1" fixture="Spot 3"/>
+  <Parameter universe="1" number="186" name="Dimmer" fixture="Spot 4"/>
+  <Parameter universe="1" number="181" name="ColorRGB_R" fixture="Spot 4"/>
+  <Parameter universe="1" number="182" name="ColorRGB_G" fixture="Spot 4"/>
+  <Parameter universe="1" number="183" name="ColorRGB_B" fixture="Spot 4"/>
+  <Parameter universe="1" number="184" name="ColorRGB_W" fixture="Spot 4"/>
+  <Parameter universe="1" number="185" name="ColorRGB_RY" fixture="Spot 4"/>
+  <Parameter universe="1" number="187" name="Shutter1" fixture="Spot 4"/>
+  <Parameter universe="1" number="193" name="Dimmer" fixture="Spot 5"/>
+  <Parameter universe="1" number="188" name="ColorRGB_R" fixture="Spot 5"/>
+  <Parameter universe="1" number="189" name="ColorRGB_G" fixture="Spot 5"/>
+  <Parameter universe="1" number="190" name="ColorRGB_B" fixture="Spot 5"/>
+  <Parameter universe="1" number="191" name="ColorRGB_W" fixture="Spot 5"/>
+  <Parameter universe="1" number="192" name="ColorRGB_RY" fixture="Spot 5"/>
+  <Parameter universe="1" number="194" name="Shutter1" fixture="Spot 5"/>
+  <Parameter universe="1" number="200" name="Dimmer" fixture="Spot 6"/>
+  <Parameter universe="1" number="195" name="ColorRGB_R" fixture="Spot 6"/>
+  <Parameter universe="1" number="196" name="ColorRGB_G" fixture="Spot 6"/>
+  <Parameter universe="1" number="197" name="ColorRGB_B" fixture="Spot 6"/>
+  <Parameter universe="1" number="198" name="ColorRGB_W" fixture="Spot 6"/>
+  <Parameter universe="1" number="199" name="ColorRGB_RY" fixture="Spot 6"/>
+  <Parameter universe="1" number="201" name="Shutter1" fixture="Spot 6"/>
+  <Parameter universe="1" number="207" name="Dimmer" fixture="Spot 7"/>
+  <Parameter universe="1" number="202" name="ColorRGB_R" fixture="Spot 7"/>
+  <Parameter universe="1" number="203" name="ColorRGB_G" fixture="Spot 7"/>
+  <Parameter universe="1" number="204" name="ColorRGB_B" fixture="Spot 7"/>
+  <Parameter universe="1" number="205" name="ColorRGB_W" fixture="Spot 7"/>
+  <Parameter universe="1" number="206" name="ColorRGB_RY" fixture="Spot 7"/>
+  <Parameter universe="1" number="208" name="Shutter1" fixture="Spot 7"/>
+  <Parameter universe="1" number="214" name="Dimmer" fixture="Spot 8"/>
+  <Parameter universe="1" number="209" name="ColorRGB_R" fixture="Spot 8"/>
+  <Parameter universe="1" number="210" name="ColorRGB_G" fixture="Spot 8"/>
+  <Parameter universe="1" number="211" name="ColorRGB_B" fixture="Spot 8"/>
+  <Parameter universe="1" number="212" name="ColorRGB_W" fixture="Spot 8"/>
+  <Parameter universe="1" number="213" name="ColorRGB_RY" fixture="Spot 8"/>
+  <Parameter universe="1" number="215" name="Shutter1" fixture="Spot 8"/>
+  <Parameter universe="1" number="221" name="Dimmer" fixture="Spot 9"/>
+  <Parameter universe="1" number="216" name="ColorRGB_R" fixture="Spot 9"/>
+  <Parameter universe="1" number="217" name="ColorRGB_G" fixture="Spot 9"/>
+  <Parameter universe="1" number="218" name="ColorRGB_B" fixture="Spot 9"/>
+  <Parameter universe="1" number="219" name="ColorRGB_W" fixture="Spot 9"/>
+  <Parameter universe="1" number="220" name="ColorRGB_RY" fixture="Spot 9"/>
+  <Parameter universe="1" number="222" name="Shutter1" fixture="Spot 9"/>
+  <Parameter universe="1" number="228" name="Dimmer" fixture="Spot 10"/>
+  <Parameter universe="1" number="223" name="ColorRGB_R" fixture="Spot 10"/>
+  <Parameter universe="1" number="224" name="ColorRGB_G" fixture="Spot 10"/>
+  <Parameter universe="1" number="225" name="ColorRGB_B" fixture="Spot 10"/>
+  <Parameter universe="1" number="226" name="ColorRGB_W" fixture="Spot 10"/>
+  <Parameter universe="1" number="227" name="ColorRGB_RY" fixture="Spot 10"/>
+  <Parameter universe="1" number="229" name="Shutter1" fixture="Spot 10"/>
+  <Parameter universe="1" number="235" name="Dimmer" fixture="Spot 11"/>
+  <Parameter universe="1" number="230" name="ColorRGB_R" fixture="Spot 11"/>
+  <Parameter universe="1" number="231" name="ColorRGB_G" fixture="Spot 11"/>
+  <Parameter universe="1" number="232" name="ColorRGB_B" fixture="Spot 11"/>
+  <Parameter universe="1" number="233" name="ColorRGB_W" fixture="Spot 11"/>
+  <Parameter universe="1" number="234" name="ColorRGB_RY" fixture="Spot 11"/>
+  <Parameter universe="1" number="236" name="Shutter1" fixture="Spot 11"/>
+  <Parameter universe="1" number="242" name="Dimmer" fixture="Spot 12"/>
+  <Parameter universe="1" number="237" name="ColorRGB_R" fixture="Spot 12"/>
+  <Parameter universe="1" number="238" name="ColorRGB_G" fixture="Spot 12"/>
+  <Parameter universe="1" number="239" name="ColorRGB_B" fixture="Spot 12"/>
+  <Parameter universe="1" number="240" name="ColorRGB_W" fixture="Spot 12"/>
+  <Parameter universe="1" number="241" name="ColorRGB_RY" fixture="Spot 12"/>
+  <Parameter universe="1" number="243" name="Shutter1" fixture="Spot 12"/>
+  <Parameter universe="1" number="249" name="Dimmer" fixture="Spot 13"/>
+  <Parameter universe="1" number="244" name="ColorRGB_R" fixture="Spot 13"/>
+  <Parameter universe="1" number="245" name="ColorRGB_G" fixture="Spot 13"/>
+  <Parameter universe="1" number="246" name="ColorRGB_B" fixture="Spot 13"/>
+  <Parameter universe="1" number="247" name="ColorRGB_W" fixture="Spot 13"/>
+  <Parameter universe="1" number="248" name="ColorRGB_RY" fixture="Spot 13"/>
+  <Parameter universe="1" number="250" name="Shutter1" fixture="Spot 13"/>
+  <Parameter universe="1" number="256" name="Dimmer" fixture="Spot 14"/>
+  <Parameter universe="1" number="251" name="ColorRGB_R" fixture="Spot 14"/>
+  <Parameter universe="1" number="252" name="ColorRGB_G" fixture="Spot 14"/>
+  <Parameter universe="1" number="253" name="ColorRGB_B" fixture="Spot 14"/>
+  <Parameter universe="1" number="254" name="ColorRGB_W" fixture="Spot 14"/>
+  <Parameter universe="1" number="255" name="ColorRGB_RY" fixture="Spot 14"/>
+  <Parameter universe="1" number="257" name="Shutter1" fixture="Spot 14"/>
+  <Parameter universe="1" number="263" name="Dimmer" fixture="Spot 15"/>
+  <Parameter universe="1" number="258" name="ColorRGB_R" fixture="Spot 15"/>
+  <Parameter universe="1" number="259" name="ColorRGB_G" fixture="Spot 15"/>
+  <Parameter universe="1" number="260" name="ColorRGB_B" fixture="Spot 15"/>
+  <Parameter universe="1" number="261" name="ColorRGB_W" fixture="Spot 15"/>
+  <Parameter universe="1" number="262" name="ColorRGB_RY" fixture="Spot 15"/>
+  <Parameter universe="1" number="264" name="Shutter1" fixture="Spot 15"/>
+  <Parameter universe="3" number="25" name="Dimmer" fixture="Fluter 1"/>
+  <Parameter universe="3" number="28" name="ColorRGB_R" fixture="Fluter 1"/>
+  <Parameter universe="3" number="29" name="ColorRGB_G" fixture="Fluter 1"/>
+  <Parameter universe="3" number="30" name="ColorRGB_B" fixture="Fluter 1"/>
+  <Parameter universe="3" number="31" name="ColorRGB_W" fixture="Fluter 1"/>
+  <Parameter universe="3" number="26" name="Shutter1" fixture="Fluter 1"/>
+  <Parameter universe="3" number="27" name="StrobeDuration" fixture="Fluter 1"/>
+  <Parameter universe="3" number="32" name="Dimmer" fixture="Fluter 2"/>
+  <Parameter universe="3" number="35" name="ColorRGB_R" fixture="Fluter 2"/>
+  <Parameter universe="3" number="36" name="ColorRGB_G" fixture="Fluter 2"/>
+  <Parameter universe="3" number="37" name="ColorRGB_B" fixture="Fluter 2"/>
+  <Parameter universe="3" number="38" name="ColorRGB_W" fixture="Fluter 2"/>
+  <Parameter universe="3" number="33" name="Shutter1" fixture="Fluter 2"/>
+  <Parameter universe="3" number="34" name="StrobeDuration" fixture="Fluter 2"/>
+  <Parameter universe="3" number="39" name="Dimmer" fixture="Fluter 3"/>
+  <Parameter universe="3" number="42" name="ColorRGB_R" fixture="Fluter 3"/>
+  <Parameter universe="3" number="43" name="ColorRGB_G" fixture="Fluter 3"/>
+  <Parameter universe="3" number="44" name="ColorRGB_B" fixture="Fluter 3"/>
+  <Parameter universe="3" number="45" name="ColorRGB_W" fixture="Fluter 3"/>
+  <Parameter universe="3" number="40" name="Shutter1" fixture="Fluter 3"/>
+  <Parameter universe="3" number="41" name="StrobeDuration" fixture="Fluter 3"/>
+  <Parameter universe="3" number="46" name="Dimmer" fixture="Fluter 4"/>
+  <Parameter universe="3" number="49" name="ColorRGB_R" fixture="Fluter 4"/>
+  <Parameter universe="3" number="50" name="ColorRGB_G" fixture="Fluter 4"/>
+  <Parameter universe="3" number="51" name="ColorRGB_B" fixture="Fluter 4"/>
+  <Parameter universe="3" number="52" name="ColorRGB_W" fixture="Fluter 4"/>
+  <Parameter universe="3" number="47" name="Shutter1" fixture="Fluter 4"/>
+  <Parameter universe="3" number="48" name="StrobeDuration" fixture="Fluter 4"/>
+  <Parameter universe="1" number="9" name="Dimmer" fixture="Stufe 1"/>
+  <Parameter universe="1" number="5" name="ColorRGB_CW" fixture="Stufe 1"/>
+  <Parameter universe="1" number="6" name="ColorRGB_WW" fixture="Stufe 1"/>
+  <Parameter universe="1" number="7" name="Shutter1" fixture="Stufe 1"/>
+  <Parameter universe="1" number="8" name="MACROS" fixture="Stufe 1"/>
+  <Parameter universe="1" number="14" name="Dimmer" fixture="Stufe 2"/>
+  <Parameter universe="1" number="10" name="ColorRGB_CW" fixture="Stufe 2"/>
+  <Parameter universe="1" number="11" name="ColorRGB_WW" fixture="Stufe 2"/>
+  <Parameter universe="1" number="12" name="Shutter1" fixture="Stufe 2"/>
+  <Parameter universe="1" number="13" name="MACROS" fixture="Stufe 2"/>
+  <Parameter universe="1" number="19" name="Dimmer" fixture="Stufe 3"/>
+  <Parameter universe="1" number="15" name="ColorRGB_CW" fixture="Stufe 3"/>
+  <Parameter universe="1" number="16" name="ColorRGB_WW" fixture="Stufe 3"/>
+  <Parameter universe="1" number="17" name="Shutter1" fixture="Stufe 3"/>
+  <Parameter universe="1" number="18" name="MACROS" fixture="Stufe 3"/>
+  <Parameter universe="1" number="24" name="Dimmer" fixture="Stufe 4"/>
+  <Parameter universe="1" number="20" name="ColorRGB_CW" fixture="Stufe 4"/>
+  <Parameter universe="1" number="21" name="ColorRGB_WW" fixture="Stufe 4"/>
+  <Parameter universe="1" number="22" name="Shutter1" fixture="Stufe 4"/>
+  <Parameter universe="1" number="23" name="MACROS" fixture="Stufe 4"/>
+  <Parameter universe="2" number="505" name="Control1" fixture="Mirrormotor"/>
+  <Parameter universe="2" number="26" name="Dimmer" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="25" name="COLORMIXER2" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="19" name="ColorRGB_R" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="20" name="ColorRGB_G" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="21" name="ColorRGB_B" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="22" name="ColorRGB_W" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="23" name="COLORMIXER" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="24" name="Shutter1" fixture="Mirrorspot"/>
+  <Parameter universe="2" number="27" name="Dimmer" fixture="Theater"/>
+  <Parameter universe="2" number="29" name="ColorRGB_WW" fixture="Theater"/>
+  <Parameter universe="2" number="30" name="ColorRGB_CW" fixture="Theater"/>
+  <Parameter universe="2" number="28" name="StrobeDuration" fixture="Theater"/>
+  <Parameter universe="2" number="31" name="Dimmer" fixture="Theater"/>
+  <Parameter universe="2" number="33" name="ColorRGB_WW" fixture="Theater"/>
+  <Parameter universe="2" number="34" name="ColorRGB_CW" fixture="Theater"/>
+  <Parameter universe="2" number="32" name="StrobeDuration" fixture="Theater"/>
+  <Parameter universe="2" number="35" name="Dimmer" fixture="Theater"/>
+  <Parameter universe="2" number="37" name="ColorRGB_WW" fixture="Theater"/>
+  <Parameter universe="2" number="38" name="ColorRGB_CW" fixture="Theater"/>
+  <Parameter universe="2" number="36" name="StrobeDuration" fixture="Theater"/>
+  <Parameter universe="2" number="39" name="Dimmer" fixture="Theater"/>
+  <Parameter universe="2" number="41" name="ColorRGB_WW" fixture="Theater"/>
+  <Parameter universe="2" number="42" name="ColorRGB_CW" fixture="Theater"/>
+  <Parameter universe="2" number="40" name="StrobeDuration" fixture="Theater"/>
+  <Parameter universe="2" number="417" name="Dimmer" fixture="Studio"/>
+  <Parameter universe="2" number="419" name="ColorRGB_R" fixture="Studio"/>
+  <Parameter universe="2" number="420" name="ColorRGB_G" fixture="Studio"/>
+  <Parameter universe="2" number="421" name="ColorRGB_B" fixture="Studio"/>
+  <Parameter universe="2" number="422" name="ColorRGB_W" fixture="Studio"/>
+  <Parameter universe="2" number="423" name="ColorRGB_RY" fixture="Studio"/>
+  <Parameter universe="2" number="424" name="ColorRGB_UV" fixture="Studio"/>
+  <Parameter universe="2" number="418" name="Shutter1" fixture="Studio"/>
+  <Parameter universe="2" number="425" name="COLORMIXER" fixture="Studio"/>
+  <Parameter universe="2" number="426" name="Dimmer" fixture="Studio"/>
+  <Parameter universe="2" number="428" name="ColorRGB_R" fixture="Studio"/>
+  <Parameter universe="2" number="429" name="ColorRGB_G" fixture="Studio"/>
+  <Parameter universe="2" number="430" name="ColorRGB_B" fixture="Studio"/>
+  <Parameter universe="2" number="431" name="ColorRGB_W" fixture="Studio"/>
+  <Parameter universe="2" number="432" name="ColorRGB_RY" fixture="Studio"/>
+  <Parameter universe="2" number="433" name="ColorRGB_UV" fixture="Studio"/>
+  <Parameter universe="2" number="427" name="Shutter1" fixture="Studio"/>
+  <Parameter universe="2" number="434" name="COLORMIXER" fixture="Studio"/>
+  <Parameter universe="1" number="3" name="Dimmer" fixture="Blinder R"/>
+  <Parameter universe="1" number="4" name="Dimmer" fixture="Blinder L"/>
+  <Parameter universe="1" number="2" name="Dimmer" fixture="Strobe"/>
+  <Parameter universe="1" number="1" name="Shutter1" fixture="Strobe"/>
+  <Parameter universe="3" number="2" name="Haze1" fixture="Hazer"/>
+  <Parameter universe="3" number="1" name="Fog1" fixture="Fog"/>
+  <Parameter universe="3" number="501" name="Fan1" fixture="Groundfog"/>
+  <Parameter universe="3" number="500" name="Fog1" fixture="Groundfog"/>
+  <Parameter universe="3" number="100" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="101" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="102" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="103" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="104" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="105" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="106" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="107" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="108" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="109" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="110" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="111" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="112" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="113" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="114" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="115" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="116" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="117" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="118" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="119" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="120" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="121" name="ColorRGB_R" fixture="Bar 1"/>
+  <Parameter universe="3" number="122" name="ColorRGB_G" fixture="Bar 1"/>
+  <Parameter universe="3" number="123" name="ColorRGB_B" fixture="Bar 1"/>
+  <Parameter universe="3" number="124" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="125" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="126" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="127" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="128" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="129" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="130" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="131" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="132" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="133" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="134" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="135" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="136" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="137" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="138" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="139" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="140" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="141" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="142" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="143" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="144" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="145" name="ColorRGB_R" fixture="Bar 2"/>
+  <Parameter universe="3" number="146" name="ColorRGB_G" fixture="Bar 2"/>
+  <Parameter universe="3" number="147" name="ColorRGB_B" fixture="Bar 2"/>
+  <Parameter universe="3" number="148" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="149" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="150" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="151" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="152" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="153" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="154" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="155" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="156" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="157" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="158" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="159" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="160" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="161" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="162" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="163" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="164" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="165" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="166" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="167" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="168" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="169" name="ColorRGB_R" fixture="Bar 3"/>
+  <Parameter universe="3" number="170" name="ColorRGB_G" fixture="Bar 3"/>
+  <Parameter universe="3" number="171" name="ColorRGB_B" fixture="Bar 3"/>
+  <Parameter universe="3" number="172" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="173" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="174" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="175" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="176" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="177" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="178" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="179" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="180" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="181" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="182" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="183" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="184" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="185" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="186" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="187" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="188" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="189" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="190" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="191" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="192" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="193" name="ColorRGB_R" fixture="Bar 4"/>
+  <Parameter universe="3" number="194" name="ColorRGB_G" fixture="Bar 4"/>
+  <Parameter universe="3" number="195" name="ColorRGB_B" fixture="Bar 4"/>
+  <Parameter universe="3" number="196" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="197" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="198" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="199" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="200" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="201" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="202" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="203" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="204" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="205" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="206" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="207" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="208" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="209" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="210" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="211" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="212" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="213" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="214" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="215" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="216" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="217" name="ColorRGB_R" fixture="Bar 5"/>
+  <Parameter universe="3" number="218" name="ColorRGB_G" fixture="Bar 5"/>
+  <Parameter universe="3" number="219" name="ColorRGB_B" fixture="Bar 5"/>
+  <Parameter universe="3" number="220" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="221" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="222" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="223" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="224" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="225" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="226" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="227" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="228" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="229" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="230" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="231" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="232" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="233" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="234" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="235" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="236" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="237" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="238" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="239" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="240" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="241" name="ColorRGB_R" fixture="Bar 6"/>
+  <Parameter universe="3" number="242" name="ColorRGB_G" fixture="Bar 6"/>
+  <Parameter universe="3" number="243" name="ColorRGB_B" fixture="Bar 6"/>
+  <Parameter universe="3" number="244" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="245" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="246" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="247" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="248" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="249" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="250" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="251" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="252" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="253" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="254" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="255" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="256" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="257" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="258" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="259" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="260" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="261" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="262" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="263" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="264" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="265" name="ColorRGB_R" fixture="Bar 7"/>
+  <Parameter universe="3" number="266" name="ColorRGB_G" fixture="Bar 7"/>
+  <Parameter universe="3" number="267" name="ColorRGB_B" fixture="Bar 7"/>
+  <Parameter universe="3" number="268" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="269" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="270" name="ColorRGB_B" fixture="Bar 8"/>
+  <Parameter universe="3" number="271" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="272" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="273" name="ColorRGB_B" fixture="Bar 8"/>
+  <Parameter universe="3" number="274" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="275" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="276" name="ColorRGB_B" fixture="Bar 8"/>
+  <Parameter universe="3" number="277" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="278" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="279" name="ColorRGB_B" fixture="Bar 8"/>
+  <Parameter universe="3" number="280" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="281" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="282" name="ColorRGB_B" fixture="Bar 8"/>
+  <Parameter universe="3" number="283" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="284" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="285" name="ColorRGB_B" fixture="Bar 8"/>
+  <Parameter universe="3" number="286" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="287" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="288" name="ColorRGB_B" fixture="Bar 8"/>
+  <Parameter universe="3" number="289" name="ColorRGB_R" fixture="Bar 8"/>
+  <Parameter universe="3" number="290" name="ColorRGB_G" fixture="Bar 8"/>
+  <Parameter universe="3" number="291" name="ColorRGB_B" fixture="Bar 8"/>
+</ParameterListExport>

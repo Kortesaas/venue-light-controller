@@ -236,6 +236,8 @@ class StreamDeckSnapshot:
     haze_configured: bool
     fog_flash_active: bool
     fog_flash_configured: bool
+    blinder_flash_active: bool
+    blinder_flash_configured: bool
 
 
 @dataclass(frozen=True)
@@ -266,8 +268,10 @@ class StreamDeckService:
         set_master_dimmer: Callable[[int], None],
         set_group_dimmer: Callable[[str, int], None],
         toggle_group_mute: Callable[[str], None],
+        set_group_flash_active: Callable[[str, bool], None],
         set_haze: Callable[[int], None],
         set_fog_flash_active: Callable[[bool], None],
+        set_blinder_flash_active: Callable[[bool], None],
         set_panel_lock: Callable[[bool], None],
         unlock_panel: Callable[[str], bool],
     ) -> None:
@@ -278,8 +282,10 @@ class StreamDeckService:
         self._set_master_dimmer = set_master_dimmer
         self._set_group_dimmer = set_group_dimmer
         self._toggle_group_mute = toggle_group_mute
+        self._set_group_flash_active = set_group_flash_active
         self._set_haze = set_haze
         self._set_fog_flash_active = set_fog_flash_active
+        self._set_blinder_flash_active = set_blinder_flash_active
         self._set_panel_lock = set_panel_lock
         self._unlock_panel = unlock_panel
 
@@ -397,7 +403,6 @@ class StreamDeckService:
             self._report_probe_error(exc)
             streamdecks = self._enumerate_streamdecks_via_hid_module()
         if not streamdecks:
-            self._reported_probe_error = False
             return
 
         selected = None
@@ -488,8 +493,10 @@ class StreamDeckService:
             return
         self._reported_probe_error = True
         _log.warning(
-            "Stream Deck probe failed. A HID backend is missing/unavailable. "
-            "Falling back to the Python 'hid' module if available. "
+            "Stream Deck probe failed (one-time warning). Common causes: "
+            "no Stream Deck connected, USB not accessible, or HID backend/dependencies missing "
+            "(for example hidapi/hidapi.dll). Falling back to the Python 'hid' module if available "
+            "while continuing periodic auto-detection. "
             "Detail: %s",
             exc,
         )
@@ -844,20 +851,17 @@ class StreamDeckService:
         )
         if not locked and snapshot.haze_configured:
             action_map[21] = ("haze_step", str(-HAZE_STEP_PERCENT))
-        blind_group = next(
-            (group for group in snapshot.group_dimmers if self._is_blind_group(group)),
-            None,
-        )
+        blind_bg = (38, 16, 16) if snapshot.blinder_flash_active else (12, 12, 12)
         visuals[29] = KeyVisual(
             title="Blind Flash",
             icon="full",
-            bg_rgb=(12, 12, 12),
+            bg_rgb=blind_bg,
             accent_rgb=PALETTE["warning"],
-            disabled=locked or (blind_group is None),
+            disabled=locked or (not snapshot.blinder_flash_configured),
             text_y_offset=-6,
         )
-        if not locked and blind_group is not None:
-            action_map[29] = ("group_flash_hold", blind_group.key)
+        if not locked and snapshot.blinder_flash_configured:
+            action_map[29] = ("blinder_flash_hold", None)
 
         # Right column = master fader controls (same position philosophy as levels page)
         master_col_bg = (14, 28, 36)
@@ -1599,7 +1603,7 @@ class StreamDeckService:
             self.notify_state_changed()
             return
         action_name, _payload = action
-        if action_name in {"fog_flash_hold", "group_flash_hold"}:
+        if action_name in {"fog_flash_hold", "group_flash_hold", "blinder_flash_hold"}:
             self._execute_action(action, key_down=state)
             return
         if not state:
@@ -1687,28 +1691,15 @@ class StreamDeckService:
                 group_key, value_raw = payload.split("|", 1)
                 self._set_group_dimmer(group_key, int(value_raw))
             elif action_name == "group_flash_hold" and payload:
-                group_key = payload
-                snapshot = self._last_snapshot or self._get_snapshot()
-                current = next(
-                    (
-                        group.value_percent
-                        for group in snapshot.group_dimmers
-                        if group.key == group_key
-                    ),
-                    100,
-                )
-                if key_down:
-                    self._group_flash_restore[group_key] = max(0, min(100, int(current)))
-                    self._set_group_dimmer(group_key, 100)
-                else:
-                    restore = self._group_flash_restore.pop(group_key, max(0, min(100, int(current))))
-                    self._set_group_dimmer(group_key, restore)
+                self._set_group_flash_active(payload, bool(key_down))
             elif action_name == "haze_step" and payload:
                 snapshot = self._last_snapshot or self._get_snapshot()
                 target = max(0, min(100, snapshot.haze_percent + int(payload)))
                 self._set_haze(target)
             elif action_name == "fog_flash_hold":
                 self._set_fog_flash_active(bool(key_down))
+            elif action_name == "blinder_flash_hold":
+                self._set_blinder_flash_active(bool(key_down))
         except Exception as exc:  # pragma: no cover - hardware/user interaction
             _log.warning("Stream Deck action '%s' failed: %s", action_name, exc)
         finally:

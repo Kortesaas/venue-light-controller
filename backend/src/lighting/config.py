@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     fixture_plan_path: str = "./fixture_plan.active.json"
     fog_flash_universe: int = 1
     fog_flash_channel: int = 0
+    blinder_flash_targets: list[str] = Field(default_factory=list)
     haze_universe: int = 1
     haze_channel: int = 0
     show_scene_created_at_on_operator: bool = True
@@ -107,6 +108,7 @@ def load_runtime_settings() -> None:
         "operator_pin_hash",
         "fog_flash_universe",
         "fog_flash_channel",
+        "blinder_flash_targets",
         "haze_universe",
         "haze_channel",
         "show_scene_created_at_on_operator",
@@ -116,6 +118,10 @@ def load_runtime_settings() -> None:
             setattr(settings, key, data[key])
 
     settings.artnet_universe_map = normalize_universe_map(settings.artnet_universe_map)
+    if not isinstance(settings.blinder_flash_targets, list):
+        settings.blinder_flash_targets = []
+    else:
+        settings.blinder_flash_targets = [str(entry).strip() for entry in settings.blinder_flash_targets if str(entry).strip()]
     try:
         settings.streamdeck_screensaver_seconds = max(0, int(settings.streamdeck_screensaver_seconds))
     except (TypeError, ValueError):
@@ -137,6 +143,7 @@ def persist_runtime_settings() -> None:
         "operator_pin_hash": settings.operator_pin_hash,
         "fog_flash_universe": settings.fog_flash_universe,
         "fog_flash_channel": settings.fog_flash_channel,
+        "blinder_flash_targets": settings.blinder_flash_targets,
         "haze_universe": settings.haze_universe,
         "haze_channel": settings.haze_channel,
         "show_scene_created_at_on_operator": settings.show_scene_created_at_on_operator,
