@@ -72,6 +72,9 @@ _recording_state_lock = threading.Lock()
 _subscribers: set[asyncio.Queue[str]] = set()
 _subscribers_lock = threading.Lock()
 _event_loop: Optional[asyncio.AbstractEventLoop] = None
+_fog_flash_sender_thread: Optional[threading.Thread] = None
+_fog_flash_sender_stop_event = threading.Event()
+_fog_flash_sender_lock = threading.Lock()
 
 ANIMATED_RECORDING_MIN_DURATION_MS = 1500
 ANIMATED_RECORDING_MAX_DURATION_MS = 60000
@@ -174,7 +177,12 @@ def _set_haze_percent(value: int) -> None:
 
 def _set_fog_flash_active(value: bool) -> None:
     global FOG_FLASH_ACTIVE
-    FOG_FLASH_ACTIVE = bool(value)
+    active = bool(value)
+    FOG_FLASH_ACTIVE = active
+    if active:
+        _start_fog_flash_sender()
+    else:
+        _stop_fog_flash_sender(send_off_frame=True)
 
 
 def _has_fog_channel_configured() -> bool:
@@ -580,14 +588,6 @@ def _apply_atmosphere_controls(payload: Dict[int, bytes]) -> Dict[int, bytes]:
             values = ensure_universe(haze_universe)
             values[haze_index] = max(0, min(255, round((HAZE_PERCENT * 255) / 100)))
             output[haze_universe] = bytes(values)
-
-    if _has_fog_channel_configured():
-        fog_universe = settings.fog_flash_universe - 1
-        fog_index = settings.fog_flash_channel - 1
-        if 0 <= fog_index < 512:
-            values = ensure_universe(fog_universe)
-            values[fog_index] = 255 if FOG_FLASH_ACTIVE else 0
-            output[fog_universe] = bytes(values)
 
     return output
 
@@ -1175,8 +1175,9 @@ def api_set_haze(request: HazeUpdateRequest):
 @router.post("/atmosphere/fog-flash")
 def api_set_fog_flash(request: FogFlashUpdateRequest):
     _assert_panel_mode()
-    _set_fog_flash_active(request.active)
-    _refresh_stream_from_base_payload()
+    active = bool(request.active)
+    _set_fog_flash_active(active)
+    _broadcast_master_dimmer_status()
     return {
         "fog_flash_active": FOG_FLASH_ACTIVE,
         "fog_flash_configured": _has_fog_channel_configured(),
@@ -1445,6 +1446,60 @@ def _build_blackout_payload() -> Dict[int, bytes]:
         universe: bytes([0] * 512)
         for universe in sorted(universes)
     }
+
+
+def _build_fog_flash_payload(active: bool) -> Optional[Dict[int, bytes]]:
+    if not _has_fog_channel_configured():
+        return None
+    fog_universe = settings.fog_flash_universe - 1
+    fog_index = settings.fog_flash_channel - 1
+    if fog_universe < 0 or not (0 <= fog_index < 512):
+        return None
+    values = bytearray(b"\x00" * 512)
+    values[fog_index] = 255 if bool(active) else 0
+    return {fog_universe: bytes(values)}
+
+
+def _fog_flash_sender_loop() -> None:
+    # Emit fog-only frames continuously while flash is active.
+    while not _fog_flash_sender_stop_event.is_set():
+        payload = _build_fog_flash_payload(True)
+        if payload is not None:
+            send_frame_once(payload)
+        # ~20 Hz is enough for reliable hold behavior without spamming.
+        if _fog_flash_sender_stop_event.wait(0.05):
+            break
+
+
+def _start_fog_flash_sender() -> None:
+    global _fog_flash_sender_thread
+    with _fog_flash_sender_lock:
+        thread = _fog_flash_sender_thread
+        if thread is not None and thread.is_alive():
+            return
+        _fog_flash_sender_stop_event.clear()
+        _fog_flash_sender_thread = threading.Thread(
+            target=_fog_flash_sender_loop,
+            name="fog-flash-sender",
+            daemon=True,
+        )
+        _fog_flash_sender_thread.start()
+
+
+def _stop_fog_flash_sender(*, send_off_frame: bool) -> None:
+    global _fog_flash_sender_thread
+    with _fog_flash_sender_lock:
+        _fog_flash_sender_stop_event.set()
+        thread = _fog_flash_sender_thread
+        _fog_flash_sender_thread = None
+    if thread is not None and thread.is_alive():
+        thread.join(timeout=0.2)
+    if send_off_frame:
+        payload = _build_fog_flash_payload(False)
+        if payload is not None:
+            # Send off twice for better reliability on lossy UDP links.
+            send_frame_once(payload)
+            send_frame_once(payload)
 
 
 def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:

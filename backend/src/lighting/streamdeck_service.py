@@ -397,7 +397,6 @@ class StreamDeckService:
             self._report_probe_error(exc)
             streamdecks = self._enumerate_streamdecks_via_hid_module()
         if not streamdecks:
-            self._reported_probe_error = False
             return
 
         selected = None
@@ -488,8 +487,10 @@ class StreamDeckService:
             return
         self._reported_probe_error = True
         _log.warning(
-            "Stream Deck probe failed. A HID backend is missing/unavailable. "
-            "Falling back to the Python 'hid' module if available. "
+            "Stream Deck probe failed (one-time warning). Common causes: "
+            "no Stream Deck connected, USB not accessible, or HID backend/dependencies missing "
+            "(for example hidapi/hidapi.dll). Falling back to the Python 'hid' module if available "
+            "while continuing periodic auto-detection. "
             "Detail: %s",
             exc,
         )
