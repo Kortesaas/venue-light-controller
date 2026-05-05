@@ -1074,6 +1074,14 @@ export default function AdminPanel({
         }}
       >
         <Paper variant="outlined" sx={{ p: 1 }}>
+          <Stack spacing={0.25} sx={{ px: 1.5, pt: 1, pb: 0.25 }}>
+            <Typography variant="subtitle1" fontWeight={700}>
+              Scene Library
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {`${scenes.length} scene${scenes.length === 1 ? "" : "s"} available. Drag-style ordering with up/down buttons.`}
+            </Typography>
+          </Stack>
           {isLoadingScenes ? (
             <Box display="flex" justifyContent="center" py={6}>
               <CircularProgress />
@@ -1267,9 +1275,14 @@ export default function AdminPanel({
 
         <Stack spacing={2}>
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-              Neue Szene aufnehmen
-            </Typography>
+            <Stack spacing={0.5} sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" fontWeight={700}>
+                Neue Szene aufnehmen
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Static snapshot or animated loop capture with style preview.
+              </Typography>
+            </Stack>
             <Stack spacing={1.5}>
               <TextField
                 label="Name"
@@ -1330,9 +1343,14 @@ export default function AdminPanel({
           </Paper>
 
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-              MA3 Fixture Plan (Optional)
-            </Typography>
+            <Stack spacing={0.5} sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" fontWeight={700}>
+                MA3 Fixture Plan (Optional)
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Import the MA3 parameter export to enable semantic fixture control.
+              </Typography>
+            </Stack>
 
             <Stack spacing={1.25}>
               {fixturePlanStatus.active ? (
@@ -1418,344 +1436,439 @@ export default function AdminPanel({
           </Paper>
 
           <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-              System Settings
-            </Typography>
+            <Stack spacing={0.5} sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" fontWeight={700}>
+                System Settings
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Netzwerk, DMX-Output, Atmosphere-Kanäle und Stream Deck Verhalten.
+              </Typography>
+            </Stack>
             {isLoadingSettings ? (
               <Box display="flex" justifyContent="center" py={2}>
                 <CircularProgress size={24} />
               </Box>
             ) : (
-              <Stack spacing={1.5}>
-                <TextField
-                  select
-                  label="Network Adapter"
-                  value={settingsForm.local_adapter}
-                  disabled={settingsForm.network_adapters.length === 0}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => {
-                      const nextAdapter = prev.network_adapters.find(
-                        (adapter) => adapter.id === event.target.value
-                      );
-                      return {
-                        ...prev,
-                        local_adapter: event.target.value,
-                        local_ip: nextAdapter?.local_ip ?? prev.local_ip,
-                      };
-                    })
-                  }
-                  size="small"
-                  fullWidth
-                  helperText={
-                    settingsForm.network_adapters.length > 0
-                      ? "Die lokale IP wird automatisch aus dem Adapter übernommen."
-                      : "Kein aktiver IPv4-Adapter gefunden."
-                  }
-                >
-                  {settingsForm.network_adapters.length === 0 ? (
-                    <MenuItem value="" disabled>
-                      No active IPv4 adapters
-                    </MenuItem>
-                  ) : null}
-                  {settingsForm.network_adapters.map((adapter) => (
-                    <MenuItem key={adapter.id} value={adapter.id} disabled={!adapter.local_ip}>
-                      {adapter.local_ip
-                        ? `${adapter.name} (${adapter.local_ip})`
-                        : `${adapter.name} (keine IPv4)`}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  label="Lokale IP"
-                  value={settingsForm.local_ip}
-                  size="small"
-                  fullWidth
-                  InputProps={{ readOnly: true }}
-                />
-                <TextField
-                  select
-                  label="Web App Adapter (QR/Link)"
-                  value={settingsForm.web_local_adapter}
-                  disabled={settingsForm.network_adapters.length === 0}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => {
-                      const nextAdapter = prev.network_adapters.find(
-                        (adapter) => adapter.id === event.target.value
-                      );
-                      return {
-                        ...prev,
-                        web_local_adapter: event.target.value,
-                        web_local_ip: nextAdapter?.local_ip ?? prev.web_local_ip,
-                      };
-                    })
-                  }
-                  size="small"
-                  fullWidth
-                  helperText={
-                    settingsForm.network_adapters.length > 0
-                      ? "Diese IP wird im QR-Code und Connect-Link angezeigt."
-                      : "Kein aktiver IPv4-Adapter gefunden."
-                  }
-                >
-                  {settingsForm.network_adapters.length === 0 ? (
-                    <MenuItem value="" disabled>
-                      No active IPv4 adapters
-                    </MenuItem>
-                  ) : null}
-                  {settingsForm.network_adapters.map((adapter) => (
-                    <MenuItem key={`web-${adapter.id}`} value={adapter.id} disabled={!adapter.local_ip}>
-                      {adapter.local_ip
-                        ? `${adapter.name} (${adapter.local_ip})`
-                        : `${adapter.name} (keine IPv4)`}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  label="Web App IP (QR)"
-                  value={settingsForm.web_local_ip}
-                  size="small"
-                  fullWidth
-                  InputProps={{ readOnly: true }}
-                />
-                <TextField
-                  label="Node IP"
-                  value={settingsForm.node_ip}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({ ...prev, node_ip: event.target.value }))
-                  }
-                  size="small"
-                  fullWidth
-                  error={settingsForm.node_ip.length > 0 && !IPV4_REGEX.test(settingsForm.node_ip)}
-                  helperText="IPv4, z.B. 2.0.0.10"
-                />
-                <TextField
-                  select
-                  label="DMX FPS"
-                  value={settingsForm.dmx_fps}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      dmx_fps: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                >
-                  {FPS_OPTIONS.map((fps) => (
-                    <MenuItem key={fps} value={fps}>
-                      {fps}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <TextField
-                  label="Poll Interval (s)"
-                  type="number"
-                  value={settingsForm.poll_interval}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      poll_interval: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                />
-                <TextField
-                  label="Universes in use"
-                  type="number"
-                  value={settingsForm.universe_count}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      universe_count: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                  helperText={universeExampleText}
-                />
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Art-Net Universe Mapping (Local U1..U8)
-                  </Typography>
-                  <Stack spacing={1}>
-                    {settingsForm.artnet_universe_map.map((targetUniverse, index) => (
+              <Stack spacing={2}>
+                <Paper variant="outlined" sx={{ p: 1.5 }}>
+                  <Stack spacing={1.25}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      Network & Routing
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                        gap: 1.25,
+                      }}
+                    >
                       <TextField
-                        key={`artnet-map-${index + 1}`}
-                        label={`Local U${index + 1} -> Art-Net`}
-                        type="number"
-                        value={targetUniverse}
-                        onChange={(event) => {
-                          const nextValue = Number(event.target.value);
+                        select
+                        label="Network Adapter"
+                        value={settingsForm.local_adapter}
+                        disabled={settingsForm.network_adapters.length === 0}
+                        onChange={(event) =>
                           setSettingsForm((prev) => {
-                            const nextMap = [...prev.artnet_universe_map];
-                            nextMap[index] = Number.isInteger(nextValue) && nextValue >= 0 ? nextValue : 0;
+                            const nextAdapter = prev.network_adapters.find(
+                              (adapter) => adapter.id === event.target.value
+                            );
                             return {
                               ...prev,
-                              artnet_universe_map: nextMap,
+                              local_adapter: event.target.value,
+                              local_ip: nextAdapter?.local_ip ?? prev.local_ip,
                             };
-                          });
-                        }}
+                          })
+                        }
                         size="small"
                         fullWidth
+                        helperText={
+                          settingsForm.network_adapters.length > 0
+                            ? "Die lokale IP wird automatisch aus dem Adapter übernommen."
+                            : "Kein aktiver IPv4-Adapter gefunden."
+                        }
+                      >
+                        {settingsForm.network_adapters.length === 0 ? (
+                          <MenuItem value="" disabled>
+                            No active IPv4 adapters
+                          </MenuItem>
+                        ) : null}
+                        {settingsForm.network_adapters.map((adapter) => (
+                          <MenuItem key={adapter.id} value={adapter.id} disabled={!adapter.local_ip}>
+                            {adapter.local_ip
+                              ? `${adapter.name} (${adapter.local_ip})`
+                              : `${adapter.name} (keine IPv4)`}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        label="Lokale IP"
+                        value={settingsForm.local_ip}
+                        size="small"
+                        fullWidth
+                        InputProps={{ readOnly: true }}
+                      />
+                      <TextField
+                        select
+                        label="Web App Adapter (QR/Link)"
+                        value={settingsForm.web_local_adapter}
+                        disabled={settingsForm.network_adapters.length === 0}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => {
+                            const nextAdapter = prev.network_adapters.find(
+                              (adapter) => adapter.id === event.target.value
+                            );
+                            return {
+                              ...prev,
+                              web_local_adapter: event.target.value,
+                              web_local_ip: nextAdapter?.local_ip ?? prev.web_local_ip,
+                            };
+                          })
+                        }
+                        size="small"
+                        fullWidth
+                        helperText={
+                          settingsForm.network_adapters.length > 0
+                            ? "Diese IP wird im QR-Code und Connect-Link angezeigt."
+                            : "Kein aktiver IPv4-Adapter gefunden."
+                        }
+                      >
+                        {settingsForm.network_adapters.length === 0 ? (
+                          <MenuItem value="" disabled>
+                            No active IPv4 adapters
+                          </MenuItem>
+                        ) : null}
+                        {settingsForm.network_adapters.map((adapter) => (
+                          <MenuItem key={`web-${adapter.id}`} value={adapter.id} disabled={!adapter.local_ip}>
+                            {adapter.local_ip
+                              ? `${adapter.name} (${adapter.local_ip})`
+                              : `${adapter.name} (keine IPv4)`}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        label="Web App IP (QR)"
+                        value={settingsForm.web_local_ip}
+                        size="small"
+                        fullWidth
+                        InputProps={{ readOnly: true }}
+                      />
+                      <TextField
+                        label="Node IP"
+                        value={settingsForm.node_ip}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({ ...prev, node_ip: event.target.value }))
+                        }
+                        size="small"
+                        fullWidth
+                        error={settingsForm.node_ip.length > 0 && !IPV4_REGEX.test(settingsForm.node_ip)}
+                        helperText="IPv4, z.B. 2.0.0.10"
+                        sx={{ gridColumn: { xs: "auto", md: "1 / -1" } }}
+                      />
+                    </Box>
+                  </Stack>
+                </Paper>
+
+                <Paper variant="outlined" sx={{ p: 1.5 }}>
+                  <Stack spacing={1.25}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      DMX Output Engine
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+                        gap: 1.25,
+                      }}
+                    >
+                      <TextField
+                        select
+                        label="DMX FPS"
+                        value={settingsForm.dmx_fps}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            dmx_fps: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                      >
+                        {FPS_OPTIONS.map((fps) => (
+                          <MenuItem key={fps} value={fps}>
+                            {fps}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        label="Poll Interval (s)"
+                        type="number"
+                        value={settingsForm.poll_interval}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            poll_interval: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                      />
+                      <TextField
+                        label="Universes in use"
+                        type="number"
+                        value={settingsForm.universe_count}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            universe_count: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                        helperText={universeExampleText}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        Art-Net Universe Mapping (Local U1..U8)
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                          gap: 1,
+                        }}
+                      >
+                        {settingsForm.artnet_universe_map.map((targetUniverse, index) => (
+                          <TextField
+                            key={`artnet-map-${index + 1}`}
+                            label={`Local U${index + 1} -> Art-Net`}
+                            type="number"
+                            value={targetUniverse}
+                            onChange={(event) => {
+                              const nextValue = Number(event.target.value);
+                              setSettingsForm((prev) => {
+                                const nextMap = [...prev.artnet_universe_map];
+                                nextMap[index] = Number.isInteger(nextValue) && nextValue >= 0 ? nextValue : 0;
+                                return {
+                                  ...prev,
+                                  artnet_universe_map: nextMap,
+                                };
+                              });
+                            }}
+                            size="small"
+                            fullWidth
+                            inputProps={{ min: 0 }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  </Stack>
+                </Paper>
+
+                <Paper variant="outlined" sx={{ p: 1.5 }}>
+                  <Stack spacing={1.25}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      Atmosphere Channels
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                        gap: 1.25,
+                      }}
+                    >
+                      <TextField
+                        label="Fog Flash Universe"
+                        type="number"
+                        value={settingsForm.fog_flash_universe}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            fog_flash_universe: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                        helperText="1-based universe"
+                      />
+                      <TextField
+                        label="Fog Flash Channel"
+                        type="number"
+                        value={settingsForm.fog_flash_channel}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            fog_flash_channel: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                        helperText="0 disables fog flash, else 1..512"
+                      />
+                      <TextField
+                        label="Haze Universe"
+                        type="number"
+                        value={settingsForm.haze_universe}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            haze_universe: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                        helperText="1-based universe"
+                      />
+                      <TextField
+                        label="Haze Channel"
+                        type="number"
+                        value={settingsForm.haze_channel}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            haze_channel: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                        helperText="0 disables haze, else 1..512"
+                      />
+                      <TextField
+                        label="Blinder Flash Targets"
+                        value={settingsForm.blinder_flash_targets.join(", ")}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            blinder_flash_targets: event.target.value
+                              .split(",")
+                              .map((entry) => entry.trim())
+                              .filter((entry) => entry.length > 0),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                        helperText="Comma-separated universe:channel targets, e.g. 1:201, 1:202, 2:15"
+                        sx={{ gridColumn: { xs: "auto", md: "1 / -1" } }}
+                      />
+                    </Box>
+                  </Stack>
+                </Paper>
+
+                <Paper variant="outlined" sx={{ p: 1.5 }}>
+                  <Stack spacing={1.25}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      Operator & Stream Deck
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                        gap: 1.25,
+                        alignItems: "center",
+                      }}
+                    >
+                      <TextField
+                        label="Stream Deck Screensaver (s)"
+                        type="number"
+                        value={settingsForm.streamdeck_screensaver_seconds}
+                        onChange={(event) =>
+                          setSettingsForm((prev) => ({
+                            ...prev,
+                            streamdeck_screensaver_seconds: Number(event.target.value),
+                          }))
+                        }
+                        size="small"
+                        fullWidth
+                        helperText="0 disables screensaver"
                         inputProps={{ min: 0 }}
                       />
-                    ))}
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={settingsForm.show_scene_created_at_on_operator}
+                            onChange={(_event, checked) =>
+                              setSettingsForm((prev) => ({
+                                ...prev,
+                                show_scene_created_at_on_operator: checked,
+                              }))
+                            }
+                          />
+                        }
+                        label="Show scene creation date on Operator view"
+                        sx={{ ml: 0.25 }}
+                      />
+                    </Box>
                   </Stack>
+                </Paper>
+
+                <Box display="flex" justifyContent="flex-end">
+                  <Button
+                    variant="contained"
+                    onClick={handleApplySettings}
+                    disabled={!canApplySettings}
+                  >
+                    Apply Settings
+                  </Button>
                 </Box>
-                <TextField
-                  label="Fog Flash Universe"
-                  type="number"
-                  value={settingsForm.fog_flash_universe}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      fog_flash_universe: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                  helperText="1-based universe"
-                />
-                <TextField
-                  label="Fog Flash Channel"
-                  type="number"
-                  value={settingsForm.fog_flash_channel}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      fog_flash_channel: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                  helperText="0 disables fog flash, else 1..512"
-                />
-                <TextField
-                  label="Blinder Flash Targets"
-                  value={settingsForm.blinder_flash_targets.join(", ")}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      blinder_flash_targets: event.target.value
-                        .split(",")
-                        .map((entry) => entry.trim())
-                        .filter((entry) => entry.length > 0),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                  helperText="Comma-separated universe:channel targets, e.g. 1:201, 1:202, 2:15"
-                />
-                <TextField
-                  label="Haze Universe"
-                  type="number"
-                  value={settingsForm.haze_universe}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      haze_universe: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                  helperText="1-based universe"
-                />
-                <TextField
-                  label="Haze Channel"
-                  type="number"
-                  value={settingsForm.haze_channel}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      haze_channel: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                  helperText="0 disables haze, else 1..512"
-                />
-                <TextField
-                  label="Stream Deck Screensaver (s)"
-                  type="number"
-                  value={settingsForm.streamdeck_screensaver_seconds}
-                  onChange={(event) =>
-                    setSettingsForm((prev) => ({
-                      ...prev,
-                      streamdeck_screensaver_seconds: Number(event.target.value),
-                    }))
-                  }
-                  size="small"
-                  fullWidth
-                  helperText="0 disables screensaver"
-                  inputProps={{ min: 0 }}
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={settingsForm.show_scene_created_at_on_operator}
-                      onChange={(_event, checked) =>
-                        setSettingsForm((prev) => ({
-                          ...prev,
-                          show_scene_created_at_on_operator: checked,
-                        }))
-                      }
-                    />
-                  }
-                  label="Show scene creation date on Operator view"
-                />
-                <Button
-                  variant="contained"
-                  onClick={handleApplySettings}
-                  disabled={!canApplySettings}
-                >
-                  Apply Settings
-                </Button>
 
                 <Divider />
 
-                <Typography variant="subtitle2" fontWeight={700}>
-                  Screen Lock PIN
-                </Typography>
-                <TextField
-                  label="Current PIN"
-                  type="password"
-                  value={currentPin}
-                  onChange={(event) => setCurrentPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                  size="small"
-                  fullWidth
-                  helperText="4 digits"
-                />
-                <TextField
-                  label="New PIN"
-                  type="password"
-                  value={newPin}
-                  onChange={(event) => setNewPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                  size="small"
-                  fullWidth
-                  helperText="exactly 4 digits"
-                />
-                <TextField
-                  label="Confirm New PIN"
-                  type="password"
-                  value={confirmPin}
-                  onChange={(event) => setConfirmPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                  size="small"
-                  fullWidth
-                  error={confirmPin.length > 0 && newPin.length > 0 && confirmPin !== newPin}
-                  helperText={
-                    confirmPin.length > 0 && newPin.length > 0 && confirmPin !== newPin
-                      ? "PINs do not match"
-                      : "repeat new PIN"
-                  }
-                />
-                <Button
-                  variant="outlined"
-                  onClick={handleApplyPin}
-                  disabled={!canApplyPin}
-                >
-                  Update PIN
-                </Button>
+                <Paper variant="outlined" sx={{ p: 1.5 }}>
+                  <Stack spacing={1.25}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      Screen Lock PIN
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
+                        gap: 1.25,
+                      }}
+                    >
+                      <TextField
+                        label="Current PIN"
+                        type="password"
+                        value={currentPin}
+                        onChange={(event) => setCurrentPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                        size="small"
+                        fullWidth
+                        helperText="4 digits"
+                      />
+                      <TextField
+                        label="New PIN"
+                        type="password"
+                        value={newPin}
+                        onChange={(event) => setNewPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                        size="small"
+                        fullWidth
+                        helperText="exactly 4 digits"
+                      />
+                      <TextField
+                        label="Confirm New PIN"
+                        type="password"
+                        value={confirmPin}
+                        onChange={(event) => setConfirmPin(event.target.value.replace(/\D/g, "").slice(0, 4))}
+                        size="small"
+                        fullWidth
+                        error={confirmPin.length > 0 && newPin.length > 0 && confirmPin !== newPin}
+                        helperText={
+                          confirmPin.length > 0 && newPin.length > 0 && confirmPin !== newPin
+                            ? "PINs do not match"
+                            : "repeat new PIN"
+                        }
+                      />
+                    </Box>
+                    <Box display="flex" justifyContent="flex-end">
+                      <Button
+                        variant="outlined"
+                        onClick={handleApplyPin}
+                        disabled={!canApplyPin}
+                      >
+                        Update PIN
+                      </Button>
+                    </Box>
+                  </Stack>
+                </Paper>
               </Stack>
             )}
           </Paper>

@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +10,11 @@ from src.lighting.api import (
     router as lighting_router,
     start_streamdeck_service,
     stop_streamdeck_service,
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
 )
 
 
