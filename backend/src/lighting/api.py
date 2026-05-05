@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from .artnet_core import (
     ARTNET_PORT,
+    create_artnet_listener_socket,
     is_stream_running,
     record_snapshots,
     send_frame_once,
@@ -92,6 +93,16 @@ def _raise_conflict(detail: str, **context: object) -> None:
     else:
         _log.warning("409 Conflict: %s", detail)
     raise HTTPException(status_code=409, detail=detail)
+
+
+def _artnet_bind_conflict_message() -> str:
+    preferred_ip = str(settings.local_ip).strip() or "0.0.0.0"
+    return (
+        "Art-Net UDP port 6454 is unavailable for recording. "
+        f"Tried listening on adapter IP {preferred_ip} and fallback 0.0.0.0. "
+        "Typical causes: another backend instance is running, MA3 (or another Art-Net app) is already listening on 6454, "
+        "or the selected adapter is not the one receiving MA3 unicast. Stop the conflicting listener, pick the correct adapter, and retry."
+    )
 
 
 def _format_sse(event: str, data: dict) -> str:
@@ -1744,12 +1755,34 @@ def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
     # Ensure port 6454 is free for snapshot recording.
     stop_stream()
     try:
-        return record_snapshots(target_universes, duration)
+        snapshot = record_snapshots(target_universes, duration)
+        per_universe_non_zero = {
+            universe: sum(1 for value in channels if int(value) > 0)
+            for universe, channels in snapshot.items()
+        }
+        total_non_zero = sum(per_universe_non_zero.values())
+        _log.info(
+            "Scene snapshot capture finished: duration=%.2fs universes=%s total_non_zero_channels=%d per_universe_non_zero=%s",
+            duration,
+            target_universes,
+            total_non_zero,
+            per_universe_non_zero,
+        )
+        if total_non_zero == 0:
+            _raise_conflict(
+                "Capture received no usable Art-Net DMX data (all channels are 0). "
+                "Scene was not saved. Verify MA3 output is active, universe mapping matches, and backend can sniff traffic on the selected adapter.",
+                duration=duration,
+                target_universes=target_universes,
+                local_ip=settings.local_ip,
+            )
+        return snapshot
     except OSError as exc:
         _raise_conflict(
-            "Art-Net UDP port 6454 is already in use. Stop the other Art-Net source or listener and retry.",
+            _artnet_bind_conflict_message(),
             port=ARTNET_PORT,
             error=str(exc),
+            local_ip=settings.local_ip,
         )
     finally:
         if restore_payload and CONTROL_MODE == "panel":
@@ -1856,18 +1889,17 @@ def _start_animated_recording_session() -> dict:
     target_universes = list(range(settings.universe_count))
     buffers = {universe: [0] * 512 for universe in target_universes}
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind(("", ARTNET_PORT))
-        sock.settimeout(0.05)
+        sock = create_artnet_listener_socket(timeout_seconds=0.05)
     except OSError as exc:
         if restore_payload:
             _set_base_stream_payload(restore_payload)
             _refresh_stream_from_base_payload()
             _set_active_scene(restore_scene_id)
         _raise_conflict(
-            "Art-Net UDP port 6454 is already in use. Stop the other Art-Net source or listener and retry.",
+            _artnet_bind_conflict_message(),
             port=ARTNET_PORT,
             error=str(exc),
+            local_ip=settings.local_ip,
         )
 
     state = {
