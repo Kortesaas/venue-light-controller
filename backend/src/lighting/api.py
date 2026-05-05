@@ -60,8 +60,10 @@ PANEL_LOCKED: bool = bool(settings.lock_on_startup)
 MASTER_DIMMER_PERCENT: int = 100
 HAZE_PERCENT: int = 0
 FOG_FLASH_ACTIVE: bool = False
+BLINDER_FLASH_ACTIVE: bool = False
 GROUP_DIMMER_VALUES: Dict[str, int] = {}
 GROUP_DIMMER_MUTED: set[str] = set()
+GROUP_FLASH_RESTORE: Dict[str, int] = {}
 _BASE_STREAM_PAYLOAD: Optional[Dict[int, bytes]] = None
 _LIVE_EDITOR_STATE: Optional[dict] = None
 _ANIMATED_PLAYBACK_STATE: Optional[dict] = None
@@ -75,6 +77,9 @@ _event_loop: Optional[asyncio.AbstractEventLoop] = None
 _fog_flash_sender_thread: Optional[threading.Thread] = None
 _fog_flash_sender_stop_event = threading.Event()
 _fog_flash_sender_lock = threading.Lock()
+_blinder_flash_sender_thread: Optional[threading.Thread] = None
+_blinder_flash_sender_stop_event = threading.Event()
+_blinder_flash_sender_lock = threading.Lock()
 
 ANIMATED_RECORDING_MIN_DURATION_MS = 1500
 ANIMATED_RECORDING_MAX_DURATION_MS = 60000
@@ -145,6 +150,8 @@ def _build_streamdeck_snapshot() -> StreamDeckSnapshot:
         haze_configured=_has_haze_channel_configured(),
         fog_flash_active=FOG_FLASH_ACTIVE,
         fog_flash_configured=_has_fog_channel_configured(),
+        blinder_flash_active=BLINDER_FLASH_ACTIVE,
+        blinder_flash_configured=_has_blinder_flash_targets_configured(),
     )
 
 
@@ -177,16 +184,56 @@ def _set_haze_percent(value: int) -> None:
 
 def _set_fog_flash_active(value: bool) -> None:
     global FOG_FLASH_ACTIVE
-    active = bool(value)
-    FOG_FLASH_ACTIVE = active
-    if active:
-        _start_fog_flash_sender()
-    else:
-        _stop_fog_flash_sender(send_off_frame=True)
+    FOG_FLASH_ACTIVE = bool(value)
+    _stop_fog_flash_sender(send_off_frame=False)
+
+
+def _set_blinder_flash_active(value: bool) -> None:
+    global BLINDER_FLASH_ACTIVE
+    BLINDER_FLASH_ACTIVE = bool(value)
+    _stop_blinder_flash_sender(send_off_frame=False)
 
 
 def _has_fog_channel_configured() -> bool:
     return settings.fog_flash_channel > 0 and settings.fog_flash_universe > 0
+
+
+def _parse_blinder_flash_targets(raw_targets: object) -> list[tuple[int, int]]:
+    targets: list[tuple[int, int]] = []
+    if not isinstance(raw_targets, list):
+        return targets
+    seen: set[tuple[int, int]] = set()
+    for raw in raw_targets:
+        if not isinstance(raw, str):
+            continue
+        token = raw.strip()
+        if not token:
+            continue
+        token = token.replace("/", ":").replace(".", ":").replace("-", ":")
+        if ":" not in token:
+            continue
+        left, right = token.split(":", 1)
+        try:
+            universe = int(left.strip())
+            channel = int(right.strip())
+        except ValueError:
+            continue
+        if universe < 1 or channel < 1 or channel > 512:
+            continue
+        pair = (universe, channel)
+        if pair in seen:
+            continue
+        seen.add(pair)
+        targets.append(pair)
+    return targets
+
+
+def _normalize_blinder_flash_targets(raw_targets: object) -> list[str]:
+    return [f"{universe}:{channel}" for universe, channel in _parse_blinder_flash_targets(raw_targets)]
+
+
+def _has_blinder_flash_targets_configured() -> bool:
+    return len(_parse_blinder_flash_targets(settings.blinder_flash_targets)) > 0
 
 
 def _has_haze_channel_configured() -> bool:
@@ -196,10 +243,11 @@ def _has_haze_channel_configured() -> bool:
 def _get_group_dimmer_layout() -> Optional[List[dict]]:
     groups = get_intensity_groups()
     with _playback_state_lock:
-        global GROUP_DIMMER_VALUES, GROUP_DIMMER_MUTED
+        global GROUP_DIMMER_VALUES, GROUP_DIMMER_MUTED, GROUP_FLASH_RESTORE
         if groups is None:
             GROUP_DIMMER_VALUES = {}
             GROUP_DIMMER_MUTED = set()
+            GROUP_FLASH_RESTORE = {}
             return None
 
         keys = {group["key"] for group in groups}
@@ -208,6 +256,7 @@ def _get_group_dimmer_layout() -> Optional[List[dict]]:
             for key in keys
         }
         GROUP_DIMMER_MUTED = {key for key in GROUP_DIMMER_MUTED if key in keys}
+        GROUP_FLASH_RESTORE = {key: value for key, value in GROUP_FLASH_RESTORE.items() if key in keys}
         values = dict(GROUP_DIMMER_VALUES)
         muted = set(GROUP_DIMMER_MUTED)
 
@@ -270,11 +319,14 @@ def _build_status_payload() -> dict:
         "master_dimmer_mode": _get_master_dimmer_mode(),
         "haze_percent": HAZE_PERCENT,
         "fog_flash_active": FOG_FLASH_ACTIVE,
+        "blinder_flash_active": BLINDER_FLASH_ACTIVE,
         "fog_flash_universe": settings.fog_flash_universe,
         "fog_flash_channel": settings.fog_flash_channel,
+        "blinder_flash_targets": _normalize_blinder_flash_targets(settings.blinder_flash_targets),
         "haze_universe": settings.haze_universe,
         "haze_channel": settings.haze_channel,
         "fog_flash_configured": _has_fog_channel_configured(),
+        "blinder_flash_configured": _has_blinder_flash_targets_configured(),
         "haze_configured": _has_haze_channel_configured(),
         "show_scene_created_at_on_operator": settings.show_scene_created_at_on_operator,
     }
@@ -589,6 +641,24 @@ def _apply_atmosphere_controls(payload: Dict[int, bytes]) -> Dict[int, bytes]:
             values[haze_index] = max(0, min(255, round((HAZE_PERCENT * 255) / 100)))
             output[haze_universe] = bytes(values)
 
+    if _has_fog_channel_configured() and FOG_FLASH_ACTIVE:
+        fog_universe = settings.fog_flash_universe - 1
+        fog_index = settings.fog_flash_channel - 1
+        if 0 <= fog_index < 512:
+            values = ensure_universe(fog_universe)
+            values[fog_index] = 255
+            output[fog_universe] = bytes(values)
+
+    if BLINDER_FLASH_ACTIVE:
+        for universe_one_based, channel_one_based in _parse_blinder_flash_targets(settings.blinder_flash_targets):
+            universe = universe_one_based - 1
+            channel_index = channel_one_based - 1
+            if universe < 0 or not (0 <= channel_index < 512):
+                continue
+            values = ensure_universe(universe)
+            values[channel_index] = 255
+            output[universe] = bytes(values)
+
     return output
 
 
@@ -617,6 +687,15 @@ def _refresh_stream_from_base_payload(*, broadcast_status: bool = True) -> None:
         stop_stream()
     if broadcast_status:
         _broadcast_master_dimmer_status(mode)
+
+
+def _build_effective_payload_from_current_state() -> Dict[int, bytes]:
+    with _playback_state_lock:
+        base_payload = _clone_payload(_BASE_STREAM_PAYLOAD or {})
+        dimmer_percent = MASTER_DIMMER_PERCENT
+    scaled_payload, _mode = _apply_master_dimmer(base_payload, dimmer_percent)
+    grouped_payload = _apply_group_dimmers(scaled_payload)
+    return _apply_atmosphere_controls(grouped_payload)
 
 
 def _set_base_stream_payload(payload: Optional[Dict[int, bytes]]) -> None:
@@ -675,12 +754,23 @@ def _streamdeck_toggle_group_mute(group_key: str) -> None:
     )
 
 
+def _streamdeck_set_group_flash_active(group_key: str, active: bool) -> None:
+    api_set_group_dimmer_flash(
+        group_key=group_key,
+        request=GroupDimmerFlashUpdateRequest(active=bool(active)),
+    )
+
+
 def _streamdeck_set_haze(value_percent: int) -> None:
     api_set_haze(HazeUpdateRequest(value_percent=value_percent))
 
 
 def _streamdeck_set_fog_flash_active(active: bool) -> None:
     api_set_fog_flash(FogFlashUpdateRequest(active=active))
+
+
+def _streamdeck_set_blinder_flash_active(active: bool) -> None:
+    api_set_blinder_flash(BlinderFlashUpdateRequest(active=active))
 
 
 def _streamdeck_set_panel_lock(locked: bool) -> None:
@@ -708,8 +798,10 @@ def start_streamdeck_service() -> None:
             set_master_dimmer=_streamdeck_set_master_dimmer,
             set_group_dimmer=_streamdeck_set_group_dimmer,
             toggle_group_mute=_streamdeck_toggle_group_mute,
+            set_group_flash_active=_streamdeck_set_group_flash_active,
             set_haze=_streamdeck_set_haze,
             set_fog_flash_active=_streamdeck_set_fog_flash_active,
+            set_blinder_flash_active=_streamdeck_set_blinder_flash_active,
             set_panel_lock=_streamdeck_set_panel_lock,
             unlock_panel=_streamdeck_unlock_panel,
         )
@@ -858,6 +950,7 @@ class SettingsResponse(BaseModel):
     artnet_universe_map: List[int]
     fog_flash_universe: int
     fog_flash_channel: int
+    blinder_flash_targets: List[str]
     haze_universe: int
     haze_channel: int
     show_scene_created_at_on_operator: bool
@@ -874,6 +967,7 @@ class SettingsUpdateRequest(BaseModel):
     artnet_universe_map: List[int]
     fog_flash_universe: int
     fog_flash_channel: int
+    blinder_flash_targets: List[str] = []
     haze_universe: int
     haze_channel: int
     show_scene_created_at_on_operator: bool
@@ -919,11 +1013,19 @@ class FogFlashUpdateRequest(BaseModel):
     active: bool
 
 
+class BlinderFlashUpdateRequest(BaseModel):
+    active: bool
+
+
 class GroupDimmerValueUpdateRequest(BaseModel):
     value_percent: int
 
 
 class GroupDimmerMuteUpdateRequest(BaseModel):
+    active: bool
+
+
+class GroupDimmerFlashUpdateRequest(BaseModel):
     active: bool
 
 
@@ -979,6 +1081,7 @@ def _get_settings_payload() -> SettingsResponse:
         artnet_universe_map=settings.artnet_universe_map,
         fog_flash_universe=settings.fog_flash_universe,
         fog_flash_channel=settings.fog_flash_channel,
+        blinder_flash_targets=_normalize_blinder_flash_targets(settings.blinder_flash_targets),
         haze_universe=settings.haze_universe,
         haze_channel=settings.haze_channel,
         show_scene_created_at_on_operator=settings.show_scene_created_at_on_operator,
@@ -1113,6 +1216,7 @@ def api_set_group_dimmer(group_key: str, request: GroupDimmerValueUpdateRequest)
     group = _find_group_dimmer_or_raise(group_key)
     with _playback_state_lock:
         GROUP_DIMMER_VALUES[group["key"]] = max(0, min(100, int(request.value_percent)))
+        GROUP_FLASH_RESTORE.pop(group["key"], None)
 
     _refresh_stream_from_base_payload()
     updated_group = _find_group_dimmer_or_raise(group_key)
@@ -1144,15 +1248,47 @@ def api_set_group_dimmer_mute(group_key: str, request: GroupDimmerMuteUpdateRequ
     }
 
 
+def _set_group_flash_active(group_key: str, active: bool) -> dict:
+    group = _find_group_dimmer_or_raise(group_key)
+    key = group["key"]
+    with _playback_state_lock:
+        current = max(0, min(100, int(GROUP_DIMMER_VALUES.get(key, group["value_percent"]))))
+        if active:
+            if key not in GROUP_FLASH_RESTORE:
+                GROUP_FLASH_RESTORE[key] = current
+            GROUP_DIMMER_VALUES[key] = 100
+        else:
+            restore = GROUP_FLASH_RESTORE.pop(key, current)
+            GROUP_DIMMER_VALUES[key] = max(0, min(100, int(restore)))
+    _refresh_stream_from_base_payload()
+    return _find_group_dimmer_or_raise(key)
+
+
+@router.post("/group-dimmers/{group_key}/flash")
+def api_set_group_dimmer_flash(group_key: str, request: GroupDimmerFlashUpdateRequest):
+    _assert_panel_mode()
+    updated_group = _set_group_flash_active(group_key, bool(request.active))
+    return {
+        "key": updated_group["key"],
+        "name": updated_group["name"],
+        "value_percent": updated_group["value_percent"],
+        "muted": updated_group["muted"],
+        "flash_active": bool(request.active),
+    }
+
+
 @router.get("/atmosphere")
 def api_get_atmosphere():
     return {
         "haze_percent": HAZE_PERCENT,
         "fog_flash_active": FOG_FLASH_ACTIVE,
+        "blinder_flash_active": BLINDER_FLASH_ACTIVE,
         "fog_flash_configured": _has_fog_channel_configured(),
+        "blinder_flash_configured": _has_blinder_flash_targets_configured(),
         "haze_configured": _has_haze_channel_configured(),
         "fog_flash_universe": settings.fog_flash_universe,
         "fog_flash_channel": settings.fog_flash_channel,
+        "blinder_flash_targets": _normalize_blinder_flash_targets(settings.blinder_flash_targets),
         "haze_universe": settings.haze_universe,
         "haze_channel": settings.haze_channel,
     }
@@ -1177,10 +1313,22 @@ def api_set_fog_flash(request: FogFlashUpdateRequest):
     _assert_panel_mode()
     active = bool(request.active)
     _set_fog_flash_active(active)
-    _broadcast_master_dimmer_status()
+    _refresh_stream_from_base_payload()
     return {
         "fog_flash_active": FOG_FLASH_ACTIVE,
         "fog_flash_configured": _has_fog_channel_configured(),
+    }
+
+
+@router.post("/atmosphere/blinder-flash")
+def api_set_blinder_flash(request: BlinderFlashUpdateRequest):
+    _assert_panel_mode()
+    active = bool(request.active)
+    _set_blinder_flash_active(active)
+    _refresh_stream_from_base_payload()
+    return {
+        "blinder_flash_active": BLINDER_FLASH_ACTIVE,
+        "blinder_flash_configured": _has_blinder_flash_targets_configured(),
     }
 
 
@@ -1440,6 +1588,8 @@ def _build_blackout_payload() -> Dict[int, bytes]:
     universes = set(range(settings.universe_count))
     if settings.fog_flash_universe > 0:
         universes.add(settings.fog_flash_universe - 1)
+    for blinder_universe, _blinder_channel in _parse_blinder_flash_targets(settings.blinder_flash_targets):
+        universes.add(blinder_universe - 1)
     if settings.haze_universe > 0:
         universes.add(settings.haze_universe - 1)
     return {
@@ -1455,9 +1605,33 @@ def _build_fog_flash_payload(active: bool) -> Optional[Dict[int, bytes]]:
     fog_index = settings.fog_flash_channel - 1
     if fog_universe < 0 or not (0 <= fog_index < 512):
         return None
-    values = bytearray(b"\x00" * 512)
-    values[fog_index] = 255 if bool(active) else 0
+    source_payload = _build_effective_payload_from_current_state()
+    values = bytearray(bytes(source_payload.get(fog_universe, b"\x00" * 512)[:512]).ljust(512, b"\x00"))
+    if bool(active):
+        values[fog_index] = 255
     return {fog_universe: bytes(values)}
+
+
+def _build_blinder_flash_payload(active: bool) -> Optional[Dict[int, bytes]]:
+    targets = _parse_blinder_flash_targets(settings.blinder_flash_targets)
+    if not targets:
+        return None
+    source_payload = _build_effective_payload_from_current_state()
+    by_universe: Dict[int, bytearray] = {}
+    for universe_one_based, channel_one_based in targets:
+        universe = universe_one_based - 1
+        channel_index = channel_one_based - 1
+        if universe < 0 or not (0 <= channel_index < 512):
+            continue
+        values = by_universe.get(universe)
+        if values is None:
+            values = bytearray(bytes(source_payload.get(universe, b"\x00" * 512)[:512]).ljust(512, b"\x00"))
+            by_universe[universe] = values
+        if bool(active):
+            values[channel_index] = 255
+    if not by_universe:
+        return None
+    return {universe: bytes(values) for universe, values in by_universe.items()}
 
 
 def _fog_flash_sender_loop() -> None:
@@ -1466,8 +1640,8 @@ def _fog_flash_sender_loop() -> None:
         payload = _build_fog_flash_payload(True)
         if payload is not None:
             send_frame_once(payload)
-        # ~20 Hz is enough for reliable hold behavior without spamming.
-        if _fog_flash_sender_stop_event.wait(0.05):
+        # Keep above typical DMX stream rates so hold-flash stays dominant.
+        if _fog_flash_sender_stop_event.wait(0.015):
             break
 
 
@@ -1498,6 +1672,45 @@ def _stop_fog_flash_sender(*, send_off_frame: bool) -> None:
         payload = _build_fog_flash_payload(False)
         if payload is not None:
             # Send off twice for better reliability on lossy UDP links.
+            send_frame_once(payload)
+            send_frame_once(payload)
+
+
+def _blinder_flash_sender_loop() -> None:
+    while not _blinder_flash_sender_stop_event.is_set():
+        payload = _build_blinder_flash_payload(True)
+        if payload is not None:
+            send_frame_once(payload)
+        if _blinder_flash_sender_stop_event.wait(0.015):
+            break
+
+
+def _start_blinder_flash_sender() -> None:
+    global _blinder_flash_sender_thread
+    with _blinder_flash_sender_lock:
+        thread = _blinder_flash_sender_thread
+        if thread is not None and thread.is_alive():
+            return
+        _blinder_flash_sender_stop_event.clear()
+        _blinder_flash_sender_thread = threading.Thread(
+            target=_blinder_flash_sender_loop,
+            name="blinder-flash-sender",
+            daemon=True,
+        )
+        _blinder_flash_sender_thread.start()
+
+
+def _stop_blinder_flash_sender(*, send_off_frame: bool) -> None:
+    global _blinder_flash_sender_thread
+    with _blinder_flash_sender_lock:
+        _blinder_flash_sender_stop_event.set()
+        thread = _blinder_flash_sender_thread
+        _blinder_flash_sender_thread = None
+    if thread is not None and thread.is_alive():
+        thread.join(timeout=0.2)
+    if send_off_frame:
+        payload = _build_blinder_flash_payload(False)
+        if payload is not None:
             send_frame_once(payload)
             send_frame_once(payload)
 
@@ -1896,6 +2109,7 @@ def api_update_settings(request: SettingsUpdateRequest):
             raise HTTPException(status_code=400, detail=f"{key} must be in range 0..512")
     if request.streamdeck_screensaver_seconds < 0:
         raise HTTPException(status_code=400, detail="streamdeck_screensaver_seconds must be >= 0")
+    normalized_blinder_targets = _normalize_blinder_flash_targets(request.blinder_flash_targets)
     if len(request.artnet_universe_map) != 8:
         raise HTTPException(status_code=400, detail="artnet_universe_map must contain exactly 8 entries")
     normalized_map = normalize_universe_map(request.artnet_universe_map)
@@ -1978,10 +2192,13 @@ def api_update_settings(request: SettingsUpdateRequest):
     settings.artnet_universe_map = normalized_map
     settings.fog_flash_universe = request.fog_flash_universe
     settings.fog_flash_channel = request.fog_flash_channel
+    settings.blinder_flash_targets = normalized_blinder_targets
     settings.haze_universe = request.haze_universe
     settings.haze_channel = request.haze_channel
     settings.show_scene_created_at_on_operator = request.show_scene_created_at_on_operator
     settings.streamdeck_screensaver_seconds = int(request.streamdeck_screensaver_seconds)
+    if not normalized_blinder_targets:
+        _set_blinder_flash_active(False)
     if _STREAMDECK_SERVICE is not None:
         _STREAMDECK_SERVICE.set_screensaver_idle_seconds(settings.streamdeck_screensaver_seconds)
     persist_runtime_settings()
@@ -2011,6 +2228,7 @@ def api_set_control_mode(request: ControlModeUpdateRequest):
         _cancel_animated_recording_session()
         _stop_animated_playback()
         _set_fog_flash_active(False)
+        _set_blinder_flash_active(False)
         _set_base_stream_payload(None)
         stop_stream()
         _set_active_scene(None)
@@ -2100,6 +2318,7 @@ def api_blackout():
     _cancel_animated_recording_session()
     _stop_animated_playback()
     _set_fog_flash_active(False)
+    _set_blinder_flash_active(False)
     blackout_payload = _build_blackout_payload()
     # Keep blackout on the line briefly so nodes/fixtures reliably latch zero.
     start_stream(blackout_payload)
@@ -2118,6 +2337,7 @@ def api_stop():
     _cancel_animated_recording_session()
     _stop_animated_playback()
     _set_fog_flash_active(False)
+    _set_blinder_flash_active(False)
     _set_base_stream_payload(None)
     stop_stream()
     _set_active_scene(None)

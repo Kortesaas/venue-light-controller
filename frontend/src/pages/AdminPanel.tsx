@@ -117,6 +117,7 @@ type SettingsState = {
   artnet_universe_map: number[];
   fog_flash_universe: number;
   fog_flash_channel: number;
+  blinder_flash_targets: string[];
   haze_universe: number;
   haze_channel: number;
   show_scene_created_at_on_operator: boolean;
@@ -197,6 +198,7 @@ export default function AdminPanel({
     artnet_universe_map: [...DEFAULT_ARTNET_UNIVERSE_MAP],
     fog_flash_universe: 1,
     fog_flash_channel: 0,
+    blinder_flash_targets: [],
     haze_universe: 1,
     haze_channel: 0,
     show_scene_created_at_on_operator: true,
@@ -287,6 +289,9 @@ export default function AdminPanel({
             ...prev,
             ...data,
             artnet_universe_map: normalizeUniverseMap(data.artnet_universe_map),
+            blinder_flash_targets: Array.isArray(data.blinder_flash_targets)
+              ? data.blinder_flash_targets.map((entry) => String(entry).trim()).filter(Boolean)
+              : prev.blinder_flash_targets,
             local_adapter: localAdapter,
             web_local_adapter: webAdapter,
             local_ip: data.local_ip ?? localAdapterEntry?.local_ip ?? prev.local_ip,
@@ -732,6 +737,7 @@ export default function AdminPanel({
           artnet_universe_map: settingsForm.artnet_universe_map.map((value) => Number(value)),
           fog_flash_universe: Number(settingsForm.fog_flash_universe),
           fog_flash_channel: Number(settingsForm.fog_flash_channel),
+          blinder_flash_targets: settingsForm.blinder_flash_targets,
           haze_universe: Number(settingsForm.haze_universe),
           haze_channel: Number(settingsForm.haze_channel),
           show_scene_created_at_on_operator: settingsForm.show_scene_created_at_on_operator,
@@ -1624,6 +1630,22 @@ export default function AdminPanel({
                   size="small"
                   fullWidth
                   helperText="0 disables fog flash, else 1..512"
+                />
+                <TextField
+                  label="Blinder Flash Targets"
+                  value={settingsForm.blinder_flash_targets.join(", ")}
+                  onChange={(event) =>
+                    setSettingsForm((prev) => ({
+                      ...prev,
+                      blinder_flash_targets: event.target.value
+                        .split(",")
+                        .map((entry) => entry.trim())
+                        .filter((entry) => entry.length > 0),
+                    }))
+                  }
+                  size="small"
+                  fullWidth
+                  helperText="Comma-separated universe:channel targets, e.g. 1:201, 1:202, 2:15"
                 />
                 <TextField
                   label="Haze Universe"
