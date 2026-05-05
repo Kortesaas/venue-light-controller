@@ -211,6 +211,7 @@ class StreamDeckScene:
     scene_type: str
     style_icon: Optional[str] = None
     style_color: Optional[str] = None
+    style_color_secondary: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -247,6 +248,7 @@ class KeyVisual:
     footer: str = ""
     icon: str = "none"
     bg_rgb: tuple[int, int, int] = PALETTE["muted_bg"]
+    bg_rgb_secondary: Optional[tuple[int, int, int]] = None
     fg_rgb: tuple[int, int, int] = PALETTE["text"]
     accent_rgb: tuple[int, int, int] = PALETTE["action"]
     disabled: bool = False
@@ -911,14 +913,26 @@ class StreamDeckService:
             is_active = scene.id == snapshot.active_scene_id
             is_dynamic = scene.scene_type == "dynamic"
             style_color_key = (scene.style_color or "").lower()
+            style_color_secondary_key = (scene.style_color_secondary or "").lower()
             style_bg = SCENE_STYLE_COLORS.get(style_color_key) if style_color_key != "default" else None
-            scene_color = (
+            style_bg_secondary = (
+                SCENE_STYLE_COLORS.get(style_color_secondary_key)
+                if style_color_secondary_key != "default"
+                else None
+            )
+            primary_scene_color = (
                 style_bg
                 if style_bg is not None
                 else (PALETTE["scene_dynamic"] if is_dynamic else PALETTE["scene_static"])
             )
+            secondary_scene_color = style_bg_secondary
             bg_strength = 0.80 if is_active else 0.16
-            bg = self._mix_rgb((0, 0, 0), scene_color, bg_strength)
+            bg = self._mix_rgb((0, 0, 0), primary_scene_color, bg_strength)
+            bg_secondary = (
+                self._mix_rgb((0, 0, 0), secondary_scene_color, bg_strength)
+                if secondary_scene_color is not None
+                else None
+            )
             icon_name = (
                 scene.style_icon
                 if scene.style_icon and scene.style_icon != "none"
@@ -928,7 +942,8 @@ class StreamDeckService:
                 title=self._limit_text(scene.name, 26),
                 icon=icon_name,
                 bg_rgb=bg,
-                accent_rgb=(255, 255, 255) if is_active else self._mix_rgb(scene_color, (0, 0, 0), 0.40),
+                bg_rgb_secondary=bg_secondary,
+                accent_rgb=(255, 255, 255) if is_active else self._mix_rgb(primary_scene_color, (0, 0, 0), 0.40),
                 text_y_offset=-6,
             )
             if not locked:
@@ -1233,7 +1248,25 @@ class StreamDeckService:
         card = (3, 3, width - 4, height - 4)
         border_color = self._mix_rgb(visual.accent_rgb, (255, 255, 255), 0.45)
         fill_color = visual.bg_rgb if not visual.disabled else self._mix_rgb(visual.bg_rgb, PALETTE["base_bg"], 0.52)
-        draw.rounded_rectangle(card, radius=12, fill=fill_color)
+        fill_color_secondary = (
+            visual.bg_rgb_secondary
+            if not visual.disabled
+            else (
+                self._mix_rgb(visual.bg_rgb_secondary, PALETTE["base_bg"], 0.52)
+                if visual.bg_rgb_secondary is not None
+                else None
+            )
+        )
+        if fill_color_secondary is not None and fill_color_secondary != fill_color:
+            self._fill_rounded_gradient(
+                image=image,
+                rect=card,
+                radius=12,
+                color_a=fill_color,
+                color_b=fill_color_secondary,
+            )
+        else:
+            draw.rounded_rectangle(card, radius=12, fill=fill_color)
 
         draw.rounded_rectangle(card, radius=12, outline=border_color, width=2)
         inner_border = (
@@ -1342,6 +1375,36 @@ class StreamDeckService:
                 )
 
         return PILHelper.to_native_format(self._deck, image)
+
+    def _fill_rounded_gradient(
+        self,
+        *,
+        image,
+        rect: tuple[int, int, int, int],
+        radius: int,
+        color_a: tuple[int, int, int],
+        color_b: tuple[int, int, int],
+    ) -> None:
+        if Image is None or ImageDraw is None:
+            return
+        x0, y0, x1, y1 = rect
+        width = max(1, x1 - x0 + 1)
+        height = max(1, y1 - y0 + 1)
+        gradient = Image.new("RGB", (width, height), color_a)
+        pixels = gradient.load()
+        denom = max(1, (width - 1) + (height - 1))
+        for y in range(height):
+            for x in range(width):
+                t = (x + y) / denom
+                pixels[x, y] = (
+                    int(round(color_a[0] * (1.0 - t) + color_b[0] * t)),
+                    int(round(color_a[1] * (1.0 - t) + color_b[1] * t)),
+                    int(round(color_a[2] * (1.0 - t) + color_b[2] * t)),
+                )
+        mask = Image.new("L", (width, height), 0)
+        mask_draw = ImageDraw.Draw(mask)
+        mask_draw.rounded_rectangle((0, 0, width - 1, height - 1), radius=radius, fill=255)
+        image.paste(gradient, (x0, y0), mask)
 
     def _get_font(self, role: str):
         cached = self._font_cache.get(role)
