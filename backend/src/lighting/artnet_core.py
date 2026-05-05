@@ -146,15 +146,35 @@ def _extract_udp_payload_from_ipv4_packet(
 
 def _build_capture_universe_aliases(target_universes: List[int]) -> Dict[int, List[int]]:
     aliases: Dict[int, List[int]] = {}
+
+    def _add_alias(incoming_universe: int, local_universe: int) -> None:
+        if incoming_universe < 0:
+            return
+        aliases.setdefault(incoming_universe, [])
+        if local_universe not in aliases[incoming_universe]:
+            aliases[incoming_universe].append(local_universe)
+
+    # Deterministic primary mapping only (no ambiguity): mapped Art-Net universe
+    # plus direct local index fallback.
     for local_universe in target_universes:
         mapped_artnet_universe = _map_local_to_artnet_universe(local_universe)
-        aliases.setdefault(mapped_artnet_universe, [])
-        if local_universe not in aliases[mapped_artnet_universe]:
-            aliases[mapped_artnet_universe].append(local_universe)
-        # Be permissive: some sources may still transmit local universe IDs directly.
-        aliases.setdefault(local_universe, [])
-        if local_universe not in aliases[local_universe]:
-            aliases[local_universe].append(local_universe)
+        _add_alias(mapped_artnet_universe, local_universe)
+        _add_alias(local_universe, local_universe)
+
+    # Optional off-by-one tolerance only for single-universe capture.
+    # For multi-universe capture this can cause cross-routing and broken playback.
+    if len(target_universes) == 1:
+        local_universe = target_universes[0]
+        mapped_artnet_universe = _map_local_to_artnet_universe(local_universe)
+        for candidate in (
+            mapped_artnet_universe + 1,
+            mapped_artnet_universe - 1,
+            local_universe + 1,
+            local_universe - 1,
+        ):
+            if candidate < 0 or candidate in aliases:
+                continue
+            _add_alias(candidate, local_universe)
     return aliases
 
 
@@ -479,7 +499,7 @@ def record_snapshots(universes: List[int], duration: float) -> dict[int, list[in
                 fallback_stats,
                 max(duration, 1.0),
             )
-            _log.info(
+            _log.warning(
                 _capture_summary_text(
                     "raw-fallback-after-bind-failure",
                     max(duration, 1.0),
@@ -488,7 +508,7 @@ def record_snapshots(universes: List[int], duration: float) -> dict[int, list[in
                     fallback_stats,
                 )
             )
-            _log.info("Raw Art-Net sniff fallback captured %d matching ArtDMX packets.", fallback_updates)
+            _log.warning("Raw Art-Net sniff fallback captured %d matching ArtDMX packets.", fallback_updates)
             return buffers
         except OSError as sniff_exc:
             raise OSError(
@@ -510,7 +530,7 @@ def record_snapshots(universes: List[int], duration: float) -> dict[int, list[in
         except OSError:
             pass
 
-    _log.info(
+    _log.warning(
         _capture_summary_text(
             "udp-listener",
             duration,
@@ -524,7 +544,7 @@ def record_snapshots(universes: List[int], duration: float) -> dict[int, list[in
         return buffers
 
     if os.name == "nt":
-        _log.info(
+        _log.warning(
             "No ArtDMX packets captured via UDP listener in %.2fs; trying raw sniff fallback on %s.",
             duration,
             settings.local_ip,
@@ -537,7 +557,7 @@ def record_snapshots(universes: List[int], duration: float) -> dict[int, list[in
                 fallback_stats,
                 max(duration, 1.0),
             )
-            _log.info(
+            _log.warning(
                 _capture_summary_text(
                     "raw-fallback-after-empty-listener",
                     max(duration, 1.0),
@@ -546,7 +566,7 @@ def record_snapshots(universes: List[int], duration: float) -> dict[int, list[in
                     fallback_stats,
                 )
             )
-            _log.info("Raw Art-Net sniff fallback captured %d matching ArtDMX packets.", fallback_updates)
+            _log.warning("Raw Art-Net sniff fallback captured %d matching ArtDMX packets.", fallback_updates)
         except OSError as exc:
             _log.warning(
                 "Raw Art-Net sniff fallback failed. Run backend elevated and verify adapter selection. Error: %s",

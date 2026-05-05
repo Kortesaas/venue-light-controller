@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 import re
 import socket
 import struct
@@ -359,6 +360,96 @@ def _parse_artdmx_packet(data: bytes) -> Optional[tuple[int, bytes]]:
         return None
 
     return universe, data[18 : 18 + length]
+
+
+def _extract_udp_payload_from_ipv4_packet(
+    packet: bytes,
+) -> Optional[tuple[bytes, str, str, int, int]]:
+    if len(packet) < 20:
+        return None
+    version = packet[0] >> 4
+    if version != 4:
+        return None
+    ihl = (packet[0] & 0x0F) * 4
+    if ihl < 20 or len(packet) < ihl + 8:
+        return None
+    protocol = packet[9]
+    if protocol != 17:  # UDP
+        return None
+    src_port = struct.unpack("!H", packet[ihl : ihl + 2])[0]
+    dst_port = struct.unpack("!H", packet[ihl + 2 : ihl + 4])[0]
+    if src_port != ARTNET_PORT and dst_port != ARTNET_PORT:
+        return None
+    udp_length = struct.unpack("!H", packet[ihl + 4 : ihl + 6])[0]
+    if udp_length < 8:
+        return None
+    payload_start = ihl + 8
+    payload_end = payload_start + (udp_length - 8)
+    if payload_end > len(packet):
+        payload_end = len(packet)
+    if payload_end <= payload_start:
+        return None
+    payload = packet[payload_start:payload_end]
+    src_ip = socket.inet_ntoa(packet[12:16])
+    dst_ip = socket.inet_ntoa(packet[16:20])
+    return payload, src_ip, dst_ip, src_port, dst_port
+
+
+def _try_open_raw_artnet_sniffer(local_ip: str) -> tuple[Optional[socket.socket], Optional[str]]:
+    if os.name != "nt":
+        return None, "raw sniff is only implemented on Windows"
+    if not local_ip:
+        return None, "no local_ip configured for raw sniff"
+    if not hasattr(socket, "SIO_RCVALL") or not hasattr(socket, "RCVALL_ON"):
+        return None, "SIO_RCVALL not available in this Python/socket build"
+
+    try:
+        raw_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_IP)
+        raw_sock.bind((local_ip, 0))
+        raw_sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+        raw_sock.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
+        raw_sock.setblocking(False)
+        return raw_sock, None
+    except OSError as exc:
+        return None, str(exc)
+
+
+def _build_capture_universe_aliases(target_universes: List[int]) -> Dict[int, List[int]]:
+    aliases: Dict[int, List[int]] = {}
+    mapping = settings.artnet_universe_map if isinstance(settings.artnet_universe_map, list) else []
+
+    def _add_alias(incoming_universe: int, local_universe: int) -> None:
+        if incoming_universe < 0:
+            return
+        aliases.setdefault(incoming_universe, [])
+        if local_universe not in aliases[incoming_universe]:
+            aliases[incoming_universe].append(local_universe)
+
+    # Deterministic primary mapping only (no ambiguity): mapped Art-Net universe
+    # plus direct local index fallback.
+    for local_universe in target_universes:
+        mapped_universe = (
+            int(mapping[local_universe])
+            if 0 <= local_universe < len(mapping) and isinstance(mapping[local_universe], int)
+            else local_universe
+        )
+        _add_alias(mapped_universe, local_universe)
+        _add_alias(local_universe, local_universe)
+
+    # Optional off-by-one tolerance only for single-universe capture.
+    # For multi-universe capture this can cause cross-routing and broken playback.
+    if len(target_universes) == 1:
+        local_universe = target_universes[0]
+        mapped_universe = (
+            int(mapping[local_universe])
+            if 0 <= local_universe < len(mapping) and isinstance(mapping[local_universe], int)
+            else local_universe
+        )
+        for candidate in (mapped_universe + 1, mapped_universe - 1, local_universe + 1, local_universe - 1):
+            if candidate < 0 or candidate in aliases:
+                continue
+            _add_alias(candidate, local_universe)
+    return aliases
 
 
 def _normalize_animated_frames(frames: list[dict], duration_ms: int) -> list[AnimatedFrame]:
@@ -1761,7 +1852,7 @@ def _record_scene_snapshot(duration: float) -> Dict[int, List[int]]:
             for universe, channels in snapshot.items()
         }
         total_non_zero = sum(per_universe_non_zero.values())
-        _log.info(
+        _log.warning(
             "Scene snapshot capture finished: duration=%.2fs universes=%s total_non_zero_channels=%d per_universe_non_zero=%s",
             duration,
             target_universes,
@@ -1815,14 +1906,61 @@ def _restore_after_animated_recording(state: dict) -> None:
 
 def _animated_recording_worker(state: dict) -> None:
     sock = state["socket"]
+    raw_sock = state.get("raw_socket")
     stop_event = state["stop_event"]
     done_event = state["done_event"]
     target_universes = state["target_universes"]
+    universe_aliases = state.get("universe_aliases", {})
     max_duration_ms = state["max_duration_ms"]
     start_time = state["start_time"]
     buffers = state["buffers"]
+    capture_stats = state.get("capture_stats", {})
     frames: list[dict] = []
     last_signature: Optional[str] = None
+
+    def apply_frame(
+        packet: bytes,
+        source_key: str,
+        incoming_universe: Optional[int] = None,
+        dmx: Optional[bytes] = None,
+    ) -> None:
+        nonlocal last_signature
+        capture_stats["packets_seen"] = int(capture_stats.get("packets_seen", 0)) + 1
+        packet_sources = capture_stats.setdefault("packet_sources", {})
+        packet_sources[source_key] = int(packet_sources.get(source_key, 0)) + 1
+
+        parsed = (incoming_universe, dmx) if incoming_universe is not None and dmx is not None else _parse_artdmx_packet(packet)
+        if parsed is None:
+            return
+        capture_stats["artdmx_packets"] = int(capture_stats.get("artdmx_packets", 0)) + 1
+        parsed_universe, parsed_dmx = parsed
+        seen_universes = capture_stats.setdefault("seen_artnet_universes", {})
+        seen_universes[parsed_universe] = int(seen_universes.get(parsed_universe, 0)) + 1
+
+        local_targets = universe_aliases.get(parsed_universe, [])
+        if not local_targets:
+            capture_stats["ignored_universe_packets"] = int(
+                capture_stats.get("ignored_universe_packets", 0)
+            ) + 1
+            return
+
+        applied_by_local = capture_stats.setdefault("applied_by_local_universe", {})
+        for local_universe in local_targets:
+            if local_universe not in target_universes:
+                continue
+            buffer = buffers[local_universe]
+            for index in range(min(len(parsed_dmx), 512)):
+                buffer[index] = parsed_dmx[index]
+            applied_by_local[local_universe] = int(applied_by_local.get(local_universe, 0)) + 1
+            capture_stats["applied_frames"] = int(capture_stats.get("applied_frames", 0)) + 1
+
+        elapsed_ms = int((time.monotonic() - start_time) * 1000)
+        snapshot = {u: list(values) for u, values in buffers.items()}
+        signature = json.dumps(snapshot, separators=(",", ":"), sort_keys=True)
+        if signature == last_signature:
+            return
+        last_signature = signature
+        frames.append({"timestamp_ms": elapsed_ms, "universes": snapshot})
 
     try:
         while not stop_event.is_set():
@@ -1832,27 +1970,26 @@ def _animated_recording_worker(state: dict) -> None:
                 break
 
             try:
-                data, _addr = sock.recvfrom(2048)
+                data, addr = sock.recvfrom(2048)
             except socket.timeout:
-                continue
+                data = None
 
-            parsed = _parse_artdmx_packet(data)
-            if parsed is None:
-                continue
-            universe, dmx = parsed
-            if universe not in target_universes:
-                continue
+            if data is not None:
+                apply_frame(data, f"udp:{addr[0]}:{addr[1]}")
 
-            buffer = buffers[universe]
-            for index in range(min(len(dmx), 512)):
-                buffer[index] = dmx[index]
-
-            snapshot = {u: list(values) for u, values in buffers.items()}
-            signature = json.dumps(snapshot, separators=(",", ":"), sort_keys=True)
-            if signature == last_signature:
-                continue
-            last_signature = signature
-            frames.append({"timestamp_ms": elapsed_ms, "universes": snapshot})
+            if raw_sock is not None:
+                while True:
+                    try:
+                        raw_packet = raw_sock.recv(65535)
+                    except BlockingIOError:
+                        break
+                    except OSError:
+                        break
+                    extracted = _extract_udp_payload_from_ipv4_packet(raw_packet)
+                    if extracted is None:
+                        continue
+                    payload, src_ip, dst_ip, src_port, dst_port = extracted
+                    apply_frame(payload, f"raw:{src_ip}:{src_port}->{dst_ip}:{dst_port}")
     except OSError as exc:
         state["error"] = str(exc)
     finally:
@@ -1860,10 +1997,20 @@ def _animated_recording_worker(state: dict) -> None:
         state["duration_ms"] = max(1, min(max_duration_ms, end_elapsed_ms))
         state["frames_raw"] = frames
         state["frame_count"] = len(frames)
+        state["capture_stats"] = capture_stats
         try:
             sock.close()
         except OSError:
             pass
+        if raw_sock is not None:
+            try:
+                raw_sock.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
+            except OSError:
+                pass
+            try:
+                raw_sock.close()
+            except OSError:
+                pass
         done_event.set()
 
 
@@ -1887,6 +2034,14 @@ def _start_animated_recording_session() -> dict:
     stop_stream()
 
     target_universes = list(range(settings.universe_count))
+    universe_aliases = _build_capture_universe_aliases(target_universes)
+    _log.warning(
+        "Animated capture aliases: targets=%s aliases=%s local_ip=%s artnet_map=%s",
+        target_universes,
+        universe_aliases,
+        settings.local_ip,
+        settings.artnet_universe_map,
+    )
     buffers = {universe: [0] * 512 for universe in target_universes}
     try:
         sock = create_artnet_listener_socket(timeout_seconds=0.05)
@@ -1902,6 +2057,12 @@ def _start_animated_recording_session() -> dict:
             local_ip=settings.local_ip,
         )
 
+    raw_sock, raw_error = _try_open_raw_artnet_sniffer(settings.local_ip)
+    if raw_sock is not None:
+        _log.warning("Animated raw Art-Net sniffer enabled on %s", settings.local_ip)
+    else:
+        _log.warning("Animated raw Art-Net sniffer unavailable: %s", raw_error)
+
     state = {
         "phase": "recording",
         "start_time": time.monotonic(),
@@ -1910,8 +2071,19 @@ def _start_animated_recording_session() -> dict:
         "done_event": threading.Event(),
         "thread": None,
         "socket": sock,
+        "raw_socket": raw_sock,
         "target_universes": target_universes,
+        "universe_aliases": universe_aliases,
         "buffers": buffers,
+        "capture_stats": {
+            "packets_seen": 0,
+            "artdmx_packets": 0,
+            "applied_frames": 0,
+            "ignored_universe_packets": 0,
+            "seen_artnet_universes": {},
+            "applied_by_local_universe": {u: 0 for u in target_universes},
+            "packet_sources": {},
+        },
         "frames_raw": [],
         "duration_ms": 0,
         "frame_count": 0,
@@ -1986,7 +2158,26 @@ def _stop_animated_recording_session(bpm: Optional[float] = None) -> dict:
     duration_ms = int(state.get("duration_ms", 0))
     raw_duration_ms = duration_ms
     frames_raw = state.get("frames_raw") or []
+    capture_stats = state.get("capture_stats") if isinstance(state.get("capture_stats"), dict) else {}
+    if capture_stats:
+        _log.warning(
+            "Animated capture summary: duration=%dms packets_seen=%d artdmx=%d applied_frames=%d ignored_universe=%d seen_artnet=%s applied_local=%s",
+            duration_ms,
+            int(capture_stats.get("packets_seen", 0)),
+            int(capture_stats.get("artdmx_packets", 0)),
+            int(capture_stats.get("applied_frames", 0)),
+            int(capture_stats.get("ignored_universe_packets", 0)),
+            capture_stats.get("seen_artnet_universes", {}),
+            capture_stats.get("applied_by_local_universe", {}),
+        )
     raw_frames = _normalize_animated_frames(frames_raw, duration_ms)
+    _log.warning(
+        "Animated frame normalization: raw_frames=%d normalized_frames=%d duration_ms=%d bpm=%s",
+        len(frames_raw),
+        len(raw_frames),
+        duration_ms,
+        bpm if bpm is not None else "none",
+    )
     frames, duration_ms, quantize_info = _apply_bpm_quantization(raw_frames, duration_ms, bpm)
     state["raw_duration_ms"] = raw_duration_ms
     state["raw_animated_frames"] = raw_frames
@@ -2005,7 +2196,7 @@ def _stop_animated_recording_session(bpm: Optional[float] = None) -> dict:
             "auto_stopped": bool(state.get("auto_stopped")),
             "min_duration_ms": ANIMATED_RECORDING_MIN_DURATION_MS,
             "max_duration_ms": ANIMATED_RECORDING_MAX_DURATION_MS,
-            "warning": "No meaningful DMX changes captured",
+            "warning": "No meaningful DMX changes captured (check Art-Net universe mapping and capture logs).",
             "bpm_quantization": quantize_info,
         }
 
