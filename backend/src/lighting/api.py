@@ -1312,6 +1312,11 @@ def api_set_haze(request: HazeUpdateRequest):
 def api_set_fog_flash(request: FogFlashUpdateRequest):
     _assert_panel_mode()
     active = bool(request.active)
+    if active == FOG_FLASH_ACTIVE:
+        return {
+            "fog_flash_active": FOG_FLASH_ACTIVE,
+            "fog_flash_configured": _has_fog_channel_configured(),
+        }
     _set_fog_flash_active(active)
     _refresh_stream_from_base_payload()
     return {
@@ -1324,6 +1329,11 @@ def api_set_fog_flash(request: FogFlashUpdateRequest):
 def api_set_blinder_flash(request: BlinderFlashUpdateRequest):
     _assert_panel_mode()
     active = bool(request.active)
+    if active == BLINDER_FLASH_ACTIVE:
+        return {
+            "blinder_flash_active": BLINDER_FLASH_ACTIVE,
+            "blinder_flash_configured": _has_blinder_flash_targets_configured(),
+        }
     _set_blinder_flash_active(active)
     _refresh_stream_from_base_payload()
     return {
