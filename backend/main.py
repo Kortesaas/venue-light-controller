@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 import logging
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -69,4 +70,5 @@ else:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    reload_enabled = os.getenv("VLC_BACKEND_RELOAD", "").strip().lower() in {"1", "true", "yes", "on"}
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=reload_enabled)
